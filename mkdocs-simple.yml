@@ -1,0 +1,77 @@
+site_name: RapidTriageME Documentation
+site_url: https://rapidtriage.me
+site_description: AI-Powered Browser Debugging Platform
+site_author: YarlisAISolutions
+
+repo_url: https://github.com/yarlisai/rapidtriage
+
+docs_dir: docs-site
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+  - mermaid2:
+      javascript: https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - toc:
+      permalink: true
+  - tables
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Overview: getting-started/index.md
+    - Quick Start: getting-started/quickstart.md
+  - Architecture:
+    - System Overview: architecture/overview.md
+  - Components:
+    - Chrome Extension: components/chrome-extension.md
+  - API Reference:
+    - REST API: api/rest.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/yarlisai
+
+copyright: |
+  &copy; 2025 YarlisAISolutions

@@ -37,7 +37,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.storage.local.get(["browserConnectorSettings"], (result) => {
       const settings = result.browserConnectorSettings || {
         serverHost: "localhost",
-        serverPort: 3025,
+        serverPort: 1421,
       };
 
       // Validate server identity first
@@ -227,7 +227,7 @@ async function updateServerWithUrl(tabId, url, source = "background_update") {
   chrome.storage.local.get(["browserConnectorSettings"], async (result) => {
     const settings = result.browserConnectorSettings || {
       serverHost: "localhost",
-      serverPort: 3025,
+      serverPort: 1421,
     };
 
     // Maximum number of retry attempts
@@ -304,7 +304,7 @@ async function retestConnectionOnRefresh(tabId) {
   chrome.storage.local.get(["browserConnectorSettings"], async (result) => {
     const settings = result.browserConnectorSettings || {
       serverHost: "localhost",
-      serverPort: 3025,
+      serverPort: 1421,
     };
 
     // Test the connection with the last known host and port

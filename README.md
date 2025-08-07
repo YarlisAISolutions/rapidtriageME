@@ -111,7 +111,7 @@ The **stdio transport** is the primary mode for local IDE integrations. The MCP 
       "command": "npx",
       "args": ["@yarlisai/rapidtriage-mcp"],
       "env": {
-        "BROWSER_TOOLS_PORT": "3025",
+        "BROWSER_TOOLS_PORT": "1421",
         "BROWSER_TOOLS_HOST": "localhost"
       }
     }
@@ -129,7 +129,7 @@ The **stdio transport** is the primary mode for local IDE integrations. The MCP 
       "args": ["/path/to/rapidtriage-mcp/dist/mcp-server.js"],
       "env": {
         "NODE_ENV": "development",
-        "BROWSER_TOOLS_PORT": "3025"
+        "BROWSER_TOOLS_PORT": "1421"
       }
     }
   }
@@ -144,7 +144,7 @@ The **stdio transport** is the primary mode for local IDE integrations. The MCP 
       "command": "npx",
       "args": ["@yarlisai/rapidtriage-mcp"],
       "env": {
-        "BROWSER_TOOLS_PORT": "3025",
+        "BROWSER_TOOLS_PORT": "1421",
         "DEBUG": "true"
       }
     }
@@ -157,7 +157,7 @@ The **stdio transport** is the primary mode for local IDE integrations. The MCP 
 1. **Start the browser server** (required for browser communication):
 ```bash
 npx @yarlisai/rapidtriage-server
-# Server starts on port 3025 by default
+# Server starts on port 1421 by default
 ```
 
 2. **Configure your IDE** with the above configuration
@@ -195,7 +195,7 @@ cursor .
       "args": ["/opt/rapidtriage/mcp-server.js"],
       "cwd": "/opt/rapidtriage",
       "env": {
-        "BROWSER_TOOLS_PORT": "3025",
+        "BROWSER_TOOLS_PORT": "1421",
         "LOG_LEVEL": "debug"
       }
     }
@@ -440,7 +440,7 @@ npx @yarlisai/rapidtriage-server
 
 # The flow:
 # 1. IDE launches MCP server as subprocess
-# 2. MCP server connects to browser server on port 3025
+# 2. MCP server connects to browser server on port 1421
 # 3. Browser extension connects to browser server
 # 4. You can now use browser tools in your IDE
 ```
@@ -468,7 +468,7 @@ curl -X POST https://rapidtriage.me/mcp \
     "rapidtriage-local": {
       "command": "npx",
       "args": ["@yarlisai/rapidtriage-mcp"],
-      "env": { "BROWSER_TOOLS_PORT": "3025" }
+      "env": { "BROWSER_TOOLS_PORT": "1421" }
     },
     "rapidtriage-cloud": {
       "transport": "http",
@@ -599,7 +599,7 @@ npm install -g @yarlisai/rapidtriage-mcp @yarlisai/rapidtriage-server
 ### Docker Installation
 ```bash
 docker pull yarlisai/rapidtriage:latest
-docker run -p 3025:3025 yarlisai/rapidtriage
+docker run -p 1421:1421 yarlisai/rapidtriage
 ```
 
 ### From Source

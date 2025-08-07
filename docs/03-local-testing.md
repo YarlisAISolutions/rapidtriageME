@@ -44,7 +44,7 @@ cd ..
 # In terminal 1 - Start the browser server
 cd rapidtriage-server
 npm start
-# Should see: "RapidTriage Server running on port 3025"
+# Should see: "RapidTriage Server running on port 1421"
 ```
 
 ### Step 4: Configure Your IDE for Local Testing
@@ -58,7 +58,7 @@ Create/edit `~/.cursor/mcp_settings.json`:
       "command": "node",
       "args": ["/Users/yarlis/Downloads/rapidtriageME/rapidtriage-mcp/dist/mcp-server.js"],
       "env": {
-        "RAPIDTRIAGE_PORT": "3025"
+        "RAPIDTRIAGE_PORT": "1421"
       }
     }
   }
@@ -74,7 +74,7 @@ Create/edit `~/.continue/config.json`:
       "command": "node",
       "args": ["/Users/yarlis/Downloads/rapidtriageME/rapidtriage-mcp/dist/mcp-server.js"],
       "env": {
-        "RAPIDTRIAGE_PORT": "3025"
+        "RAPIDTRIAGE_PORT": "1421"
       }
     }
   }
@@ -255,8 +255,8 @@ rapidtriage-mcp     # Instead of node dist/mcp-server.js
 
 **Solution:**
 ```bash
-# Check if port 3025 is already in use
-lsof -i :3025
+# Check if port 1421 is already in use
+lsof -i :1421
 
 # If in use, kill the process
 kill -9 <PID>
@@ -336,7 +336,7 @@ Before publishing, ensure:
   - [ ] Shows "Connected" status
 
 - [ ] **Server Functions**
-  - [ ] Starts on port 3025
+  - [ ] Starts on port 1421
   - [ ] Handles connections
   - [ ] No memory leaks
 

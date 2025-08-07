@@ -238,7 +238,7 @@ async function getAvailablePort(
 }
 
 // Start with requested port and find an available one
-const REQUESTED_PORT = parseInt(process.env.PORT || "3025", 10);
+const REQUESTED_PORT = parseInt(process.env.PORT || "1421", 10);
 let PORT = REQUESTED_PORT;
 
 // Create application and initialize middleware

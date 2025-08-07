@@ -1,0 +1,151 @@
+site_name: RapidTriageME Documentation
+site_url: https://rapidtriage.me/docs
+site_description: AI-Powered Browser Debugging Platform - Complete Documentation
+site_author: YarlisAISolutions
+
+repo_name: rapidtriage/rapidtriage
+repo_url: https://github.com/yarlisai/rapidtriage
+edit_uri: edit/main/docs/
+
+docs_dir: docs-site
+
+theme:
+  name: material
+  logo: assets/logo.png
+  favicon: assets/favicon.ico
+  
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.prune
+    - navigation.indexes
+    - navigation.top
+    - toc.follow
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - search.share
+    - header.autohide
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+plugins:
+  - search:
+      separator: '[\s\-\.]'
+  - mermaid2:
+      javascript: https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - abbr
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - tables
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - getting-started/index.md
+    - Quick Start: getting-started/quickstart.md
+    - Installation: getting-started/installation.md
+    - Configuration: getting-started/configuration.md
+  - Architecture:
+    - architecture/index.md
+    - System Overview: architecture/overview.md
+    - Components: architecture/components.md
+    - Data Flow: architecture/data-flow.md
+  - Components:
+    - components/index.md
+    - Chrome Extension: components/chrome-extension.md
+    - Browser Connector: components/browser-connector.md
+    - MCP Server: components/mcp-server.md
+    - Cloudflare Worker: components/cloudflare-worker.md
+  - Deployment:
+    - deployment/index.md
+    - Local Testing: deployment/local-testing.md
+    - Cloudflare Setup: deployment/cloudflare.md
+    - Domain Configuration: deployment/domain.md
+    - Production: deployment/production.md
+  - API Reference:
+    - api/index.md
+    - REST Endpoints: api/rest.md
+    - WebSocket: api/websocket.md
+    - MCP Protocol: api/mcp.md
+  - Guides:
+    - guides/index.md
+    - IDE Integration: guides/ide-integration.md
+    - Debugging Tips: guides/debugging.md
+    - Security: guides/security.md
+    - Performance: guides/performance.md
+  - Troubleshooting:
+    - troubleshooting/index.md
+    - Common Issues: troubleshooting/common-issues.md
+    - FAQ: troubleshooting/faq.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/yarlisai
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/yarlisai
+  
+  analytics:
+    provider: google
+    property: G-XXXXXXXXXX
+  
+  version:
+    provider: mike
+    default: stable
+
+copyright: |
+  &copy; 2025 <a href="https://yarlis.ai" target="_blank" rel="noopener">YarlisAISolutions</a>

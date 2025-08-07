@@ -1,34 +1,29 @@
 # Cloudflare Workers configuration for RapidTriageME
-# YarlisAISolutions Browser Tools MCP Platform
-# Production Configuration
+# Configuration for rapidtriage.me domain
 
 name = "rapidtriage-me"
 main = "src/worker-minimal.ts"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Account details - will be configured during deployment
-account_id = "ed3fbe9532564f2f06ae772da689431a" # Your Cloudflare account ID
+# Account details
+account_id = "ed3fbe9532564f2f06ae772da689431a"
 workers_dev = false
 
 # Custom domain configuration
+# Replace ZONE_ID_HERE with your actual Zone ID from Cloudflare Dashboard
 routes = [
-  { pattern = "rapidtriage.me/*", zone_name = "rapidtriage.me" },
-  { pattern = "www.rapidtriage.me/*", zone_name = "rapidtriage.me" }
+  { pattern = "rapidtriage.me/*", zone_id = "ZONE_ID_HERE" },
+  { pattern = "www.rapidtriage.me/*", zone_id = "ZONE_ID_HERE" }
 ]
 
 # Environment variables for production
 [vars]
 ENVIRONMENT = "production"
-BROWSER_TOOLS_PORT = "3025"
+BROWSER_TOOLS_PORT = "1421"
 SSE_ENDPOINT = "/sse"
 HEALTH_ENDPOINT = "/health"
 METRICS_ENDPOINT = "/metrics"
-
-# Secrets - Should be set via wrangler secret for production
-# Remove these hardcoded values before production deployment
-# AUTH_TOKEN = "use-wrangler-secret-put-AUTH_TOKEN"
-# JWT_SECRET = "use-wrangler-secret-put-JWT_SECRET"
 
 # KV namespace for session storage
 [[kv_namespaces]]
@@ -43,9 +38,6 @@ class_name = "BrowserSession"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["BrowserSession"]
-
-# Rate limiting configuration (not supported in wrangler.toml)
-# Configure rate limiting in Cloudflare dashboard
 
 # Build configuration
 [build]
@@ -64,7 +56,7 @@ workers_dev = true
 
 [env.staging.vars]
 ENVIRONMENT = "staging"
-BROWSER_TOOLS_PORT = "3025"
+BROWSER_TOOLS_PORT = "1421"
 SSE_ENDPOINT = "/sse"
 HEALTH_ENDPOINT = "/health"
 METRICS_ENDPOINT = "/metrics"
@@ -85,15 +77,15 @@ workers_dev = false
 
 [[env.production.routes]]
 pattern = "rapidtriage.me/*"
-zone_name = "rapidtriage.me"
+zone_id = "dba0cbc72f7f0b7727fbdb6f4d6d7901"
 
 [[env.production.routes]]
 pattern = "www.rapidtriage.me/*"
-zone_name = "rapidtriage.me"
+zone_id = "dba0cbc72f7f0b7727fbdb6f4d6d7901"
 
 [env.production.vars]
 ENVIRONMENT = "production"
-BROWSER_TOOLS_PORT = "3025"
+BROWSER_TOOLS_PORT = "1421"
 SSE_ENDPOINT = "/sse"
 HEALTH_ENDPOINT = "/health"
 METRICS_ENDPOINT = "/metrics"

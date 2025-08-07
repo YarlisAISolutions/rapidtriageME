@@ -9,7 +9,7 @@ let settings = {
   screenshotPath: "",
   // Add server connection settings
   serverHost: "localhost",
-  serverPort: 3025,
+  serverPort: 1421,
   allowAutoPaste: false, // Default auto-paste setting
 };
 
@@ -702,7 +702,7 @@ async function discoverServer(quietMode = false) {
 
     // Build port list in a smart order:
     // 1. Start with current configured port
-    // 2. Add default port (3025)
+    // 2. Add default port (1421)
     // 3. Add sequential ports around the default (for fallback detection)
     const ports = [];
 
@@ -711,8 +711,8 @@ async function discoverServer(quietMode = false) {
     ports.push(configuredPort);
 
     // Add default port if it's not the same as configured
-    if (configuredPort !== 3025) {
-      ports.push(3025);
+    if (configuredPort !== 1421) {
+      ports.push(1421);
     }
 
     // Add sequential fallback ports (from default up to default+10)

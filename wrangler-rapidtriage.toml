@@ -1,0 +1,100 @@
+# Cloudflare Workers configuration for RapidTriageME
+# Configuration for rapidtriage.me domain
+
+name = "rapidtriage-me"
+main = "src/worker-minimal.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Account details
+account_id = "ed3fbe9532564f2f06ae772da689431a"
+workers_dev = false
+
+# Custom domain configuration
+# Replace ZONE_ID_HERE with your actual Zone ID from Cloudflare Dashboard
+routes = [
+  { pattern = "rapidtriage.me/*", zone_id = "ZONE_ID_HERE" },
+  { pattern = "www.rapidtriage.me/*", zone_id = "ZONE_ID_HERE" }
+]
+
+# Environment variables for production
+[vars]
+ENVIRONMENT = "production"
+BROWSER_TOOLS_PORT = "1421"
+SSE_ENDPOINT = "/sse"
+HEALTH_ENDPOINT = "/health"
+METRICS_ENDPOINT = "/metrics"
+
+# KV namespace for session storage
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "5926c0732c074d23b7ea3941fd1c6836"
+
+# Durable Objects for WebSocket connections
+[[durable_objects.bindings]]
+name = "BROWSER_SESSIONS"
+class_name = "BrowserSession"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["BrowserSession"]
+
+# Build configuration
+[build]
+command = "npm run build"
+
+# Development environment
+[env.development]
+name = "rapidtriage-dev"
+workers_dev = true
+vars = { ENVIRONMENT = "development" }
+
+# Staging environment
+[env.staging]
+name = "rapidtriage-staging"
+workers_dev = true
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+BROWSER_TOOLS_PORT = "1421"
+SSE_ENDPOINT = "/sse"
+HEALTH_ENDPOINT = "/health"
+METRICS_ENDPOINT = "/metrics"
+LOG_LEVEL = "debug"
+
+[[env.staging.kv_namespaces]]
+binding = "SESSIONS"
+id = "5926c0732c074d23b7ea3941fd1c6836"
+
+[[env.staging.durable_objects.bindings]]
+name = "BROWSER_SESSIONS"
+class_name = "BrowserSession"
+
+# Production environment
+[env.production]
+name = "rapidtriage-me-production"
+workers_dev = false
+
+[[env.production.routes]]
+pattern = "rapidtriage.me/*"
+zone_id = "ZONE_ID_HERE"
+
+[[env.production.routes]]
+pattern = "www.rapidtriage.me/*"
+zone_id = "ZONE_ID_HERE"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+BROWSER_TOOLS_PORT = "1421"
+SSE_ENDPOINT = "/sse"
+HEALTH_ENDPOINT = "/health"
+METRICS_ENDPOINT = "/metrics"
+LOG_LEVEL = "error"
+
+[[env.production.kv_namespaces]]
+binding = "SESSIONS"
+id = "5926c0732c074d23b7ea3941fd1c6836"
+
+[[env.production.durable_objects.bindings]]
+name = "BROWSER_SESSIONS"
+class_name = "BrowserSession"

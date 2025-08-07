@@ -32,7 +32,7 @@ npm install -g @yarlisai/rapidtriage-server
 npx @yarlisai/rapidtriage-server
 ```
 
-2. The server will start on port 3025 by default
+2. The server will start on port 1421 by default
 
 3. Install and enable the RapidTriage Chrome Extension
 

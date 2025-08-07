@@ -600,7 +600,7 @@ class RemoteBrowserToolsMCPServer {
 // Configuration and startup
 const config: BrowserTriageConfig = {
   port: parseInt(process.env.PORT || '8080'),
-  browserToolsPort: parseInt(process.env.BROWSER_TOOLS_PORT || '3025'),
+  browserToolsPort: parseInt(process.env.BROWSER_TOOLS_PORT || '1421'),
   allowedOrigins: (process.env.ALLOWED_ORIGINS || '*').split(','),
   authToken: process.env.AUTH_TOKEN,
   tunnelUrl: process.env.TUNNEL_URL
@@ -632,7 +632,7 @@ npm install express cors axios @modelcontextprotocol/sdk
 # 2. Set up environment
 cat > .env << EOF
 PORT=8080
-BROWSER_TOOLS_PORT=3025
+BROWSER_TOOLS_PORT=1421
 AUTH_TOKEN=your-secure-token-here
 ALLOWED_ORIGINS=https://claude.ai,https://cursor.sh
 EOF
@@ -698,7 +698,7 @@ services:
       - "8080:8080"
     environment:
       - PORT=8080
-      - BROWSER_TOOLS_PORT=3025
+      - BROWSER_TOOLS_PORT=1421
       - AUTH_TOKEN=${AUTH_TOKEN}
       - ALLOWED_ORIGINS=https://claude.ai,https://cursor.sh
     volumes:

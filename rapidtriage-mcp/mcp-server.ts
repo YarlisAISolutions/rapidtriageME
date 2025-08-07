@@ -13,7 +13,7 @@ const server = new McpServer({
 
 // Track the discovered server connection
 let discoveredHost = "127.0.0.1";
-let discoveredPort = 3025;
+let discoveredPort = 1421;
 let serverDiscovered = false;
 
 // Function to get the default port from environment variable or default
@@ -40,7 +40,7 @@ function getDefaultServerPort(): number {
   }
 
   // Default port if no configuration found
-  return 3025;
+  return 1421;
 }
 
 // Function to get default server host from environment variable or default
@@ -66,7 +66,7 @@ async function discoverServer(): Promise<boolean> {
   const ports = [defaultPort];
 
   // Add additional ports (fallback range)
-  for (let p = 3025; p <= 3035; p++) {
+  for (let p = 1421; p <= 1431; p++) {
     if (p !== defaultPort) {
       ports.push(p);
     }

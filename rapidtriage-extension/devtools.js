@@ -10,7 +10,7 @@ let settings = {
   showResponseHeaders: false,
   screenshotPath: "", // Add new setting for screenshot path
   serverHost: "localhost", // Default server host
-  serverPort: 3025, // Default server port
+  serverPort: 1421, // Default server port
   allowAutoPaste: false, // Default auto-paste setting
 };
 

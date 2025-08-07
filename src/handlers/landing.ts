@@ -236,7 +236,7 @@ export function generateLandingPage(env: any): string {
       </p>
       <p style="margin-top: 10px;">
         © 2024 YarlisAISolutions. All rights reserved. | 
-        <a href="mailto:support@yarlis.ai">Contact Support</a>
+        <a href="mailto:support@rapidtriage.me">Contact Support</a>
       </p>
     </div>
   </div>
