@@ -1,0 +1,43 @@
+# Source files
+src/
+*.ts
+!dist/*.d.ts
+
+# Config files
+tsconfig.json
+.env
+.env.*
+
+# Development files
+*.log
+npm-debug.log*
+.DS_Store
+node_modules/
+
+# Git files
+.git/
+.gitignore
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+test/
+tests/
+*.test.ts
+*.spec.ts
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Build artifacts
+*.tsbuildinfo
+
+# Lighthouse directories
+lighthouse/src/
+!lighthouse/dist/

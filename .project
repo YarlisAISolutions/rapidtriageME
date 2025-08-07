@@ -1,0 +1,6 @@
+PROJECT_NAME=RapidTriageME
+REPOSITORY_URL=https://github.com/YarlisAISolutions/rapidtriageME
+PROVIDER=CLOUDFLARE
+REGION=GLOBAL
+DOMAIN=rapidtriage.me
+DESCRIPTION=Remote Browser Tools MCP Platform for AI-powered browser triage and debugging

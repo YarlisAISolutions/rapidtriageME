@@ -1,0 +1,64 @@
+{
+  "name": "@yarlisai/rapidtriage-mcp",
+  "version": "1.0.0",
+  "description": "YarlisAISolutions RapidTriage MCP - AI-powered browser debugging and triage platform using Model Context Protocol",
+  "main": "dist/mcp-server.js",
+  "bin": {
+    "rapidtriage-mcp": "dist/mcp-server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YarlisAISolutions/rapidtriage-mcp.git"
+  },
+  "homepage": "https://rapidtriage.me",
+  "bugs": {
+    "url": "https://github.com/YarlisAISolutions/rapidtriage-mcp/issues"
+  },
+  "scripts": {
+    "inspect": "tsc && npx @modelcontextprotocol/inspector node -- dist/mcp-server.js",
+    "inspect-live": "npx @modelcontextprotocol/inspector npx -- @yarlisai/rapidtriage-mcp",
+    "build": "tsc",
+    "start": "tsc && node dist/mcp-server.js",
+    "test": "echo \"No tests yet\"",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "browser",
+    "debugging",
+    "triage",
+    "ai",
+    "chrome",
+    "extension",
+    "yarlis",
+    "rapidtriage",
+    "remote-debugging",
+    "lighthouse",
+    "performance",
+    "accessibility"
+  ],
+  "author": "YarlisAISolutions",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.4.1",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "llm-cost": "^1.0.5",
+    "node-fetch": "^2.7.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.14",
+    "@types/body-parser": "^1.19.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.1",
+    "@types/node-fetch": "^2.6.11",
+    "typescript": "^5.7.3"
+  }
+}

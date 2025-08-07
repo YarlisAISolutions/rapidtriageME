@@ -1,0 +1,172 @@
+{
+  "team_name": "RapidTriageME Development Team",
+  "project": "YarlisAISolutions Browser Debugging Platform",
+  "version": "1.0.0",
+  "last_updated": "2025-08-07",
+  
+  "team_structure": {
+    "project_manager": {
+      "agent": "agent-pm.json",
+      "primary_focus": "Product strategy, stakeholder coordination, cross-team alignment",
+      "reports_to": "Product Owner",
+      "collaborates_with": ["developer", "tester", "release_manager"]
+    },
+    "developer": {
+      "agent": "agent-developer.json",
+      "primary_focus": "Implementation, integration, performance optimization",
+      "reports_to": "project_manager",
+      "collaborates_with": ["tester", "release_manager", "project_manager"]
+    },
+    "tester": {
+      "agent": "agent-tester.json",
+      "primary_focus": "Quality assurance, compatibility testing, security validation",
+      "reports_to": "project_manager",
+      "collaborates_with": ["developer", "release_manager", "project_manager"]
+    },
+    "release_manager": {
+      "agent": "agent-release-manager.json",
+      "primary_focus": "Deployment coordination, version management, production stability",
+      "reports_to": "project_manager",
+      "collaborates_with": ["developer", "tester", "project_manager"]
+    }
+  },
+  
+  "communication_channels": {
+    "daily_standup": {
+      "participants": ["all"],
+      "frequency": "daily",
+      "duration": "15 minutes",
+      "focus": "Progress updates, blockers, daily goals"
+    },
+    "sprint_planning": {
+      "participants": ["project_manager", "developer", "tester"],
+      "frequency": "bi-weekly",
+      "duration": "2 hours",
+      "focus": "Feature prioritization, effort estimation, sprint goals"
+    },
+    "release_planning": {
+      "participants": ["project_manager", "release_manager", "tester"],
+      "frequency": "monthly",
+      "duration": "1 hour",
+      "focus": "Release schedule, deployment strategy, risk assessment"
+    },
+    "technical_review": {
+      "participants": ["developer", "tester"],
+      "frequency": "weekly",
+      "duration": "1 hour",
+      "focus": "Code reviews, architecture decisions, technical debt"
+    },
+    "retrospective": {
+      "participants": ["all"],
+      "frequency": "bi-weekly",
+      "duration": "1 hour",
+      "focus": "Process improvements, lessons learned, team health"
+    }
+  },
+  
+  "project_phases": {
+    "planning": {
+      "lead": "project_manager",
+      "support": ["developer", "tester"],
+      "deliverables": ["requirements", "architecture", "timeline"]
+    },
+    "development": {
+      "lead": "developer",
+      "support": ["tester"],
+      "deliverables": ["code", "unit_tests", "documentation"]
+    },
+    "testing": {
+      "lead": "tester",
+      "support": ["developer"],
+      "deliverables": ["test_reports", "bug_reports", "quality_metrics"]
+    },
+    "deployment": {
+      "lead": "release_manager",
+      "support": ["developer", "tester"],
+      "deliverables": ["release_packages", "deployment_logs", "monitoring_setup"]
+    },
+    "maintenance": {
+      "lead": "developer",
+      "support": ["tester", "release_manager"],
+      "deliverables": ["patches", "updates", "performance_improvements"]
+    }
+  },
+  
+  "decision_matrix": {
+    "feature_prioritization": {
+      "decision_maker": "project_manager",
+      "consulted": ["developer", "tester"],
+      "informed": ["release_manager"]
+    },
+    "technical_architecture": {
+      "decision_maker": "developer",
+      "consulted": ["project_manager"],
+      "informed": ["tester", "release_manager"]
+    },
+    "release_timing": {
+      "decision_maker": "release_manager",
+      "consulted": ["project_manager", "tester"],
+      "informed": ["developer"]
+    },
+    "quality_standards": {
+      "decision_maker": "tester",
+      "consulted": ["project_manager", "developer"],
+      "informed": ["release_manager"]
+    }
+  },
+  
+  "escalation_path": [
+    {
+      "level": 1,
+      "type": "technical_issue",
+      "escalate_to": "developer",
+      "timeframe": "2 hours"
+    },
+    {
+      "level": 2,
+      "type": "blocking_issue",
+      "escalate_to": "project_manager",
+      "timeframe": "4 hours"
+    },
+    {
+      "level": 3,
+      "type": "critical_production_issue",
+      "escalate_to": "release_manager",
+      "timeframe": "immediate"
+    }
+  ],
+  
+  "success_metrics": {
+    "project_health": [
+      "Sprint velocity",
+      "Defect escape rate",
+      "Code coverage percentage",
+      "Deployment frequency",
+      "Mean time to recovery"
+    ],
+    "team_health": [
+      "Team satisfaction score",
+      "Knowledge sharing index",
+      "Cross-functional collaboration",
+      "Process adherence",
+      "Innovation rate"
+    ],
+    "product_health": [
+      "User adoption rate",
+      "NPM download growth",
+      "Chrome extension ratings",
+      "Performance benchmarks",
+      "Security vulnerability count"
+    ]
+  },
+  
+  "tools_and_platforms": {
+    "project_management": ["GitHub Projects", "Linear", "Jira"],
+    "communication": ["Discord", "Slack", "Teams"],
+    "documentation": ["GitHub Wiki", "Notion", "Confluence"],
+    "code_repository": ["GitHub", "GitLab"],
+    "ci_cd": ["GitHub Actions", "CircleCI", "Jenkins"],
+    "monitoring": ["Cloudflare Analytics", "DataDog", "Sentry"],
+    "testing": ["Jest", "Playwright", "Lighthouse"]
+  }
+}

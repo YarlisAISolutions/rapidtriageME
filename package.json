@@ -1,0 +1,50 @@
+{
+  "name": "rapidtriage-me",
+  "version": "1.0.0",
+  "description": "YarlisAISolutions Browser Tools MCP Platform - Remote browser triage and debugging",
+  "main": "dist/worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "tsc",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
+    "tail": "wrangler tail",
+    "secret:add": "wrangler secret put",
+    "kv:create": "wrangler kv:namespace create SESSIONS",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "cloudflare-workers",
+    "remote-debugging",
+    "ai-tools",
+    "yarlis"
+  ],
+  "author": "YarlisAISolutions",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20240117.0",
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "typescript": "^5.3.3",
+    "wrangler": "^3.22.4",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

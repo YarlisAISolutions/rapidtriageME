@@ -1,0 +1,108 @@
+# Cloudflare Workers configuration for RapidTriageME
+# YarlisAISolutions Browser Tools MCP Platform
+# Production Configuration
+
+name = "rapidtriage-me"
+main = "src/worker-minimal.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Account details - will be configured during deployment
+account_id = "ed3fbe9532564f2f06ae772da689431a" # Your Cloudflare account ID
+workers_dev = false
+
+# Custom domain configuration
+routes = [
+  { pattern = "rapidtriage.me/*", zone_name = "rapidtriage.me" },
+  { pattern = "www.rapidtriage.me/*", zone_name = "rapidtriage.me" }
+]
+
+# Environment variables for production
+[vars]
+ENVIRONMENT = "production"
+BROWSER_TOOLS_PORT = "3025"
+SSE_ENDPOINT = "/sse"
+HEALTH_ENDPOINT = "/health"
+METRICS_ENDPOINT = "/metrics"
+
+# Secrets - Should be set via wrangler secret for production
+# Remove these hardcoded values before production deployment
+# AUTH_TOKEN = "use-wrangler-secret-put-AUTH_TOKEN"
+# JWT_SECRET = "use-wrangler-secret-put-JWT_SECRET"
+
+# KV namespace for session storage
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "5926c0732c074d23b7ea3941fd1c6836"
+
+# Durable Objects for WebSocket connections
+[[durable_objects.bindings]]
+name = "BROWSER_SESSIONS"
+class_name = "BrowserSession"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["BrowserSession"]
+
+# Rate limiting configuration (not supported in wrangler.toml)
+# Configure rate limiting in Cloudflare dashboard
+
+# Build configuration
+[build]
+command = "npm run build"
+
+# Development environment
+[env.development]
+name = "rapidtriage-dev"
+workers_dev = true
+vars = { ENVIRONMENT = "development" }
+
+# Staging environment
+[env.staging]
+name = "rapidtriage-staging"
+workers_dev = true
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+BROWSER_TOOLS_PORT = "3025"
+SSE_ENDPOINT = "/sse"
+HEALTH_ENDPOINT = "/health"
+METRICS_ENDPOINT = "/metrics"
+LOG_LEVEL = "debug"
+
+[[env.staging.kv_namespaces]]
+binding = "SESSIONS"
+id = "5926c0732c074d23b7ea3941fd1c6836"
+
+[[env.staging.durable_objects.bindings]]
+name = "BROWSER_SESSIONS"
+class_name = "BrowserSession"
+
+# Production environment
+[env.production]
+name = "rapidtriage-me-production"
+workers_dev = false
+
+[[env.production.routes]]
+pattern = "rapidtriage.me/*"
+zone_name = "rapidtriage.me"
+
+[[env.production.routes]]
+pattern = "www.rapidtriage.me/*"
+zone_name = "rapidtriage.me"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+BROWSER_TOOLS_PORT = "3025"
+SSE_ENDPOINT = "/sse"
+HEALTH_ENDPOINT = "/health"
+METRICS_ENDPOINT = "/metrics"
+LOG_LEVEL = "error"
+
+[[env.production.kv_namespaces]]
+binding = "SESSIONS"
+id = "5926c0732c074d23b7ea3941fd1c6836"
+
+[[env.production.durable_objects.bindings]]
+name = "BROWSER_SESSIONS"
+class_name = "BrowserSession"

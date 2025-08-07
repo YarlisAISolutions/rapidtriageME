@@ -1,0 +1,69 @@
+{
+  "name": "@yarlisai/rapidtriage-server",
+  "version": "1.0.0",
+  "description": "YarlisAISolutions RapidTriage Server - Comprehensive browser debugging and triage server with Lighthouse audits",
+  "type": "module",
+  "main": "dist/browser-connector.js",
+  "bin": {
+    "rapidtriage-server": "./dist/browser-connector.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YarlisAISolutions/rapidtriage-server.git"
+  },
+  "homepage": "https://rapidtriage.me",
+  "bugs": {
+    "url": "https://github.com/YarlisAISolutions/rapidtriage-server/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && node dist/browser-connector.js",
+    "test": "echo \"No tests yet\"",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "browser",
+    "debugging",
+    "triage",
+    "logging",
+    "screenshots",
+    "chrome",
+    "extension",
+    "yarlis",
+    "rapidtriage",
+    "lighthouse",
+    "puppeteer",
+    "performance",
+    "accessibility",
+    "seo"
+  ],
+  "author": "YarlisAISolutions",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.4.1",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "lighthouse": "^11.6.0",
+    "llm-cost": "^1.0.5",
+    "node-fetch": "^2.7.0",
+    "puppeteer-core": "^22.4.1",
+    "ws": "^8.18.0"
+  },
+  "optionalDependencies": {
+    "chrome-launcher": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.14",
+    "@types/body-parser": "^1.19.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.1",
+    "@types/node-fetch": "^2.6.11",
+    "@types/puppeteer-core": "^7.0.4",
+    "typescript": "^5.7.3"
+  }
+}

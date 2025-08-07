@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../smart-agent-teams"
+		},
+		{
+			"path": "../../../sat_project"
+		},
+		{
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
