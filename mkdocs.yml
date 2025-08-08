@@ -108,6 +108,8 @@ nav:
     - Browser Connector: components/browser-connector.md
     - MCP Server: components/mcp-server.md
     - Cloudflare Worker: components/cloudflare-worker.md
+  - Testing:
+    - Testing Process: testing/index.md
   - Deployment:
     - deployment/index.md
     - Local Testing: deployment/local-testing.md
