@@ -1,33 +1,134 @@
-# Getting Started
+# Getting Started with RapidTriageME
 
-Welcome to RapidTriageME! This section will help you get up and running quickly.
+Welcome to **RapidTriageME** - the AI-powered browser debugging platform that revolutionizes how you debug, analyze, and optimize web applications. This guide will walk you through everything you need to know to get started.
 
-## 📋 Prerequisites
+## What is RapidTriageME?
 
-Before you begin, ensure you have:
+RapidTriageME is a comprehensive browser debugging platform that enables AI assistants to interact with web browsers through the Model Context Protocol (MCP). It captures real-time browser data including console logs, network requests, errors, and performance metrics, making them available to your favorite AI coding assistants.
 
-- **Node.js 18+** - [Download](https://nodejs.org/)
-- **Chrome or Edge browser** - For the extension
-- **Terminal access** - Command line interface
-- **5 minutes** - That's all you need!
+### Key Benefits
 
-## 🎯 Choose Your Path
+- **AI-Powered Debugging** - Let AI assistants analyze browser issues for you
+- **Real-time Data Capture** - Monitor console logs, network requests, and errors as they happen  
+- **Cross-Platform** - Works with 10+ IDEs and AI assistants
+- **Remote Debugging** - Debug browsers anywhere with cloud deployment
+- **Comprehensive Audits** - Built-in Lighthouse integration for performance, accessibility, SEO
+- **Zero Configuration** - Works out of the box with sensible defaults
+
+## How It Works
+
+RapidTriageME consists of three main components working together:
+
+```mermaid
+graph LR
+    A[Chrome Extension] -->|WebSocket| B[Browser Connector<br/>Port 1421]
+    B -->|HTTP/REST| C[MCP Server]
+    C -->|MCP Protocol| D[AI Assistant<br/>Claude/Cursor/etc.]
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#e8f5e8
+    style D fill:#fff3e0
+```
+
+1. **Chrome Extension** - Captures browser data through DevTools API
+2. **Browser Connector** - Local server (port 1421) that processes and aggregates data
+3. **MCP Server** - Bridges data to AI assistants using Model Context Protocol
+
+## Installation Overview
+
+Getting started requires three simple steps:
+
+!!! tip "Quick Setup (5 minutes)"
+    1. **Install Chrome Extension** - Load the unpacked extension
+    2. **Start Browser Server** - Run `npx @yarlisai/rapidtriage-server`
+    3. **Configure AI Assistant** - Add MCP configuration to your IDE
+
+## Supported Platforms
+
+### AI Assistants & IDEs
+- **Cursor** - AI-first code editor with native MCP support
+- **Claude Desktop** - Anthropic's official desktop application
+- **VS Code** - With Continue extension for AI assistance
+- **Zed** - High-performance multiplayer code editor
+- **JetBrains IDEs** - IntelliJ, WebStorm, PyCharm with AI Assistant
+- **And 10+ more** - Any MCP-compatible client
+
+### Operating Systems
+- **macOS** - Full support (Intel and Apple Silicon)
+- **Windows** - Complete Windows 10/11 support
+- **Linux** - Ubuntu, Debian, CentOS, and other distributions
+
+### Browsers
+- **Chrome** - Primary supported browser (recommended)
+- **Microsoft Edge** - Chromium-based browsers
+- **Chromium** - Open-source browser support
+
+## Use Cases
+
+### Web Development
+- Debug JavaScript errors in real-time
+- Monitor API calls and network performance
+- Analyze bundle sizes and loading performance
+- Test responsive design across viewports
+
+### Quality Assurance
+- Automated accessibility testing
+- Performance regression detection
+- Cross-browser compatibility testing
+- Security vulnerability scanning
+
+### SEO Optimization
+- Meta tag validation and optimization
+- Core Web Vitals monitoring
+- Structured data validation
+- Mobile-friendliness assessment
+
+### DevOps & Monitoring
+- Production error monitoring
+- Performance baseline establishment
+- User experience optimization
+- Third-party service monitoring
+
+## Architecture Benefits
+
+### Local Development
+```
+Browser → Extension → Connector(:1421) → MCP → AI
+```
+- **Ultra-low latency** - Direct local communication
+- **Complete privacy** - All data stays on your machine
+- **No internet required** - Works completely offline
+- **Simple setup** - Just run one command
+
+### Cloud Deployment
+```
+Browser → Extension → Cloudflare Worker → AI
+```
+- **Global reach** - Debug from anywhere in the world
+- **Team collaboration** - Share debugging sessions
+- **Scalable** - Handles multiple concurrent sessions
+- **Secure** - JWT authentication and encryption
+
+## What's Next?
+
+Choose your path based on your needs:
 
 <div class="grid cards" markdown>
 
--   :material-rocket:{ .lg .middle } **Quick Start**
+-   :material-rocket-launch:{ .lg .middle } **Quick Start**
 
     ---
 
-    Get running in 5 minutes with minimal setup
+    Get up and running in under 5 minutes
 
-    [:octicons-arrow-right-24: Quick Start](quickstart.md)
+    [:octicons-arrow-right-24: Quickstart Guide](quickstart.md)
 
--   :material-package:{ .lg .middle } **Full Installation**
+-   :material-download:{ .lg .middle } **Detailed Installation**
 
     ---
 
-    Complete installation with all components
+    Step-by-step installation with troubleshooting
 
     [:octicons-arrow-right-24: Installation Guide](installation.md)
 
@@ -35,53 +136,63 @@ Before you begin, ensure you have:
 
     ---
 
-    Customize settings and environment
+    Advanced configuration options and customization
 
-    [:octicons-arrow-right-24: Configuration](configuration.md)
+    [:octicons-arrow-right-24: Configuration Guide](configuration.md)
+
+-   :material-book-open-variant:{ .lg .middle } **Architecture**
+
+    ---
+
+    Understand how RapidTriageME works under the hood
+
+    [:octicons-arrow-right-24: Architecture Overview](../architecture/index.md)
 
 </div>
 
-## 🚀 Installation Options
+## Prerequisites
 
-### Option 1: NPM Global Install (Recommended)
-```bash
-npm install -g @yarlisai/rapidtriage-server
-npm install -g @yarlisai/rapidtriage-mcp
-```
+Before you begin, ensure you have:
 
-### Option 2: Local Development
-```bash
-git clone https://github.com/yarlisai/rapidtriage.git
-cd rapidtriage
-./run.sh all
-```
+### Required
+- **Node.js 18+** - Download from [nodejs.org](https://nodejs.org/)
+- **Chrome Browser** - Download from [chrome.google.com](https://chrome.google.com/)
+- **Terminal Access** - Command line interface
 
-### Option 3: Docker
-```bash
-docker run -p 1421:1421 yarlisai/rapidtriage
-```
+### Recommended
+- **AI Assistant** - Cursor, Claude Desktop, VS Code with Continue
+- **Git** - For cloning repositories and version control
+- **Package Manager** - npm (comes with Node.js) or yarn
 
-## ✅ What You'll Have
+## Verification Checklist
 
-After setup, you'll have:
+After installation, verify everything is working:
 
-- ✅ Chrome extension capturing browser data
-- ✅ Local server running on port `1421`
-- ✅ MCP server for AI integration
-- ✅ Full debugging capabilities
+- [ ] Chrome extension loaded and visible in extensions page
+- [ ] Browser connector server running on port 1421
+- [ ] DevTools panel shows "RapidTriage" tab
+- [ ] AI assistant recognizes MCP tools
+- [ ] Screenshot capture works
+- [ ] Console logs are accessible
 
-## 🎉 Ready to Start?
+## Support & Community
 
-Jump to the [Quick Start Guide](quickstart.md) to begin your journey with RapidTriageME!
+- **Documentation** - Comprehensive guides and API reference
+- **GitHub Issues** - Bug reports and feature requests
+- **Discord Community** - Real-time support and discussions
+- **Example Projects** - Sample implementations and use cases
 
-## 📚 In This Section
+## Getting Help
 
-- **[Quick Start](quickstart.md)** - 5-minute setup guide
-- **[Installation](installation.md)** - Detailed installation instructions
-- **[Configuration](configuration.md)** - Environment and settings configuration
+If you encounter issues:
 
-## 🤝 Need Help?
+1. Check our [troubleshooting guide](../troubleshooting/common-issues.md)
+2. Review [frequently asked questions](../troubleshooting/faq.md)
+3. Search [existing issues](https://github.com/yarlisai/rapidtriage/issues)
+4. Join our [Discord community](https://discord.gg/rapidtriage)
 
-- Check our [FAQ](../troubleshooting/faq.md)
-- Join our [Discord community](https://discord.gg/rapidtriage)
-- Open an [issue on GitHub](https://github.com/yarlisai/rapidtriage/issues)
+---
+
+Ready to transform your browser debugging experience? Let's get started!
+
+[:octicons-arrow-right-24: Quick Start Guide](quickstart.md){ .md-button .md-button--primary }
