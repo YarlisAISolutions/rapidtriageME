@@ -41,7 +41,7 @@ Getting started requires three simple steps:
 
 !!! tip "Quick Setup (5 minutes)"
     1. **Install Chrome Extension** - Load the unpacked extension
-    2. **Start Browser Server** - Run `npx @/-server`
+    2. **Start Browser Server** - Run `npx @yarlisai/rapidtriage-server`
     3. **Configure AI Assistant** - Add MCP configuration to your IDE
 
 ## Supported Platforms

@@ -1,5 +1,5 @@
 {
-  "name": "@/-server",
+  "name": "@yarlis/rapidtriage-server",
   "version": "1.0.0",
   "description": "YarlisAISolutions RapidTriage Server - Comprehensive browser debugging and triage server with Lighthouse audits",
   "type": "module",
@@ -9,11 +9,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/YarlisAISolutions/rapidtriage-server.git"
+    "url": "https://github.com/YarlisAISolutions/rapidtriageME.git"
   },
   "homepage": "https://rapidtriage.me",
   "bugs": {
-    "url": "https://github.com/YarlisAISolutions/rapidtriage-server/issues"
+    "url": "https://github.com/YarlisAISolutions/rapidtriageME/issues"
   },
   "scripts": {
     "build": "tsc",

@@ -9,7 +9,7 @@
 <meta content="YarlisAISolutions" name="author"/>
 <link href="https://rapidtriage.me/docs/troubleshooting/" rel="canonical"/>
 <link href="../guides/performance/" rel="prev"/>
-<link href="../contributing/" rel="next"/>
+<link href="common-issues/" rel="next"/>
 <link href="../assets/favicon.ico" rel="icon"/>
 <meta content="mkdocs-1.6.1, mkdocs-material-9.6.16" name="generator"/>
 <title>Troubleshooting Guide - RapidTriageME Documentation</title>
@@ -358,7 +358,7 @@
           </label>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="common-issues.md">
+<a class="md-nav__link" href="common-issues/">
 <span class="md-ellipsis">
     Common Issues
     
@@ -366,7 +366,7 @@
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="faq.md">
+<a class="md-nav__link" href="faq/">
 <span class="md-ellipsis">
     FAQ
     
@@ -435,7 +435,7 @@
 <h2 id="common-issues-and-solutions">Common Issues and Solutions<a class="headerlink" href="#common-issues-and-solutions" title="Permanent link">¶</a></h2>
 <h3 id="server-wont-start-port-1421">Server Won't Start (Port 1421)<a class="headerlink" href="#server-wont-start-port-1421" title="Permanent link">¶</a></h3>
 <h4 id="symptom">Symptom<a class="headerlink" href="#symptom" title="Permanent link">¶</a></h4>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a>$<span class="w"> </span>npx<span class="w"> </span>@/-server
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a>$<span class="w"> </span>npx<span class="w"> </span>@yarlisai/rapidtriage-server
 </span><span id="__span-0-2"><a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a>Error:<span class="w"> </span>listen<span class="w"> </span>EADDRINUSE<span class="w"> </span>:::1421
 </span></code></pre></div>
 <h4 id="diagnosis">Diagnosis<a class="headerlink" href="#diagnosis" title="Permanent link">¶</a></h4>
@@ -457,13 +457,13 @@
 </span><span id="__span-2-5"><a href="#__codelineno-2-5" id="__codelineno-2-5" name="__codelineno-2-5"></a>pkill<span class="w"> </span>-f<span class="w"> </span>node
 </span><span id="__span-2-6"><a href="#__codelineno-2-6" id="__codelineno-2-6" name="__codelineno-2-6"></a>
 </span><span id="__span-2-7"><a href="#__codelineno-2-7" id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="c1"># Then restart</span>
-</span><span id="__span-2-8"><a href="#__codelineno-2-8" id="__codelineno-2-8" name="__codelineno-2-8"></a>npx<span class="w"> </span>@/-server
+</span><span id="__span-2-8"><a href="#__codelineno-2-8" id="__codelineno-2-8" name="__codelineno-2-8"></a>npx<span class="w"> </span>@yarlisai/rapidtriage-server
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="c1"># Set custom port</span>
 </span><span id="__span-3-2"><a href="#__codelineno-3-2" id="__codelineno-3-2" name="__codelineno-3-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">RAPIDTRIAGE_PORT</span><span class="o">=</span><span class="m">3030</span>
-</span><span id="__span-3-3"><a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a>npx<span class="w"> </span>@/-server
+</span><span id="__span-3-3"><a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a>npx<span class="w"> </span>@yarlisai/rapidtriage-server
 </span><span id="__span-3-4"><a href="#__codelineno-3-4" id="__codelineno-3-4" name="__codelineno-3-4"></a>
 </span><span id="__span-3-5"><a href="#__codelineno-3-5" id="__codelineno-3-5" name="__codelineno-3-5"></a><span class="c1"># Update MCP configuration</span>
 </span><span id="__span-3-6"><a href="#__codelineno-3-6" id="__codelineno-3-6" name="__codelineno-3-6"></a><span class="o">{</span>
@@ -483,7 +483,7 @@
 </span><span id="__span-4-3"><a href="#__codelineno-4-3" id="__codelineno-4-3" name="__codelineno-4-3"></a>
 </span><span id="__span-4-4"><a href="#__codelineno-4-4" id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="c1"># Use unprivileged port instead</span>
 </span><span id="__span-4-5"><a href="#__codelineno-4-5" id="__codelineno-4-5" name="__codelineno-4-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">RAPIDTRIAGE_PORT</span><span class="o">=</span><span class="m">8080</span>
-</span><span id="__span-4-6"><a href="#__codelineno-4-6" id="__codelineno-4-6" name="__codelineno-4-6"></a>npx<span class="w"> </span>@/-server
+</span><span id="__span-4-6"><a href="#__codelineno-4-6" id="__codelineno-4-6" name="__codelineno-4-6"></a>npx<span class="w"> </span>@yarlisai/rapidtriage-server
 </span></code></pre></div>
 </div>
 </div>
@@ -559,7 +559,7 @@
 </ul>
 <h4 id="diagnosis_1">Diagnosis<a class="headerlink" href="#diagnosis_1" title="Permanent link">¶</a></h4>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a href="#__codelineno-10-1" id="__codelineno-10-1" name="__codelineno-10-1"></a><span class="c1"># Test MCP server directly</span>
-</span><span id="__span-10-2"><a href="#__codelineno-10-2" id="__codelineno-10-2" name="__codelineno-10-2"></a>npx<span class="w"> </span>@/-mcp
+</span><span id="__span-10-2"><a href="#__codelineno-10-2" id="__codelineno-10-2" name="__codelineno-10-2"></a>npx<span class="w"> </span>@yarlisai/rapidtriage-mcp
 </span><span id="__span-10-3"><a href="#__codelineno-10-3" id="__codelineno-10-3" name="__codelineno-10-3"></a>
 </span><span id="__span-10-4"><a href="#__codelineno-10-4" id="__codelineno-10-4" name="__codelineno-10-4"></a><span class="c1"># Expected output:</span>
 </span><span id="__span-10-5"><a href="#__codelineno-10-5" id="__codelineno-10-5" name="__codelineno-10-5"></a>Connected<span class="w"> </span>to<span class="w"> </span>browser<span class="w"> </span>tools<span class="w"> </span>server<span class="w"> </span>at<span class="w"> </span>http://localhost:1421
@@ -575,7 +575,7 @@
 </span><span id="__span-11-3"><a href="#__codelineno-11-3" id="__codelineno-11-3" name="__codelineno-11-3"></a><span class="w">  </span><span class="nt">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-11-4"><a href="#__codelineno-11-4" id="__codelineno-11-4" name="__codelineno-11-4"></a><span class="w">    </span><span class="nt">"rapidtriage"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-11-5"><a href="#__codelineno-11-5" id="__codelineno-11-5" name="__codelineno-11-5"></a><span class="w">      </span><span class="nt">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span>
-</span><span id="__span-11-6"><a href="#__codelineno-11-6" id="__codelineno-11-6" name="__codelineno-11-6"></a><span class="w">      </span><span class="nt">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"@/-mcp"</span><span class="p">],</span>
+</span><span id="__span-11-6"><a href="#__codelineno-11-6" id="__codelineno-11-6" name="__codelineno-11-6"></a><span class="w">      </span><span class="nt">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"@yarlisai/rapidtriage-mcp"</span><span class="p">],</span>
 </span><span id="__span-11-7"><a href="#__codelineno-11-7" id="__codelineno-11-7" name="__codelineno-11-7"></a><span class="w">      </span><span class="nt">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-11-8"><a href="#__codelineno-11-8" id="__codelineno-11-8" name="__codelineno-11-8"></a><span class="w">        </span><span class="nt">"BROWSER_TOOLS_PORT"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1421"</span><span class="p">,</span>
 </span><span id="__span-11-9"><a href="#__codelineno-11-9" id="__codelineno-11-9" name="__codelineno-11-9"></a><span class="w">        </span><span class="nt">"BROWSER_TOOLS_HOST"</span><span class="p">:</span><span class="w"> </span><span class="s2">"localhost"</span>
@@ -593,13 +593,13 @@
 </span><span id="__span-12-5"><a href="#__codelineno-12-5" id="__codelineno-12-5" name="__codelineno-12-5"></a><span class="c1"># Use absolute paths if needed</span>
 </span><span id="__span-12-6"><a href="#__codelineno-12-6" id="__codelineno-12-6" name="__codelineno-12-6"></a><span class="o">{</span>
 </span><span id="__span-12-7"><a href="#__codelineno-12-7" id="__codelineno-12-7" name="__codelineno-12-7"></a><span class="w">  </span><span class="s2">"command"</span>:<span class="w"> </span><span class="s2">"/usr/local/bin/npx"</span>,
-</span><span id="__span-12-8"><a href="#__codelineno-12-8" id="__codelineno-12-8" name="__codelineno-12-8"></a><span class="w">  </span><span class="s2">"args"</span>:<span class="w"> </span><span class="o">[</span><span class="s2">"@/-mcp"</span><span class="o">]</span>
+</span><span id="__span-12-8"><a href="#__codelineno-12-8" id="__codelineno-12-8" name="__codelineno-12-8"></a><span class="w">  </span><span class="s2">"args"</span>:<span class="w"> </span><span class="o">[</span><span class="s2">"@yarlisai/rapidtriage-mcp"</span><span class="o">]</span>
 </span><span id="__span-12-9"><a href="#__codelineno-12-9" id="__codelineno-12-9" name="__codelineno-12-9"></a><span class="o">}</span>
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a href="#__codelineno-13-1" id="__codelineno-13-1" name="__codelineno-13-1"></a><span class="c1"># Install globally first</span>
-</span><span id="__span-13-2"><a href="#__codelineno-13-2" id="__codelineno-13-2" name="__codelineno-13-2"></a>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@/-mcp
+</span><span id="__span-13-2"><a href="#__codelineno-13-2" id="__codelineno-13-2" name="__codelineno-13-2"></a>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@yarlisai/rapidtriage-mcp
 </span><span id="__span-13-3"><a href="#__codelineno-13-3" id="__codelineno-13-3" name="__codelineno-13-3"></a>
 </span><span id="__span-13-4"><a href="#__codelineno-13-4" id="__codelineno-13-4" name="__codelineno-13-4"></a><span class="c1"># Then use direct command</span>
 </span><span id="__span-13-5"><a href="#__codelineno-13-5" id="__codelineno-13-5" name="__codelineno-13-5"></a><span class="o">{</span>
@@ -662,7 +662,7 @@
 </span><span id="__span-17-10"><a href="#__codelineno-17-10" id="__codelineno-17-10" name="__codelineno-17-10"></a>
 </span><span id="__span-17-11"><a href="#__codelineno-17-11" id="__codelineno-17-11" name="__codelineno-17-11"></a><span class="c1"># Check npm packages</span>
 </span><span id="__span-17-12"><a href="#__codelineno-17-12" id="__codelineno-17-12" name="__codelineno-17-12"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"\n📦 Package versions:"</span>
-</span><span id="__span-17-13"><a href="#__codelineno-17-13" id="__codelineno-17-13" name="__codelineno-17-13"></a>npm<span class="w"> </span>list<span class="w"> </span>-g<span class="w"> </span>@/-server<span class="w"> </span>@/-mcp<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"❌ Packages not installed globally"</span>
+</span><span id="__span-17-13"><a href="#__codelineno-17-13" id="__codelineno-17-13" name="__codelineno-17-13"></a>npm<span class="w"> </span>list<span class="w"> </span>-g<span class="w"> </span>@yarlisai/rapidtriage-server<span class="w"> </span>@yarlisai/rapidtriage-mcp<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"❌ Packages not installed globally"</span>
 </span><span id="__span-17-14"><a href="#__codelineno-17-14" id="__codelineno-17-14" name="__codelineno-17-14"></a>
 </span><span id="__span-17-15"><a href="#__codelineno-17-15" id="__codelineno-17-15" name="__codelineno-17-15"></a><span class="c1"># Check server port</span>
 </span><span id="__span-17-16"><a href="#__codelineno-17-16" id="__codelineno-17-16" name="__codelineno-17-16"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"\n🔌 Port 1421 status:"</span>
@@ -795,11 +795,11 @@
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a href="#__codelineno-24-1" id="__codelineno-24-1" name="__codelineno-24-1"></a><span class="c1"># Server debugging</span>
 </span><span id="__span-24-2"><a href="#__codelineno-24-2" id="__codelineno-24-2" name="__codelineno-24-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">DEBUG</span><span class="o">=</span>rapidtriage:*
 </span><span id="__span-24-3"><a href="#__codelineno-24-3" id="__codelineno-24-3" name="__codelineno-24-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LOG_LEVEL</span><span class="o">=</span>debug
-</span><span id="__span-24-4"><a href="#__codelineno-24-4" id="__codelineno-24-4" name="__codelineno-24-4"></a>npx<span class="w"> </span>@/-server<span class="w"> </span>--verbose
+</span><span id="__span-24-4"><a href="#__codelineno-24-4" id="__codelineno-24-4" name="__codelineno-24-4"></a>npx<span class="w"> </span>@yarlisai/rapidtriage-server<span class="w"> </span>--verbose
 </span><span id="__span-24-5"><a href="#__codelineno-24-5" id="__codelineno-24-5" name="__codelineno-24-5"></a>
 </span><span id="__span-24-6"><a href="#__codelineno-24-6" id="__codelineno-24-6" name="__codelineno-24-6"></a><span class="c1"># MCP debugging  </span>
 </span><span id="__span-24-7"><a href="#__codelineno-24-7" id="__codelineno-24-7" name="__codelineno-24-7"></a><span class="nb">export</span><span class="w"> </span><span class="nv">DEBUG</span><span class="o">=</span>mcp:*
-</span><span id="__span-24-8"><a href="#__codelineno-24-8" id="__codelineno-24-8" name="__codelineno-24-8"></a>npx<span class="w"> </span>@/-mcp<span class="w"> </span>--debug
+</span><span id="__span-24-8"><a href="#__codelineno-24-8" id="__codelineno-24-8" name="__codelineno-24-8"></a>npx<span class="w"> </span>@yarlisai/rapidtriage-mcp<span class="w"> </span>--debug
 </span></code></pre></div>
 <h3 id="capture-network-traffic">Capture Network Traffic<a class="headerlink" href="#capture-network-traffic" title="Permanent link">¶</a></h3>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a href="#__codelineno-25-1" id="__codelineno-25-1" name="__codelineno-25-1"></a><span class="c1"># Use netstat to monitor connections</span>
@@ -830,7 +830,7 @@
 </span><span id="__span-27-4"><a href="#__codelineno-27-4" id="__codelineno-27-4" name="__codelineno-27-4"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"Chrome: </span><span class="k">$(</span>google-chrome<span class="w"> </span>--version<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s1">'Not found'</span><span class="k">)</span><span class="s2">"</span>
 </span><span id="__span-27-5"><a href="#__codelineno-27-5" id="__codelineno-27-5" name="__codelineno-27-5"></a>
 </span><span id="__span-27-6"><a href="#__codelineno-27-6" id="__codelineno-27-6" name="__codelineno-27-6"></a><span class="c1"># Package versions</span>
-</span><span id="__span-27-7"><a href="#__codelineno-27-7" id="__codelineno-27-7" name="__codelineno-27-7"></a>npm<span class="w"> </span>list<span class="w"> </span>@/-server<span class="w"> </span>@/-mcp
+</span><span id="__span-27-7"><a href="#__codelineno-27-7" id="__codelineno-27-7" name="__codelineno-27-7"></a>npm<span class="w"> </span>list<span class="w"> </span>@yarlisai/rapidtriage-server<span class="w"> </span>@yarlisai/rapidtriage-mcp
 </span><span id="__span-27-8"><a href="#__codelineno-27-8" id="__codelineno-27-8" name="__codelineno-27-8"></a>
 </span><span id="__span-27-9"><a href="#__codelineno-27-9" id="__codelineno-27-9" name="__codelineno-27-9"></a><span class="c1"># Error logs</span>
 </span><span id="__span-27-10"><a href="#__codelineno-27-10" id="__codelineno-27-10" name="__codelineno-27-10"></a>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span><span class="w"> </span>~/.rapidtriage/logs/error.log
@@ -854,13 +854,13 @@
 <p>📚 <strong>Documentation</strong></p>
 <hr/>
 <p>Common issues and FAQ</p>
-<p><a href="faq.md"><span class="twemoji"><svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"></path></svg></span> FAQ</a></p>
+<p><a href="faq/"><span class="twemoji"><svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"></path></svg></span> FAQ</a></p>
 </li>
 <li>
 <p>🔧 <strong>Common Issues</strong></p>
 <hr/>
 <p>Detailed troubleshooting guide</p>
-<p><a href="common-issues.md"><span class="twemoji"><svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"></path></svg></span> Common Issues</a></p>
+<p><a href="common-issues/"><span class="twemoji"><svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"></path></svg></span> Common Issues</a></p>
 </li>
 </ul>
 </div>

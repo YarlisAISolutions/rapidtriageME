@@ -203,10 +203,10 @@ Edit `~/.cursor/mcp_settings.json`:
 rapidtriageME/
 ├── rapidtriage-mcp/       # MCP server package
 │   ├── dist/             # Compiled JS
-│   └── package.json      # @/-mcp
+│   └── package.json      # @yarlis/rapidtriage-mcp
 ├── rapidtriage-server/    # Browser server package
 │   ├── dist/             # Compiled JS
-│   └── package.json      # @/-server
+│   └── package.json      # @yarlis/rapidtriage-server
 ├── rapidtriage-extension/ # Browser extension
 └── src/                  # Cloudflare Worker source
 ```

@@ -1,0 +1,10 @@
+# RapidTriage Mobile Project Metadata
+
+PROJECT_NAME=RapidTriage Mobile
+REPOSITORY_URL=https://github.com/rapidtriage/mobile
+PROVIDER=EXPO/REACT_NATIVE
+REGION=N/A
+PLATFORM=iOS/Android/Web
+TECHNOLOGY_STACK=React Native, TypeScript, Expo, Zustand, React Navigation
+VERSION=1.0.0
+ENVIRONMENT=Development

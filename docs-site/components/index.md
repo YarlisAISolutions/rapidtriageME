@@ -218,7 +218,7 @@ sequenceDiagram
 
 ```bash
 # 1. Start Browser Connector
-npx @/-server
+npx @yarlisai/rapidtriage-server
 # Running on port 1421
 
 # 2. Configure IDE with MCP Server
@@ -227,7 +227,7 @@ npx @/-server
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp"]
+      "args": ["@yarlisai/rapidtriage-mcp"]
     }
   }
 }
@@ -265,10 +265,10 @@ wscat -c ws://localhost:1421/ws
 #### MCP Testing
 ```bash
 # Test MCP server directly
-npx @/-mcp
+npx @yarlisai/rapidtriage-mcp
 
 # Use MCP inspector
-npx @modelcontextprotocol/inspector npx @/-mcp
+npx @modelcontextprotocol/inspector npx @yarlisai/rapidtriage-mcp
 ```
 
 ## Component Configuration
@@ -335,8 +335,8 @@ export DEBUG=rapidtriage:*
 export LOG_LEVEL=debug
 
 # Start components with verbose logging
-npx @/-server --verbose
-npx @/-mcp --debug
+npx @yarlisai/rapidtriage-server --verbose
+npx @yarlisai/rapidtriage-mcp --debug
 ```
 
 ### Component Metrics

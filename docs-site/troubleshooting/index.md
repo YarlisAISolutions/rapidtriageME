@@ -49,7 +49,7 @@ flowchart TD
 
 #### Symptom
 ```bash
-$ npx @/-server
+$ npx @yarlisai/rapidtriage-server
 Error: listen EADDRINUSE :::1421
 ```
 
@@ -74,14 +74,14 @@ node    12345 user   18u  IPv6  0x1234      0t0  TCP *:1421 (LISTEN)
     pkill -f node
     
     # Then restart
-    npx @/-server
+    npx @yarlisai/rapidtriage-server
     ```
 
 === "Use different port"
     ```bash
     # Set custom port
     export RAPIDTRIAGE_PORT=3030
-    npx @/-server
+    npx @yarlisai/rapidtriage-server
     
     # Update MCP configuration
     {
@@ -102,7 +102,7 @@ node    12345 user   18u  IPv6  0x1234      0t0  TCP *:1421 (LISTEN)
     
     # Use unprivileged port instead
     export RAPIDTRIAGE_PORT=8080
-    npx @/-server
+    npx @yarlisai/rapidtriage-server
     ```
 
 ### Chrome Extension Not Loading
@@ -177,7 +177,7 @@ node    12345 user   18u  IPv6  0x1234      0t0  TCP *:1421 (LISTEN)
 
 ```bash
 # Test MCP server directly
-npx @/-mcp
+npx @yarlisai/rapidtriage-mcp
 
 # Expected output:
 Connected to browser tools server at http://localhost:1421
@@ -194,7 +194,7 @@ Available tools: screenshot_capture, get_console_logs, ...
       "mcpServers": {
         "rapidtriage": {
           "command": "npx",
-          "args": ["@/-mcp"],
+          "args": ["@yarlisai/rapidtriage-mcp"],
           "env": {
             "BROWSER_TOOLS_PORT": "1421",
             "BROWSER_TOOLS_HOST": "localhost"
@@ -213,14 +213,14 @@ Available tools: screenshot_capture, get_console_logs, ...
     # Use absolute paths if needed
     {
       "command": "/usr/local/bin/npx",
-      "args": ["@/-mcp"]
+      "args": ["@yarlisai/rapidtriage-mcp"]
     }
     ```
 
 === "Install Global Package"
     ```bash
     # Install globally first
-    npm install -g @/-mcp
+    npm install -g @yarlisai/rapidtriage-mcp
     
     # Then use direct command
     {
@@ -284,7 +284,7 @@ node --version || echo "❌ Node.js not found"
 
 # Check npm packages
 echo "\n📦 Package versions:"
-npm list -g @/-server @/-mcp 2>/dev/null || echo "❌ Packages not installed globally"
+npm list -g @yarlisai/rapidtriage-server @yarlisai/rapidtriage-mcp 2>/dev/null || echo "❌ Packages not installed globally"
 
 # Check server port
 echo "\n🔌 Port 1421 status:"
@@ -427,11 +427,11 @@ curl -w "Status: %{http_code}\n" -s http://localhost:1421/health | jq .
 # Server debugging
 export DEBUG=rapidtriage:*
 export LOG_LEVEL=debug
-npx @/-server --verbose
+npx @yarlisai/rapidtriage-server --verbose
 
 # MCP debugging  
 export DEBUG=mcp:*
-npx @/-mcp --debug
+npx @yarlisai/rapidtriage-mcp --debug
 ```
 
 ### Capture Network Traffic
@@ -473,7 +473,7 @@ echo "Node: $(node --version)"
 echo "Chrome: $(google-chrome --version 2>/dev/null || echo 'Not found')"
 
 # Package versions
-npm list @/-server @/-mcp
+npm list @yarlisai/rapidtriage-server @yarlisai/rapidtriage-mcp
 
 # Error logs
 tail -n 50 ~/.rapidtriage/logs/error.log

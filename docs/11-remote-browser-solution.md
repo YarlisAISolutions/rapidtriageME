@@ -529,7 +529,7 @@ class RemoteBrowserToolsMCPServer {
 
   private startBrowserToolsServer() {
     console.log('Starting Browser Tools middleware server...');
-    this.browserToolsProcess = spawn('npx', ['@/-server@latest'], {
+    this.browserToolsProcess = spawn('npx', ['@yarlis/rapidtriage-server@latest'], {
       stdio: 'inherit',
       env: { 
         ...process.env, 

@@ -47,7 +47,7 @@
 
 ## 📦 Package Details
 
-### **@/-mcp**
+### **@yarlis/rapidtriage-mcp**
 - **Location**: `/rapidtriage-mcp`
 - **Version**: 1.0.0
 - **Description**: AI-powered browser debugging and triage platform using MCP
@@ -55,7 +55,7 @@
 - **Main**: `dist/mcp-server.js`
 - **Build Status**: ✅ Successful
 
-### **@/-server**
+### **@yarlis/rapidtriage-server**
 - **Location**: `/rapidtriage-server`
 - **Version**: 1.0.0
 - **Description**: Comprehensive browser debugging server with Lighthouse audits
@@ -114,17 +114,17 @@ npm publish --access public
 ### Step 5: Post-Publishing Verification
 ```bash
 # Verify packages are published
-npm view @/-mcp
-npm view @/-server
+npm view @yarlis/rapidtriage-mcp
+npm view @yarlis/rapidtriage-server
 
 # Test installation
-npx @/-server@latest --version
-npx @/-mcp@latest --version
+npx @yarlis/rapidtriage-server@latest --version
+npx @yarlis/rapidtriage-mcp@latest --version
 
 # Test in a new project
 mkdir test-rapidtriage && cd test-rapidtriage
 npm init -y
-npm install @/-mcp @/-server
+npm install @yarlis/rapidtriage-mcp @yarlis/rapidtriage-server
 ```
 
 ## 🔄 Version Management
@@ -252,8 +252,8 @@ npm run build
 npm whoami
 
 # Check package name availability
-npm view @/-mcp
-npm view @/-server
+npm view @yarlis/rapidtriage-mcp
+npm view @yarlis/rapidtriage-server
 
 # Force republish (bump version first)
 npm version patch
@@ -266,7 +266,7 @@ npm publish --access public --force
 npm cache clean --force
 
 # Use specific version
-npm install @/-mcp@1.0.0
+npm install @yarlis/rapidtriage-mcp@1.0.0
 ```
 
 ## 📝 Release Notes Template
@@ -283,13 +283,13 @@ npm install @/-mcp@1.0.0
 - Remote debugging support
 
 ## 📦 Packages
-- @/-mcp
-- @/-server
+- @yarlis/rapidtriage-mcp
+- @yarlis/rapidtriage-server
 
 ## 🚀 Quick Start
 \`\`\`bash
-npx @/-server@latest
-npx @/-mcp@latest
+npx @yarlis/rapidtriage-server@latest
+npx @yarlis/rapidtriage-mcp@latest
 \`\`\`
 
 ## 📚 Documentation

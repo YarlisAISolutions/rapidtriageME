@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - 🎆 **Initial Release** - Complete rebranding to YarlisAISolutions RapidTriageME
 - 🤖 **Multi-IDE Support** - Compatible with 10+ IDEs and AI assistants
-- 📦 **NPM Packages** - Published `@/-mcp` and `@/-server`
+- 📦 **NPM Packages** - Published `@yarlisai/rapidtriage-mcp` and `@yarlisai/rapidtriage-server`
 - 🌍 **Cloud Deployment** - Ready for Cloudflare Workers at rapidtriage.me
 - 📸 **Advanced Screenshots** - Full-page and element-specific capture with auto-paste
 - 🚀 **Lighthouse Integration** - Complete SEO, performance, accessibility, and best practice audits
@@ -126,7 +126,7 @@ This is a major version with breaking changes. Follow these steps:
 npm uninstall -g cursor-browser-tools
 
 # Install new packages
-npm install -g @/-server @/-mcp
+npm install -g @yarlisai/rapidtriage-server @yarlisai/rapidtriage-mcp
 ```
 
 #### 2. Update IDE Configuration
@@ -149,7 +149,7 @@ npm install -g @/-server @/-mcp
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp"],
+      "args": ["@yarlisai/rapidtriage-mcp"],
       "env": {
         "BROWSER_TOOLS_PORT": "1421"
       }
