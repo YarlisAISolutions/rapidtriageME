@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "project": {
+    "name": "RapidTriageME",
+    "description": "Remote Browser Tools MCP Platform for AI-powered browser triage and debugging",
+    "type": "cloudflare-worker",
+    "provider": "CLOUDFLARE",
+    "domain": "rapidtriage.me"
+  },
+  "commands": {
+    "build": "npm run build",
+    "test": "npm test",
+    "lint": "npm run lint",
+    "typecheck": "npm run typecheck",
+    "dev": "npm run dev",
+    "deploy": {
+      "staging": "npm run deploy:staging",
+      "production": "npm run deploy:production"
+    }
+  },
+  "conventions": {
+    "codeStyle": {
+      "language": "typescript",
+      "indentation": "spaces",
+      "indentSize": 2,
+      "quotes": "double",
+      "semicolons": true,
+      "lineEndings": "lf"
+    },
+    "comments": {
+      "style": "detailed",
+      "focus": "why-over-what",
+      "includeContext": true,
+      "explainComplexLogic": true,
+      "addExamples": true
+    },
+    "naming": {
+      "folders": "numbered-sequential",
+      "files": "kebab-case",
+      "classes": "PascalCase",
+      "functions": "camelCase",
+      "constants": "UPPER_SNAKE_CASE"
+    }
+  },
+  "environment": {
+    "runtime": "cloudflare-workers",
+    "nodeVersion": ">=18.0.0",
+    "packageManager": "npm",
+    "framework": "MCP SDK with Cloudflare Workers"
+  },
+  "testing": {
+    "framework": "jest",
+    "runBefore": ["lint", "typecheck"],
+    "coverage": {
+      "enabled": true,
+      "threshold": 80
+    }
+  },
+  "git": {
+    "defaultBranch": "main",
+    "commitStyle": "conventional",
+    "noCoAuthor": true,
+    "hooks": {
+      "preCommit": ["lint", "typecheck"]
+    }
+  },
+  "cloudflare": {
+    "workers": true,
+    "kvNamespaces": ["SESSIONS"],
+    "environments": ["staging", "production"]
+  },
+  "dependencies": {
+    "manager": "npm",
+    "lockFile": "package-lock.json",
+    "autoInstall": false
+  },
+  "documentation": {
+    "createDocs": false,
+    "updateReadme": false,
+    "generateChangelog": false
+  }
+}
