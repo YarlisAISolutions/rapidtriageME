@@ -25,22 +25,29 @@ function print_menu() {
     echo "Available commands:"
     echo ""
     echo -e "${GREEN}1${NC}) env       - Load environment variables"
-    echo -e "${GREEN}2${NC}) test      - Run local tests"
-    echo -e "${GREEN}3${NC}) login     - Login to Cloudflare"
-    echo -e "${GREEN}4${NC}) deploy    - Deploy to Cloudflare"
-    echo -e "${GREEN}5${NC}) dns       - Configure DNS records"
-    echo -e "${GREEN}6${NC}) publish   - Publish npm packages"
-    echo -e "${GREEN}7${NC}) all       - Run complete deployment workflow"
-    echo -e "${GREEN}8${NC}) status    - Check deployment status"
+    echo -e "${GREEN}2${NC}) switch    - Switch environment (local/staging/production)"
+    echo -e "${GREEN}3${NC}) test      - Run local tests"
+    echo -e "${GREEN}4${NC}) login     - Login to Cloudflare"
+    echo -e "${GREEN}5${NC}) deploy    - Deploy to Cloudflare"
+    echo -e "${GREEN}6${NC}) dns       - Configure DNS records"
+    echo -e "${GREEN}7${NC}) publish   - Publish npm packages"
+    echo -e "${GREEN}8${NC}) all       - Run complete deployment workflow"
+    echo -e "${GREEN}9${NC}) status    - Check deployment status"
     echo ""
-    echo -e "${YELLOW}Usage:${NC} ./run.sh [command]"
+    echo -e "${YELLOW}Usage:${NC} ./run.sh [command] [args]"
     echo -e "${YELLOW}Example:${NC} ./run.sh test"
+    echo -e "${YELLOW}Example:${NC} ./run.sh switch production"
     echo ""
 }
 
 function run_env() {
     echo -e "${BLUE}Loading environment variables...${NC}"
     source "$SCRIPTS_PATH/01-load-env.sh"
+}
+
+function switch_env() {
+    echo -e "${BLUE}Switching environment...${NC}"
+    "$SCRIPT_DIR/switch-env.sh" "$@"
 }
 
 function run_test() {
@@ -136,6 +143,10 @@ print_header
 case "$1" in
     env)
         run_env
+        ;;
+    switch)
+        shift
+        switch_env "$@"
         ;;
     test)
         run_test
