@@ -1,8 +1,10 @@
 # 🤖 RapidTriageME Agent Team Configuration
 
+**Version 2.0.0** | **Last Updated: August 9, 2025**
+
 ## Overview
 
-This directory contains specialized AI agent definitions for the RapidTriageME browser debugging platform. Each agent represents a distinct role with specific responsibilities, designed to work collaboratively on the development, testing, and deployment of the platform.
+This directory contains specialized AI agent definitions for the RapidTriageME browser debugging platform. Each agent represents a distinct role with specific responsibilities, designed to work collaboratively on the development, testing, and deployment of this AI-powered browser debugging solution that integrates with 10+ IDEs via the Model Context Protocol (MCP).
 
 ## Agent Roles
 
@@ -42,7 +44,7 @@ This directory contains specialized AI agent definitions for the RapidTriageME b
 **Primary Focus:** Deployment coordination and production stability
 
 **Key Responsibilities:**
-- Manage NPM package publishing (@yarlisai scope)
+- Manage NPM package publishing (@yarlis scope)
 - Coordinate Chrome Web Store releases
 - Deploy to Cloudflare Workers platform
 - Maintain CI/CD pipelines with GitHub Actions

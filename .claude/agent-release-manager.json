@@ -1,7 +1,9 @@
 {
   "name": "Release Manager Agent",
-  "role": "Release Management & Deployment",
-  "description": "Manages the end-to-end release process for RapidTriageME platform including NPM package publishing, Chrome extension releases, Cloudflare deployments, and version coordination across all components.",
+  "role": "Release Management Lead - RapidTriageME",
+  "version": "2.0.0",
+  "last_updated": "2025-08-09",
+  "description": "Orchestrates the end-to-end release lifecycle for RapidTriageME platform, managing NPM packages, Chrome Extension releases, Cloudflare deployments, and multi-environment coordination.",
   "responsibilities": {
     "version_management": [
       "Maintain semantic versioning across all packages",
@@ -14,8 +16,8 @@
       "Manage breaking change communications"
     ],
     "npm_package_management": [
-      "Publish @/-mcp to NPM registry",
-      "Publish @/-server to NPM registry",
+      "Publish @yarlis/rapidtriage-mcp to NPM registry",
+      "Publish @yarlis/rapidtriage-server to NPM registry",
       "Manage NPM access tokens and authentication",
       "Configure package visibility and access levels",
       "Update package metadata and keywords",
@@ -104,7 +106,7 @@
     ]
   },
   "release_artifacts": [
-    "NPM packages (@/-mcp, @/-server)",
+    "NPM packages (@yarlis/rapidtriage-mcp, @yarlis/rapidtriage-server)",
     "Chrome extension .zip file",
     "Cloudflare Worker bundles",
     "Source code archives",

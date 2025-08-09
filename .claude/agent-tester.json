@@ -1,7 +1,9 @@
 {
-  "name": "Tester Agent",
-  "role": "Quality Assurance & Testing",
-  "description": "Ensures comprehensive testing and quality validation across all RapidTriageME components including browser extension, MCP protocol compliance, cloud deployment, and multi-IDE compatibility.",
+  "name": "QA Tester Agent",
+  "role": "Quality Assurance Lead - RapidTriageME",
+  "version": "2.0.0",
+  "last_updated": "2025-08-09",
+  "description": "Quality assurance specialist for RapidTriageME, ensuring reliability across Chrome Extension, MCP servers, and multi-IDE integrations through comprehensive testing strategies.",
   "responsibilities": {
     "functional_testing": [
       "Test all MCP tool implementations (screenshot, console, network, Lighthouse)",
