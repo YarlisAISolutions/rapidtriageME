@@ -22,8 +22,8 @@ Read our comprehensive [documentation](https://rapidtriage.me/docs) for installa
 
 ```
 rapidtriageME/
-├── rapidtriage-mcp/        # MCP server (@/-mcp)
-├── rapidtriage-server/     # Browser server (@/-server)
+├── rapidtriage-mcp/        # MCP server (@yarlis/rapidtriage-mcp)
+├── rapidtriage-server/     # Browser server (@yarlis/rapidtriage-server)
 ├── rapidtriage-extension/  # Browser extension
 ├── src/                   # Cloudflare Worker source
 └── docs/                  # Documentation
@@ -38,7 +38,7 @@ Check out our project roadmap here: [Github Roadmap / Project Board](https://git
 ### v1.0.0 - Complete Rebranding & Multi-IDE Support
 - 🎨 **Rebranded** to YarlisAISolutions RapidTriageME
 - 🔧 **Multi-IDE Support** - Now works with 10+ IDEs, not just Cursor
-- 📦 **New Package Names** - `@/-mcp` and `@/-server`
+- 📦 **New Package Names** - `@yarlis/rapidtriage-mcp` and `@yarlis/rapidtriage-server`
 - 🚀 **Cloud Deployment** - Ready for Cloudflare Workers at rapidtriage.me
 - 🔄 **Auto-Paste** - Screenshots auto-paste into Cursor (with focus)
 - 🎯 **Lighthouse Integration** - SEO, performance, accessibility, and best practice audits
@@ -57,12 +57,12 @@ Download and install the RapidTriage Chrome Extension:
 
 ### 2. **Install MCP Server** (in your IDE)
 ```bash
-npx @/-mcp@latest
+npx @yarlis/rapidtriage-mcp@latest
 ```
 
 ### 3. **Start Browser Server** (in terminal)
 ```bash
-npx @/-server@latest
+npx @yarlis/rapidtriage-server@latest
 ```
 
 ### Important Notes:
@@ -109,7 +109,7 @@ The **stdio transport** is the primary mode for local IDE integrations. The MCP 
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp"],
+      "args": ["@yarlis/rapidtriage-mcp"],
       "env": {
         "BROWSER_TOOLS_PORT": "1421",
         "BROWSER_TOOLS_HOST": "localhost"
@@ -142,7 +142,7 @@ The **stdio transport** is the primary mode for local IDE integrations. The MCP 
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp"],
+      "args": ["@yarlis/rapidtriage-mcp"],
       "env": {
         "BROWSER_TOOLS_PORT": "1421",
         "DEBUG": "true"
@@ -156,7 +156,7 @@ The **stdio transport** is the primary mode for local IDE integrations. The MCP 
 
 1. **Start the browser server** (required for browser communication):
 ```bash
-npx @/-server
+npx @yarlis/rapidtriage-server
 # Server starts on port 1421 by default
 ```
 
@@ -433,7 +433,7 @@ const transport = new SseServerTransport({
 #### Example 1: Local Development with stdio
 ```bash
 # Terminal 1: Start browser server
-npx @/-server
+npx @yarlis/rapidtriage-server
 
 # Terminal 2: Your IDE automatically starts MCP server
 # Just open your project in Cursor/VS Code/etc.
@@ -467,7 +467,7 @@ curl -X POST https://rapidtriage.me/mcp \
   "mcpServers": {
     "rapidtriage-local": {
       "command": "npx",
-      "args": ["@/-mcp"],
+      "args": ["@yarlis/rapidtriage-mcp"],
       "env": { "BROWSER_TOOLS_PORT": "1421" }
     },
     "rapidtriage-cloud": {
@@ -593,7 +593,7 @@ See [IDE_CONFIGURATION.md](./IDE_CONFIGURATION.md) for detailed setup instructio
 
 ### NPM Global Installation
 ```bash
-npm install -g @/-mcp @/-server
+npm install -g @yarlis/rapidtriage-mcp @yarlis/rapidtriage-server
 ```
 
 ### Docker Installation
@@ -613,7 +613,7 @@ npm run build
 ## 🚀 Deployment
 
 ### Local Development
-1. Start the server: `npx @/-server`
+1. Start the server: `npx @yarlis/rapidtriage-server`
 2. Configure your IDE (see [IDE_CONFIGURATION.md](./IDE_CONFIGURATION.md))
 3. Install Chrome extension
 4. Open Chrome DevTools → RapidTriage panel

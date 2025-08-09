@@ -107,10 +107,10 @@ graph TB
 
     ```bash
     # Install the browser connector
-    npm install -g @/-server
+    npm install -g @yarlisai/rapidtriage-server
     
     # Install the MCP server
-    npm install -g @/-mcp
+    npm install -g @yarlisai/rapidtriage-mcp
     
     # Start the server
     rapidtriage-server

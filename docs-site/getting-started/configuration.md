@@ -199,7 +199,7 @@ Configure your AI assistant to work with RapidTriageME.
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp"],
+      "args": ["@yarlisai/rapidtriage-mcp"],
       "env": {
         "BROWSER_TOOLS_PORT": "1421",
         "BROWSER_TOOLS_HOST": "localhost",
@@ -228,7 +228,7 @@ Configure your AI assistant to work with RapidTriageME.
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp"],
+      "args": ["@yarlisai/rapidtriage-mcp"],
       "env": {
         "BROWSER_TOOLS_PORT": "1421",
         "BROWSER_TOOLS_HOST": "localhost",
@@ -254,7 +254,7 @@ Configure your AI assistant to work with RapidTriageME.
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp"],
+      "args": ["@yarlisai/rapidtriage-mcp"],
       "env": {
         "BROWSER_TOOLS_PORT": "1421",
         "DEBUG": "true",
@@ -273,7 +273,7 @@ Configure your AI assistant to work with RapidTriageME.
   "language_servers": {
     "rapidtriage-mcp": {
       "command": "npx",
-      "args": ["@/-mcp"],
+      "args": ["@yarlisai/rapidtriage-mcp"],
       "env": {
         "BROWSER_TOOLS_PORT": "1421",
         "NODE_ENV": "development"
@@ -386,7 +386,7 @@ Use environment-specific configuration:
 export RAPIDTRIAGE_ENV=staging
 
 # Start server with environment config
-npx @/-server --env=staging
+npx @yarlisai/rapidtriage-server --env=staging
 ```
 
 ### Cloud Deployment Configuration
@@ -523,13 +523,13 @@ RAPIDTRIAGE_RATE_LIMIT_MAX=1000
 
 ```bash
 # Test configuration loading
-npx @/-server --validate-config
+npx @yarlisai/rapidtriage-server --validate-config
 
 # Check environment variables
-npx @/-server --show-config
+npx @yarlisai/rapidtriage-server --show-config
 
 # Test specific configuration file
-npx @/-server --config ./custom-config.json --validate-config
+npx @yarlisai/rapidtriage-server --config ./custom-config.json --validate-config
 ```
 
 ### Configuration Schema
@@ -571,7 +571,7 @@ lsof -i :1421
 
 # Use a different port
 export RAPIDTRIAGE_PORT=3030
-npx @/-server
+npx @yarlisai/rapidtriage-server
 ```
 
 #### Permission Denied
@@ -581,7 +581,7 @@ npx @/-server
 export RAPIDTRIAGE_PORT=8080
 
 # Or run with sudo (not recommended)
-sudo RAPIDTRIAGE_PORT=80 npx @/-server
+sudo RAPIDTRIAGE_PORT=80 npx @yarlisai/rapidtriage-server
 ```
 
 #### Configuration Not Loading
@@ -591,10 +591,10 @@ sudo RAPIDTRIAGE_PORT=80 npx @/-server
 ls -la ~/.rapidtriage/config.json
 
 # Check JSON syntax
-npx @/-server --validate-config --verbose
+npx @yarlisai/rapidtriage-server --validate-config --verbose
 
 # Enable debug logging
-DEBUG=rapidtriage:config npx @/-server
+DEBUG=rapidtriage:config npx @yarlisai/rapidtriage-server
 ```
 
 ### Debug Configuration
@@ -605,7 +605,7 @@ export DEBUG=rapidtriage:config,rapidtriage:server
 export LOG_LEVEL=debug
 
 # Start server with debugging
-npx @/-server --verbose
+npx @yarlisai/rapidtriage-server --verbose
 ```
 
 ## Best Practices

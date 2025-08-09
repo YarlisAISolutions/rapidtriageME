@@ -10,7 +10,7 @@ rapidtriageME/
 ├── 📦 rapidtriage-mcp/           # MCP Protocol Server
 │   ├── dist/                     # Compiled JavaScript
 │   ├── src/                      # TypeScript source (if applicable)
-│   ├── package.json              # @/-mcp
+│   ├── package.json              # @yarlis/rapidtriage-mcp
 │   ├── tsconfig.json             # TypeScript configuration
 │   ├── README.md                 # Package documentation
 │   ├── .npmignore               # NPM publish exclusions
@@ -19,7 +19,7 @@ rapidtriageME/
 ├── 📦 rapidtriage-server/        # Browser Middleware Server
 │   ├── dist/                     # Compiled JavaScript
 │   ├── lighthouse/              # Lighthouse audit modules
-│   ├── package.json             # @/-server
+│   ├── package.json             # @yarlis/rapidtriage-server
 │   ├── tsconfig.json            # TypeScript configuration
 │   ├── README.md                # Package documentation
 │   ├── .npmignore              # NPM publish exclusions
@@ -79,8 +79,8 @@ rapidtriageME/
 ### NPM Packages
 | Package | Folder | NPM Name | Binary |
 |---------|--------|----------|--------|
-| MCP Server | `rapidtriage-mcp/` | `@/-mcp` | `rapidtriage-mcp` |
-| Browser Server | `rapidtriage-server/` | `@/-server` | `rapidtriage-server` |
+| MCP Server | `rapidtriage-mcp/` | `@yarlis/rapidtriage-mcp` | `rapidtriage-mcp` |
+| Browser Server | `rapidtriage-server/` | `@yarlis/rapidtriage-server` | `rapidtriage-server` |
 
 ### Browser Extension
 | Component | Folder | Display Name | Version |
@@ -136,12 +136,12 @@ cd ../rapidtriage-server && npm publish --access public
 ### Installation Commands
 ```bash
 # For users
-npx @/-mcp@latest
-npx @/-server@latest
+npx @yarlis/rapidtriage-mcp@latest
+npx @yarlis/rapidtriage-server@latest
 
 # Global installation
-npm install -g @/-mcp
-npm install -g @/-server
+npm install -g @yarlis/rapidtriage-mcp
+npm install -g @yarlis/rapidtriage-server
 ```
 
 ### Extension Distribution

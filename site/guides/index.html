@@ -8,7 +8,7 @@
 <meta content="AI-Powered Browser Debugging Platform - Complete Documentation" name="description"/>
 <meta content="YarlisAISolutions" name="author"/>
 <link href="https://rapidtriage.me/docs/guides/" rel="canonical"/>
-<link href="../api/rest/" rel="prev"/>
+<link href="../api/mcp/" rel="prev"/>
 <link href="ide-integration/" rel="next"/>
 <link href="../assets/favicon.ico" rel="icon"/>
 <meta content="mkdocs-1.6.1, mkdocs-material-9.6.16" name="generator"/>
@@ -757,7 +757,7 @@
 <h3 id="with-testing-frameworks">With Testing Frameworks<a class="headerlink" href="#with-testing-frameworks" title="Permanent link">¶</a></h3>
 <h4 id="jest-integration">Jest Integration<a class="headerlink" href="#jest-integration" title="Permanent link">¶</a></h4>
 <div class="language-javascript highlight"><pre><span></span><code><span id="__span-9-1"><a href="#__codelineno-9-1" id="__codelineno-9-1" name="__codelineno-9-1"></a><span class="c1">// test/debug.helper.js</span>
-</span><span id="__span-9-2"><a href="#__codelineno-9-2" id="__codelineno-9-2" name="__codelineno-9-2"></a><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">RapidTriageClient</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">require</span><span class="p">(</span><span class="s1">'@/-client'</span><span class="p">);</span>
+</span><span id="__span-9-2"><a href="#__codelineno-9-2" id="__codelineno-9-2" name="__codelineno-9-2"></a><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">RapidTriageClient</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">require</span><span class="p">(</span><span class="s1">'@yarlisai/rapidtriage-client'</span><span class="p">);</span>
 </span><span id="__span-9-3"><a href="#__codelineno-9-3" id="__codelineno-9-3" name="__codelineno-9-3"></a>
 </span><span id="__span-9-4"><a href="#__codelineno-9-4" id="__codelineno-9-4" name="__codelineno-9-4"></a><span class="kd">class</span><span class="w"> </span><span class="nx">DebugHelper</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-9-5"><a href="#__codelineno-9-5" id="__codelineno-9-5" name="__codelineno-9-5"></a><span class="w">  </span><span class="kr">constructor</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>

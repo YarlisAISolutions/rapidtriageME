@@ -1,5 +1,5 @@
 {
-  "name": "@/-mcp",
+  "name": "@yarlis/rapidtriage-mcp",
   "version": "1.0.0",
   "description": "YarlisAISolutions RapidTriage MCP - AI-powered browser debugging and triage platform using Model Context Protocol",
   "main": "dist/mcp-server.js",
@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/YarlisAISolutions/rapidtriage-mcp.git"
+    "url": "https://github.com/YarlisAISolutions/rapidtriageME.git"
   },
   "homepage": "https://rapidtriage.me",
   "bugs": {
-    "url": "https://github.com/YarlisAISolutions/rapidtriage-mcp/issues"
+    "url": "https://github.com/YarlisAISolutions/rapidtriageME/issues"
   },
   "scripts": {
     "inspect": "tsc && npx @modelcontextprotocol/inspector node -- dist/mcp-server.js",
-    "inspect-live": "npx @modelcontextprotocol/inspector npx -- @/-mcp",
+    "inspect-live": "npx @modelcontextprotocol/inspector npx -- @yarlis/rapidtriage-mcp",
     "build": "tsc",
     "start": "tsc && node dist/mcp-server.js",
     "test": "echo \"No tests yet\"",

@@ -394,7 +394,7 @@ console.log('Screenshot saved:', result.path);
 ## SDK Support
 
 Official SDKs available:
-- Node.js: `npm install @/-sdk`
+- Node.js: `npm install @yarlisai/rapidtriage-sdk`
 - Python: `pip install rapidtriage`
 - Go: `go get -go`
 

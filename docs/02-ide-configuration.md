@@ -18,7 +18,7 @@ The AI-first code editor with deep MCP integration.
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp@latest"],
+      "args": ["@yarlis/rapidtriage-mcp@latest"],
       "env": {
         "RAPIDTRIAGE_PORT": "1421"
       }
@@ -51,7 +51,7 @@ code --install-extension continue.continue
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp@latest"],
+      "args": ["@yarlis/rapidtriage-mcp@latest"],
       "env": {
         "RAPIDTRIAGE_PORT": "1421"
       }
@@ -77,7 +77,7 @@ The high-performance, multiplayer code editor.
   "mcp_servers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp@latest"],
+      "args": ["@yarlis/rapidtriage-mcp@latest"],
       "env": {
         "RAPIDTRIAGE_PORT": "1421"
       }
@@ -103,7 +103,7 @@ code --install-extension saoudrizwan.claude-dev
   "cline.mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp@latest"],
+      "args": ["@yarlis/rapidtriage-mcp@latest"],
       "env": {
         "RAPIDTRIAGE_PORT": "1421"
       }
@@ -127,7 +127,7 @@ Anthropic's official desktop application.
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp@latest"],
+      "args": ["@yarlis/rapidtriage-mcp@latest"],
       "env": {
         "RAPIDTRIAGE_PORT": "1421"
       }
@@ -148,7 +148,7 @@ The IDE that writes code with you.
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp@latest"],
+      "args": ["@yarlis/rapidtriage-mcp@latest"],
       "env": {
         "RAPIDTRIAGE_PORT": "1421"
       }
@@ -174,7 +174,7 @@ With AI Assistant plugin supporting MCP.
   "servers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp@latest"],
+      "args": ["@yarlis/rapidtriage-mcp@latest"],
       "env": {
         "RAPIDTRIAGE_PORT": "1421"
       }
@@ -197,7 +197,7 @@ require('codecompanion').setup({
   mcp_servers = {
     rapidtriage = {
       command = "npx",
-      args = {"@/-mcp@latest"},
+      args = {"@yarlis/rapidtriage-mcp@latest"},
       env = {
         RAPIDTRIAGE_PORT = "1421"
       }
@@ -224,7 +224,7 @@ Lightweight editor with AI capabilities.
       "enabled": true,
       "mcp_servers": {
         "rapidtriage": {
-          "command": ["npx", "@/-mcp@latest"],
+          "command": ["npx", "@yarlis/rapidtriage-mcp@latest"],
           "env": {
             "RAPIDTRIAGE_PORT": "1421"
           }
@@ -245,7 +245,7 @@ For any MCP-compatible client or custom integration.
   "name": "rapidtriage",
   "transport": "stdio",
   "command": "npx",
-  "args": ["@/-mcp@latest"],
+  "args": ["@yarlis/rapidtriage-mcp@latest"],
   "env": {
     "RAPIDTRIAGE_PORT": "1421",
     "NODE_ENV": "production"
@@ -265,7 +265,7 @@ For any MCP-compatible client or custom integration.
 ### Step 1: Start the RapidTriage Server
 ```bash
 # In a terminal, start the middleware server
-npx @/-server@latest
+npx @yarlis/rapidtriage-server@latest
 ```
 
 ### Step 2: Configure Your IDE
@@ -367,7 +367,7 @@ For remote MCP server with SSE transport:
 ## 🐛 Troubleshooting
 
 ### Connection Issues
-1. Ensure the server is running: `npx @/-server@latest`
+1. Ensure the server is running: `npx @yarlis/rapidtriage-server@latest`
 2. Check port availability: `lsof -i :1421`
 3. Verify Chrome extension is installed and enabled
 

@@ -94,11 +94,11 @@ This is the fastest and easiest way to get started with RapidTriageME.
 
 ```bash
 # Install both packages globally
-npm install -g @/-server @/-mcp
+npm install -g @yarlisai/rapidtriage-server @yarlisai/rapidtriage-mcp
 
 # Or install separately
-npm install -g @/-server
-npm install -g @/-mcp
+npm install -g @yarlisai/rapidtriage-server
+npm install -g @yarlisai/rapidtriage-mcp
 ```
 
 #### Step 2: Verify Installation
@@ -111,8 +111,8 @@ rapidtriage-server --version
 rapidtriage-mcp --version
 
 # Alternative: Use npx (doesn't require global install)
-npx @/-server --version
-npx @/-mcp --version
+npx @yarlisai/rapidtriage-server --version
+npx @yarlisai/rapidtriage-mcp --version
 ```
 
 ### Method 2: Local Development Installation
@@ -123,8 +123,8 @@ For developers who want to contribute or customize RapidTriageME.
 
 ```bash
 # Clone the main repository
-git clone .git
-cd rapidtriage
+git clone https://github.com/YarlisAISolutions/rapidtriageME.git
+cd rapidtriageME
 ```
 
 #### Step 2: Install Dependencies
@@ -196,7 +196,7 @@ docker run -d \
   --name rapidtriage \
   -p 1421:1421 \
   -p 8080:8080 \
-  /:latest
+  yarlisai/rapidtriage:latest
 
 # Check if container is running
 docker ps
@@ -214,7 +214,7 @@ For more complex deployments:
 version: '3.8'
 services:
   rapidtriage:
-    image: /:latest
+    image: yarlisai/rapidtriage:latest
     ports:
       - "1421:1421"
       - "8080:8080"
@@ -241,7 +241,7 @@ Choose your preferred method:
 
 === "GitHub Releases"
     
-    1. Visit [GitHub Releases](/releases/latest)
+    1. Visit [GitHub Releases](https://github.com/YarlisAISolutions/rapidtriageME/releases/latest)
     2. Download `rapidtriage-extension-v1.0.0.zip`
     3. Extract to a folder (e.g., `~/rapidtriage-extension`)
 
@@ -249,8 +249,8 @@ Choose your preferred method:
     
     ```bash
     # Clone repository
-    git clone .git
-    cd rapidtriage/rapidtriage-extension
+    git clone https://github.com/YarlisAISolutions/rapidtriageME.git
+    cd rapidtriageME/rapidtriage-extension
     
     # Extension files are ready to use
     ```
@@ -259,7 +259,7 @@ Choose your preferred method:
     
     ```bash
     # Download and extract
-    curl -L /releases/latest/download/rapidtriage-extension.zip -o rapidtriage-extension.zip
+    curl -L https://github.com/YarlisAISolutions/rapidtriageME/releases/latest/download/rapidtriage-extension.zip -o rapidtriage-extension.zip
     unzip rapidtriage-extension.zip
     ```
 
@@ -370,7 +370,7 @@ Configure your preferred IDE to use RapidTriageME:
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp"],
+      "args": ["@yarlisai/rapidtriage-mcp"],
       "env": {
         "BROWSER_TOOLS_PORT": "1421",
         "NODE_ENV": "development"
@@ -396,7 +396,7 @@ Configure your preferred IDE to use RapidTriageME:
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp"],
+      "args": ["@yarlisai/rapidtriage-mcp"],
       "env": {
         "BROWSER_TOOLS_PORT": "1421"
       }
@@ -414,7 +414,7 @@ Configure your preferred IDE to use RapidTriageME:
   "mcpServers": {
     "rapidtriage": {
       "command": "npx",
-      "args": ["@/-mcp"],
+      "args": ["@yarlisai/rapidtriage-mcp"],
       "env": {
         "BROWSER_TOOLS_PORT": "1421",
         "DEBUG": "true"
@@ -430,7 +430,7 @@ Configure your preferred IDE to use RapidTriageME:
 
 ```bash
 # Terminal 1: Start browser connector server
-npx @/-server
+npx @yarlisai/rapidtriage-server
 
 # You should see:
 # 🚀 RapidTriage Server running on port 1421
@@ -452,7 +452,7 @@ Start your IDE (Cursor, VS Code, etc.) and verify MCP connection:
 
 ```bash
 # Test MCP server directly
-npx @/-mcp
+npx @yarlisai/rapidtriage-mcp
 
 # Should output available tools:
 # Tools: screenshot_capture, get_console_logs, run_lighthouse_audit, etc.
@@ -480,7 +480,7 @@ lsof -i :1421
 kill -9 <PID>
 
 # Or use a different port
-RAPIDTRIAGE_PORT=3030 npx @/-server
+RAPIDTRIAGE_PORT=3030 npx @yarlisai/rapidtriage-server
 ```
 
 #### Permission Errors (npm global install)
@@ -493,7 +493,7 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
 
 # Or use npx instead of global install
-npx @/-server
+npx @yarlisai/rapidtriage-server
 ```
 
 #### Chrome Extension Not Loading
@@ -510,12 +510,12 @@ npx @/-server
 which node
 
 # Check if package is installed
-npm list -g @/-mcp
+npm list -g @yarlisai/rapidtriage-mcp
 
 # Try absolute path in IDE config
 {
   "command": "/usr/local/bin/npx",
-  "args": ["@/-mcp"]
+  "args": ["@yarlisai/rapidtriage-mcp"]
 }
 ```
 
@@ -524,9 +524,9 @@ npm list -g @/-mcp
 If you encounter issues not covered here:
 
 1. **Check our [troubleshooting guide](../troubleshooting/common-issues.md)**
-2. **Search [existing issues](/issues)**
+2. **Search [existing issues](https://github.com/YarlisAISolutions/rapidtriageME/issues)**
 3. **Join our [Discord community](https://discord.gg/rapidtriage)**
-4. **Create a [new issue](/issues/new)**
+4. **Create a [new issue](https://github.com/YarlisAISolutions/rapidtriageME/issues/new)**
 
 When reporting issues, include:
 - Operating system and version

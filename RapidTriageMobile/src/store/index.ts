@@ -46,7 +46,7 @@ interface AuthStore {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -66,12 +66,17 @@ export const useAuthStore = create<AuthStore>()(
       login: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
         try {
-          // Mock login - replace with actual API call
-          const mockUser: User = {
-            id: '1',
-            email,
-            firstName: 'John',
-            lastName: 'Doe',
+          // Use auth factory to get appropriate service (real or mock)
+          const { authService } = await import('../services/auth/auth-factory');
+          const userProfile = await authService.signInWithEmail(email, password);
+          
+          // Convert UserProfile to User format for store
+          const user: User = {
+            id: userProfile.uid,
+            email: userProfile.email,
+            firstName: userProfile.displayName?.split(' ')[0] || 'User',
+            lastName: userProfile.displayName?.split(' ').slice(1).join(' ') || '',
+            avatar: userProfile.photoURL,
             subscription: {
               tierId: 'free',
               status: 'active',
@@ -80,11 +85,11 @@ export const useAuthStore = create<AuthStore>()(
                 scansLimit: 10
               }
             },
-            createdAt: new Date().toISOString(),
+            createdAt: userProfile.createdAt.toISOString(),
             updatedAt: new Date().toISOString()
           };
           
-          set({ user: mockUser, isAuthenticated: true, isLoading: false });
+          set({ user, isAuthenticated: true, isLoading: false });
         } catch (error) {
           set({ 
             error: error instanceof Error ? error.message : 'Login failed',
@@ -93,8 +98,17 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
-      logout: () => {
-        set({ user: null, isAuthenticated: false, error: null });
+      logout: async () => {
+        set({ isLoading: true });
+        try {
+          const { authService } = await import('../services/auth/auth-factory');
+          await authService.logout();
+          set({ user: null, isAuthenticated: false, error: null, isLoading: false });
+        } catch (error) {
+          console.error('Logout error:', error);
+          // Still clear local state even if logout fails
+          set({ user: null, isAuthenticated: false, error: null, isLoading: false });
+        }
       },
     }),
     {

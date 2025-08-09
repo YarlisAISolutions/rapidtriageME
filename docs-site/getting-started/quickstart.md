@@ -22,11 +22,11 @@ Get RapidTriageME up and running in under 5 minutes!
 
 ```bash
 # Using npm (recommended)
-npx @/-server
+npx @yarlisai/rapidtriage-server
 
 # Or clone and run locally
-git clone .git
-cd rapidtriage
+git clone https://github.com/YarlisAISolutions/rapidtriageME.git
+cd rapidtriageME
 ./run.sh test
 ```
 
@@ -47,7 +47,7 @@ Available at: http://localhost:1421
       "mcpServers": {
         "rapidtriage": {
           "command": "npx",
-          "args": ["@/-mcp"],
+          "args": ["@yarlisai/rapidtriage-mcp"],
           "env": {
             "BROWSER_TOOLS_PORT": "1421"
           }
@@ -126,7 +126,7 @@ You're now ready to use RapidTriageME for AI-powered browser debugging.
     Verify MCP configuration:
     ```bash
     # Test MCP server directly
-    npx @/-mcp
+    npx @yarlisai/rapidtriage-mcp
     ```
 
-Need help? Check our [troubleshooting guide](../troubleshooting/common-issues.md) or [open an issue](/issues).
+Need help? Check our [troubleshooting guide](../troubleshooting/common-issues.md) or [open an issue](https://github.com/YarlisAISolutions/rapidtriageME/issues).
