@@ -1,3 +1,21 @@
+// Helper function to safely send messages (devtools might not be open)
+function safeSendRuntimeMessage(message, callback) {
+  try {
+    chrome.runtime.sendMessage(message, (response) => {
+      // Check for errors but don't throw
+      if (chrome.runtime.lastError) {
+        // This is expected if DevTools isn't open - silently ignore
+        console.debug("Runtime message not delivered:", chrome.runtime.lastError.message);
+      } else if (callback) {
+        callback(response);
+      }
+    });
+  } catch (e) {
+    // Silently ignore - DevTools probably not open
+    console.debug("Could not send runtime message:", e.message);
+  }
+}
+
 // Listen for messages from the devtools panel
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "GET_CURRENT_URL" && message.tabId) {
@@ -314,7 +332,7 @@ async function retestConnectionOnRefresh(tabId) {
     );
 
     // Notify all devtools instances about the connection status
-    chrome.runtime.sendMessage({
+    safeSendRuntimeMessage({
       type: "CONNECTION_STATUS_UPDATE",
       isConnected: isConnected,
       tabId: tabId,
@@ -322,7 +340,7 @@ async function retestConnectionOnRefresh(tabId) {
 
     // Always notify for page refresh, whether connected or not
     // This ensures any ongoing discovery is cancelled and restarted
-    chrome.runtime.sendMessage({
+    safeSendRuntimeMessage({
       type: "INITIATE_AUTO_DISCOVERY",
       reason: "page_refresh",
       tabId: tabId,
