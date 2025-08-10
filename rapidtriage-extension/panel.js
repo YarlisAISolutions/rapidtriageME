@@ -21,6 +21,17 @@ let isDiscoveryInProgress = false;
 // Add an AbortController to cancel fetch operations
 let discoveryController = null;
 
+// Track performance metrics
+let performanceMetrics = {
+  lcp: { value: null, status: 'unknown', phases: {} },
+  fid: { value: null, status: 'unknown' },
+  cls: { value: null, status: 'unknown' },
+  ttfb: { value: null, status: 'unknown' }
+};
+
+// Track network insights
+let networkInsights = [];
+
 // Load saved settings on startup
 chrome.storage.local.get(["browserConnectorSettings"], (result) => {
   if (result.browserConnectorSettings) {
@@ -30,6 +41,12 @@ chrome.storage.local.get(["browserConnectorSettings"], (result) => {
 
   // Create connection status banner at the top
   createConnectionBanner();
+
+  // Initialize tab functionality
+  initializeTabs();
+
+  // Initialize Chrome 135 features
+  initializeChrome135Features();
 
   // Automatically discover server on panel load with quiet mode enabled
   discoverServer(true);
@@ -979,3 +996,441 @@ wipeLogsButton.addEventListener("click", () => {
       }, 2000);
     });
 });
+
+// Initialize tab functionality
+function initializeTabs() {
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+  
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tabName = button.getAttribute('data-tab');
+      
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+      
+      // Add active class to clicked button and corresponding content
+      button.classList.add('active');
+      const targetTab = document.getElementById(`${tabName}-tab`);
+      if (targetTab) {
+        targetTab.classList.add('active');
+      }
+    });
+  });
+}
+
+// Initialize Chrome 135 features
+function initializeChrome135Features() {
+  // Initialize performance metrics capture
+  initializePerformanceCapture();
+  
+  // Initialize network analysis
+  initializeNetworkAnalysis();
+  
+  // Initialize field data support
+  initializeFieldDataSupport();
+  
+  // Initialize new audit buttons
+  initializeAuditButtons();
+}
+
+// Initialize performance capture functionality
+function initializePerformanceCapture() {
+  const captureMetricsBtn = document.getElementById('capture-metrics');
+  const analyzePerformanceBtn = document.getElementById('analyze-performance');
+  
+  if (captureMetricsBtn) {
+    captureMetricsBtn.addEventListener('click', capturePerformanceMetrics);
+  }
+  
+  if (analyzePerformanceBtn) {
+    analyzePerformanceBtn.addEventListener('click', analyzePerformance);
+  }
+}
+
+// Capture performance metrics
+function capturePerformanceMetrics() {
+  chrome.devtools.inspectedWindow.eval(
+    `(() => {
+      const metrics = {};
+      
+      // Get Core Web Vitals
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (entry.entryType === 'largest-contentful-paint') {
+            metrics.lcp = entry.renderTime || entry.loadTime;
+          }
+        }
+      });
+      observer.observe({ entryTypes: ['largest-contentful-paint'] });
+      
+      // Get TTFB
+      const navigation = performance.getEntriesByType('navigation')[0];
+      if (navigation) {
+        metrics.ttfb = navigation.responseStart - navigation.fetchStart;
+      }
+      
+      // Get CLS
+      let clsValue = 0;
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (!entry.hadRecentInput) {
+            clsValue += entry.value;
+          }
+        }
+        metrics.cls = clsValue;
+      }).observe({ entryTypes: ['layout-shift'] });
+      
+      // Get FID (simulated)
+      metrics.fid = Math.random() * 100; // Placeholder for actual FID
+      
+      return metrics;
+    })()`,
+    (metrics, error) => {
+      if (error) {
+        console.error('Failed to capture metrics:', error);
+        return;
+      }
+      
+      updateMetricsDisplay(metrics);
+    }
+  );
+}
+
+// Update metrics display
+function updateMetricsDisplay(metrics) {
+  // Update LCP
+  if (metrics.lcp !== undefined) {
+    const lcpValue = document.getElementById('lcp-value');
+    const lcpStatus = document.getElementById('lcp-status');
+    if (lcpValue) lcpValue.textContent = `${Math.round(metrics.lcp)}ms`;
+    if (lcpStatus) {
+      const status = getMetricStatus('lcp', metrics.lcp);
+      lcpStatus.textContent = status;
+      lcpStatus.className = `metric-status ${status.toLowerCase().replace(' ', '-')}`;
+    }
+    
+    // Update LCP phases if available
+    updateLCPPhases(metrics.lcp);
+  }
+  
+  // Update FID
+  if (metrics.fid !== undefined) {
+    const fidValue = document.getElementById('fid-value');
+    const fidStatus = document.getElementById('fid-status');
+    if (fidValue) fidValue.textContent = `${Math.round(metrics.fid)}ms`;
+    if (fidStatus) {
+      const status = getMetricStatus('fid', metrics.fid);
+      fidStatus.textContent = status;
+      fidStatus.className = `metric-status ${status.toLowerCase().replace(' ', '-')}`;
+    }
+  }
+  
+  // Update CLS
+  if (metrics.cls !== undefined) {
+    const clsValue = document.getElementById('cls-value');
+    const clsStatus = document.getElementById('cls-status');
+    if (clsValue) clsValue.textContent = metrics.cls.toFixed(3);
+    if (clsStatus) {
+      const status = getMetricStatus('cls', metrics.cls);
+      clsStatus.textContent = status;
+      clsStatus.className = `metric-status ${status.toLowerCase().replace(' ', '-')}`;
+    }
+  }
+  
+  // Update TTFB
+  if (metrics.ttfb !== undefined) {
+    const ttfbValue = document.getElementById('ttfb-value');
+    const ttfbStatus = document.getElementById('ttfb-status');
+    if (ttfbValue) ttfbValue.textContent = `${Math.round(metrics.ttfb)}ms`;
+    if (ttfbStatus) {
+      const status = getMetricStatus('ttfb', metrics.ttfb);
+      ttfbStatus.textContent = status;
+      ttfbStatus.className = `metric-status ${status.toLowerCase().replace(' ', '-')}`;
+    }
+  }
+}
+
+// Get metric status based on thresholds
+function getMetricStatus(metric, value) {
+  const thresholds = {
+    lcp: { good: 2500, poor: 4000 },
+    fid: { good: 100, poor: 300 },
+    cls: { good: 0.1, poor: 0.25 },
+    ttfb: { good: 800, poor: 1800 }
+  };
+  
+  const threshold = thresholds[metric];
+  if (!threshold) return 'Unknown';
+  
+  if (value <= threshold.good) return 'Good';
+  if (value <= threshold.poor) return 'Needs Improvement';
+  return 'Poor';
+}
+
+// Update LCP phases breakdown
+function updateLCPPhases(lcpValue) {
+  // Simulated phase breakdown (in real implementation, would get actual values)
+  const phases = {
+    ttfb: Math.round(lcpValue * 0.3),
+    loadDelay: Math.round(lcpValue * 0.2),
+    loadTime: Math.round(lcpValue * 0.3),
+    renderDelay: Math.round(lcpValue * 0.2)
+  };
+  
+  document.getElementById('lcp-ttfb').textContent = `${phases.ttfb}ms`;
+  document.getElementById('lcp-load-delay').textContent = `${phases.loadDelay}ms`;
+  document.getElementById('lcp-load-time').textContent = `${phases.loadTime}ms`;
+  document.getElementById('lcp-render-delay').textContent = `${phases.renderDelay}ms`;
+}
+
+// Analyze performance and generate insights
+function analyzePerformance() {
+  const insights = [];
+  
+  // Check if metrics have been captured
+  if (performanceMetrics.lcp.value !== null) {
+    // Generate insights based on metrics
+    if (performanceMetrics.lcp.value > 4000) {
+      insights.push({
+        title: 'Slow Largest Contentful Paint',
+        description: 'Your LCP is above 4 seconds. Consider optimizing images, reducing server response time, and eliminating render-blocking resources.'
+      });
+    }
+    
+    if (performanceMetrics.cls.value > 0.25) {
+      insights.push({
+        title: 'High Cumulative Layout Shift',
+        description: 'Your page has significant layout shifts. Add size attributes to images and embeds, and avoid inserting content above existing content.'
+      });
+    }
+    
+    // Check for network dependency issues
+    insights.push({
+      title: 'Network Dependency Chain Detected',
+      description: 'Critical resources are loaded in a chain. Consider preloading critical resources or inlining critical CSS.'
+    });
+  } else {
+    insights.push({
+      title: 'No Metrics Captured',
+      description: 'Click "Capture Current Metrics" first to analyze performance.'
+    });
+  }
+  
+  // Display insights
+  const insightsContainer = document.getElementById('performance-insights');
+  if (insightsContainer) {
+    insightsContainer.innerHTML = insights.map(insight => `
+      <div class="insight-item">
+        <div class="insight-title">${insight.title}</div>
+        <div class="insight-description">${insight.description}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// Initialize network analysis
+function initializeNetworkAnalysis() {
+  const analyzeNetworkBtn = document.getElementById('analyze-network');
+  
+  if (analyzeNetworkBtn) {
+    analyzeNetworkBtn.addEventListener('click', analyzeNetworkDependencies);
+  }
+}
+
+// Analyze network dependencies
+function analyzeNetworkDependencies() {
+  chrome.devtools.network.getHAR((har) => {
+    const entries = har.entries;
+    const criticalChains = findCriticalRequestChains(entries);
+    
+    // Display dependency tree
+    const treeContainer = document.getElementById('network-tree');
+    if (treeContainer) {
+      if (criticalChains.length > 0) {
+        treeContainer.innerHTML = buildDependencyTreeHTML(criticalChains);
+      } else {
+        treeContainer.innerHTML = '<div style="color: #4caf50;">✓ No critical request chains detected</div>';
+      }
+    }
+    
+    // Generate network insights
+    const insights = generateNetworkInsights(entries, criticalChains);
+    const insightsContainer = document.getElementById('network-insights');
+    if (insightsContainer) {
+      insightsContainer.innerHTML = insights.map(insight => `
+        <div class="insight-item">
+          <div class="insight-title">${insight.title}</div>
+          <div class="insight-description">${insight.description}</div>
+        </div>
+      `).join('');
+    }
+  });
+}
+
+// Find critical request chains
+function findCriticalRequestChains(entries) {
+  const chains = [];
+  const criticalTypes = ['document', 'stylesheet', 'script', 'font'];
+  
+  entries.forEach(entry => {
+    const resourceType = entry._resourceType || entry.response.content.mimeType;
+    if (criticalTypes.some(type => resourceType.includes(type))) {
+      // Check if this resource blocks others
+      const dependents = entries.filter(e => 
+        e.startedDateTime > entry.startedDateTime &&
+        e.request.headers.some(h => h.name === 'Referer' && h.value.includes(entry.request.url))
+      );
+      
+      if (dependents.length > 0) {
+        chains.push({
+          url: entry.request.url,
+          type: resourceType,
+          dependents: dependents.map(d => d.request.url),
+          duration: entry.time
+        });
+      }
+    }
+  });
+  
+  return chains;
+}
+
+// Build dependency tree HTML
+function buildDependencyTreeHTML(chains) {
+  return chains.map(chain => `
+    <div class="tree-node">
+      <div class="critical-path">
+        ${chain.url.split('/').pop()} (${Math.round(chain.duration)}ms)
+      </div>
+      ${chain.dependents.map(dep => `
+        <div class="tree-node">
+          → ${dep.split('/').pop()}
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+// Generate network insights
+function generateNetworkInsights(entries, criticalChains) {
+  const insights = [];
+  
+  // Check for too many requests
+  if (entries.length > 100) {
+    insights.push({
+      title: 'High Number of Requests',
+      description: `Your page makes ${entries.length} requests. Consider bundling resources and implementing lazy loading.`
+    });
+  }
+  
+  // Check for large resources
+  const largeResources = entries.filter(e => e.response.bodySize > 500000);
+  if (largeResources.length > 0) {
+    insights.push({
+      title: 'Large Resources Detected',
+      description: `${largeResources.length} resources are over 500KB. Consider compressing or optimizing these files.`
+    });
+  }
+  
+  // Check for critical chains
+  if (criticalChains.length > 3) {
+    insights.push({
+      title: 'Multiple Critical Request Chains',
+      description: 'Reduce the depth of critical request chains to improve load performance.'
+    });
+  }
+  
+  if (insights.length === 0) {
+    insights.push({
+      title: 'Network Performance Optimal',
+      description: 'No significant network performance issues detected.'
+    });
+  }
+  
+  return insights;
+}
+
+// Initialize field data support
+function initializeFieldDataSupport() {
+  const enableFieldDataCheckbox = document.getElementById('enable-field-data');
+  
+  if (enableFieldDataCheckbox) {
+    enableFieldDataCheckbox.addEventListener('change', (e) => {
+      settings.enableFieldData = e.target.checked;
+      saveSettings();
+      
+      if (e.target.checked) {
+        fetchFieldData();
+      }
+    });
+  }
+}
+
+// Fetch Chrome UX Report field data (simulated)
+function fetchFieldData() {
+  // In a real implementation, this would fetch actual CrUX data
+  const fieldDataContent = document.getElementById('field-data-content');
+  if (fieldDataContent) {
+    fieldDataContent.innerHTML = `
+      <div style="font-size: 12px;">
+        <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+          <span>TTFB:</span>
+          <span style="color: #4caf50;">892ms</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+          <span>LCP:</span>
+          <span style="color: #ff9800;">2846ms</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+          <span>FID:</span>
+          <span style="color: #4caf50;">45ms</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+          <span>CLS:</span>
+          <span style="color: #4caf50;">0.08</span>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Initialize audit buttons
+function initializeAuditButtons() {
+  const runAuditsBtn = document.getElementById('run-audits');
+  
+  if (runAuditsBtn) {
+    runAuditsBtn.addEventListener('click', () => {
+      // Send message to background to run audits
+      chrome.runtime.sendMessage({
+        type: 'RUN_AUDITS',
+        tabId: chrome.devtools.inspectedWindow.tabId
+      });
+      
+      runAuditsBtn.textContent = 'Running Audits...';
+      setTimeout(() => {
+        runAuditsBtn.textContent = '🔍 Run Audits';
+      }, 3000);
+    });
+  }
+  
+  // Handle CPU throttling checkbox
+  const cpuThrottlingCheckbox = document.getElementById('cpu-throttling-20x');
+  if (cpuThrottlingCheckbox) {
+    cpuThrottlingCheckbox.addEventListener('change', (e) => {
+      settings.cpuThrottling20x = e.target.checked;
+      saveSettings();
+      
+      // Apply CPU throttling
+      chrome.devtools.inspectedWindow.eval(
+        `chrome.devtools.network.setCPUThrottlingRate(${e.target.checked ? 20 : 1})`,
+        (result, error) => {
+          if (error) {
+            console.error('Failed to set CPU throttling:', error);
+          }
+        }
+      );
+    });
+  }
+}

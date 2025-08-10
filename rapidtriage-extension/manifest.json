@@ -1,7 +1,7 @@
 {
     "name": "RapidTriage DevTools",
-    "version": "1.0.0",
-    "description": "YarlisAISolutions RapidTriage - AI-powered browser debugging extension for MCP-enabled IDEs",
+    "version": "2.0.0",
+    "description": "YarlisAISolutions RapidTriage - AI-powered browser debugging with Chrome 135 performance insights",
     "manifest_version": 3,
     "author": "YarlisAISolutions",
     "homepage_url": "https://rapidtriage.me",

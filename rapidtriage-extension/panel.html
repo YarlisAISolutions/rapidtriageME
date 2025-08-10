@@ -7,6 +7,45 @@
             font-family: system-ui, -apple-system, sans-serif;
             background-color: #282828;
             color: #fff;
+            margin: 0;
+        }
+        
+        /* Tab Navigation */
+        .tabs-container {
+            display: flex;
+            border-bottom: 1px solid #444;
+            margin: -16px -16px 16px -16px;
+            padding: 0 16px;
+            background: #222;
+        }
+        
+        .tab-button {
+            padding: 12px 20px;
+            background: none;
+            color: #999;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .tab-button:hover {
+            color: #fff;
+            background: #333;
+        }
+        
+        .tab-button.active {
+            color: #fff;
+            border-bottom-color: #4a9eff;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         .endpoint-list {
             margin: 16px 0;
@@ -113,58 +152,290 @@
         .action-button.danger:hover {
             background-color: #d32f2f;
         }
+        
+        /* Performance Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .metric-card {
+            background: #333;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #4a9eff;
+        }
+        
+        .metric-label {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+        
+        .metric-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .metric-status {
+            font-size: 10px;
+            margin-top: 4px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        
+        .metric-status.good {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .metric-status.needs-improvement {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .metric-status.poor {
+            background: #f44336;
+            color: white;
+        }
+        
+        /* Insights Section */
+        .insight-item {
+            background: #333;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid #ff9800;
+        }
+        
+        .insight-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .insight-description {
+            color: #ccc;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        /* Network Tree */
+        .dependency-tree {
+            background: #333;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .tree-node {
+            margin-left: 16px;
+            padding: 2px 0;
+        }
+        
+        .critical-path {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        
+        /* LCP Phases */
+        .lcp-phases {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .lcp-phase {
+            background: #333;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .lcp-phase-name {
+            font-size: 10px;
+            color: #999;
+            margin-bottom: 2px;
+        }
+        
+        .lcp-phase-time {
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
-    <div class="settings-section">
-        <h3>Quick Actions</h3>
-        <div class="quick-actions">
-            <button id="capture-screenshot" class="action-button">
-                Capture Screenshot
-            </button>
-            <button id="wipe-logs" class="action-button danger">
-                Wipe All Logs
-            </button>
+    <!-- Tab Navigation -->
+    <div class="tabs-container">
+        <button class="tab-button active" data-tab="general">General</button>
+        <button class="tab-button" data-tab="performance">Performance</button>
+        <button class="tab-button" data-tab="network">Network</button>
+        <button class="tab-button" data-tab="settings">Settings</button>
+    </div>
+    
+    <!-- General Tab -->
+    <div id="general-tab" class="tab-content active">
+        <div class="settings-section">
+            <h3>Quick Actions</h3>
+            <div class="quick-actions">
+                <button id="capture-screenshot" class="action-button">
+                    📸 Screenshot
+                </button>
+                <button id="run-audits" class="action-button">
+                    🔍 Run Audits
+                </button>
+                <button id="wipe-logs" class="action-button danger">
+                    🗑️ Clear Logs
+                </button>
+            </div>
+            <div class="checkbox-group-2" style="margin-top: 10px; display: flex; align-items: center;">
+                <label>
+                    <input type="checkbox" id="allow-auto-paste">
+                    Allow Auto-paste to Cursor
+                </label>
+            </div>
         </div>
-        <div class="checkbox-group-2" style="margin-top: 10px; display: flex; align-items: center;">
-            <label>
-                <input type="checkbox" id="allow-auto-paste">
-                Allow Auto-paste to Cursor
-            </label>
+        
+        <!-- Core Web Vitals -->
+        <div class="settings-section">
+            <h3>Core Web Vitals</h3>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">LCP</div>
+                    <div class="metric-value" id="lcp-value">--</div>
+                    <div class="metric-status" id="lcp-status">--</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">FID</div>
+                    <div class="metric-value" id="fid-value">--</div>
+                    <div class="metric-status" id="fid-status">--</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">CLS</div>
+                    <div class="metric-value" id="cls-value">--</div>
+                    <div class="metric-status" id="cls-status">--</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">TTFB</div>
+                    <div class="metric-value" id="ttfb-value">--</div>
+                    <div class="metric-status" id="ttfb-status">--</div>
+                </div>
+            </div>
+            <button id="capture-metrics" class="action-button" style="width: 100%;">
+                Capture Current Metrics
+            </button>
         </div>
     </div>
+    
+    <!-- Performance Tab -->
+    <div id="performance-tab" class="tab-content">
+        <div class="settings-section">
+            <h3>LCP Breakdown by Phase</h3>
+            <div class="lcp-phases">
+                <div class="lcp-phase">
+                    <div class="lcp-phase-name">TTFB</div>
+                    <div class="lcp-phase-time" id="lcp-ttfb">--</div>
+                </div>
+                <div class="lcp-phase">
+                    <div class="lcp-phase-name">Load Delay</div>
+                    <div class="lcp-phase-time" id="lcp-load-delay">--</div>
+                </div>
+                <div class="lcp-phase">
+                    <div class="lcp-phase-name">Load Time</div>
+                    <div class="lcp-phase-time" id="lcp-load-time">--</div>
+                </div>
+                <div class="lcp-phase">
+                    <div class="lcp-phase-name">Render Delay</div>
+                    <div class="lcp-phase-time" id="lcp-render-delay">--</div>
+                </div>
+            </div>
+            <div style="margin-top: 12px; padding: 8px; background: #2a2a2a; border-radius: 4px;">
+                <div style="font-size: 11px; color: #999; margin-bottom: 4px;">Field Data (75th percentile)</div>
+                <div id="field-data-content" style="font-size: 12px; color: #fff;">
+                    Enable field data in settings to see Chrome UX Report data
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h3>Performance Insights</h3>
+            <div id="performance-insights">
+                <div class="insight-item">
+                    <div class="insight-title">Waiting for insights...</div>
+                    <div class="insight-description">Run performance analysis to see recommendations</div>
+                </div>
+            </div>
+            <button id="analyze-performance" class="action-button" style="width: 100%;">
+                Analyze Performance
+            </button>
+        </div>
+    </div>
+    
+    <!-- Network Tab -->
+    <div id="network-tab" class="tab-content">
+        <div class="settings-section">
+            <h3>Network Dependency Tree</h3>
+            <div class="dependency-tree" id="network-tree">
+                <div style="color: #999;">No critical request chains detected</div>
+            </div>
+            <button id="analyze-network" class="action-button" style="width: 100%;">
+                Analyze Network Dependencies
+            </button>
+        </div>
+        
+        <div class="settings-section">
+            <h3>Network Insights</h3>
+            <div id="network-insights">
+                <div class="insight-item">
+                    <div class="insight-title">No issues detected</div>
+                    <div class="insight-description">Network performance appears optimal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Tab -->
+    <div id="settings-tab" class="tab-content">
+        <div class="settings-section">
+            <h3>Screenshot Settings</h3>
+            <div class="form-group">
+                <label for="screenshot-path">Screenshot directory (defaults to Downloads folder)</label>
+                <input type="text" id="screenshot-path" placeholder="/path/to/screenshots">
+            </div>
+        </div>
 
-    <div class="settings-section">
-        <h3>Screenshot Settings</h3>
-        <div class="form-group">
-            <label for="screenshot-path">Provide a directory to save screenshots to (by default screenshots will be saved to your downloads folder if no path is provided)</label>
-            <input type="text" id="screenshot-path" placeholder="/path/to/screenshots">
+        <div class="settings-section">
+            <h3>Server Connection Settings</h3>
+            <div class="form-group">
+                <label for="server-host">Server Host</label>
+                <input type="text" id="server-host" placeholder="localhost or IP address">
+            </div>
+            <div class="form-group">
+                <label for="server-port">Server Port</label>
+                <input type="number" id="server-port" min="1" max="65535" value="3025">
+            </div>
+            <div class="quick-actions">
+                <button id="discover-server" class="action-button">
+                    Auto-Discover Server
+                </button>
+                <button id="test-connection" class="action-button">
+                    Test Connection
+                </button>
+            </div>
+            <div id="connection-status" style="margin-top: 8px; display: none;">
+                <span id="status-icon" class="status-indicator"></span>
+                <span id="status-text"></span>
+            </div>
         </div>
-    </div>
-
-    <div class="settings-section">
-        <h3>Server Connection Settings</h3>
-        <div class="form-group">
-            <label for="server-host">Server Host</label>
-            <input type="text" id="server-host" placeholder="localhost or IP address">
-        </div>
-        <div class="form-group">
-            <label for="server-port">Server Port</label>
-            <input type="number" id="server-port" min="1" max="65535" value="3025">
-        </div>
-        <div class="quick-actions">
-            <button id="discover-server" class="action-button">
-                Auto-Discover Server
-            </button>
-            <button id="test-connection" class="action-button">
-                Test Connection
-            </button>
-        </div>
-        <div id="connection-status" style="margin-top: 8px; display: none;">
-            <span id="status-icon" class="status-indicator"></span>
-            <span id="status-text"></span>
-        </div>
-    </div>
 
     <div class="settings-section">
         <div class="settings-header" id="advanced-settings-header">
@@ -206,6 +477,20 @@
                 <label>
                     <input type="checkbox" id="show-response-headers">
                     Include Response Headers
+                </label>
+            </div>
+            
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="enable-field-data">
+                    Enable Chrome UX Report Field Data
+                </label>
+            </div>
+            
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="cpu-throttling-20x">
+                    Enable 20x CPU Throttling (Chrome 135)
                 </label>
             </div>
         </div>
