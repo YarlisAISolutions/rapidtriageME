@@ -16,6 +16,10 @@ const PORT = process.env.PORT || 3025;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+// Store for logs and current URL
+let browserLogs = [];
+let currentTabUrl = null;
+
 // Browser instance management
 let browser = null;
 
@@ -50,6 +54,80 @@ async function initBrowser() {
     }
     return browser;
 }
+
+// Identity endpoint for Chrome extension validation
+app.get('/.identity', (req, res) => {
+    res.json({
+        signature: 'mcp-browser-connector-24x7',
+        name: 'RapidTriageME Browser Tools Server',
+        version: '2.0.0',
+        port: PORT
+    });
+});
+
+// Endpoint to receive logs from Chrome extension
+app.post('/extension-log', (req, res) => {
+    const logData = req.body;
+    
+    // Store the log (limit to last 100 entries)
+    browserLogs.push({
+        ...logData.data,
+        receivedAt: new Date().toISOString()
+    });
+    
+    if (browserLogs.length > 100) {
+        browserLogs = browserLogs.slice(-100);
+    }
+    
+    console.log('Received log from extension:', logData.data.type);
+    
+    res.json({ 
+        status: 'ok', 
+        message: 'Log received',
+        logsCount: browserLogs.length 
+    });
+});
+
+// Endpoint to clear logs
+app.post('/wipelogs', (req, res) => {
+    browserLogs = [];
+    console.log('All logs cleared');
+    res.json({ 
+        status: 'ok', 
+        message: 'All logs cleared successfully' 
+    });
+});
+
+// Endpoint to receive current URL from extension
+app.post('/current-url', (req, res) => {
+    const { url, tabId, timestamp, source } = req.body;
+    currentTabUrl = url;
+    
+    console.log(`URL updated: ${url} (source: ${source})`);
+    
+    res.json({
+        status: 'ok',
+        message: 'URL updated',
+        url: url
+    });
+});
+
+// Endpoint to get current URL
+app.get('/current-url', (req, res) => {
+    res.json({
+        url: currentTabUrl,
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Get stored logs
+app.get('/logs', (req, res) => {
+    res.json({
+        logs: browserLogs,
+        count: browserLogs.length,
+        currentUrl: currentTabUrl
+    });
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
