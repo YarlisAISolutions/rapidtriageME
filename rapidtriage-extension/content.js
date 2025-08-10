@@ -181,17 +181,76 @@
         const elementInfo = getElementInfo(element);
         window.__RAPIDTRIAGE__.selectedElement = elementInfo;
         
+        // Store in Chrome storage for persistence
+        chrome.storage.local.set({
+            'rapidtriage_selected_element': elementInfo,
+            'rapidtriage_selected_time': Date.now()
+        });
+        
         // Send to extension
         chrome.runtime.sendMessage({
             type: 'ELEMENT_SELECTED',
             data: elementInfo
         });
         
-        // Exit inspect mode
-        isInspectMode = false;
-        document.body.style.cursor = '';
+        // Show a temporary notification
+        showSelectionNotification(elementInfo);
+        
+        // Exit inspect mode after a delay to allow popup to receive the message
+        setTimeout(() => {
+            isInspectMode = false;
+            document.body.style.cursor = '';
+            document.removeEventListener('mouseover', handleMouseOver, true);
+            document.removeEventListener('click', handleClick, true);
+        }, 100);
         
         console.log('[RapidTriage] Element selected:', elementInfo);
+    }
+    
+    // Show a temporary notification when element is selected
+    function showSelectionNotification(elementInfo) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 999999;
+            font-family: system-ui, sans-serif;
+            font-size: 14px;
+            animation: slideIn 0.3s ease-out;
+        `;
+        notification.innerHTML = `
+            ✅ Element Selected: <strong>${elementInfo.tagName}</strong>
+            ${elementInfo.id ? '#' + elementInfo.id : ''}
+            <br><small>Open extension to see details</small>
+        `;
+        
+        // Add animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideIn 0.3s ease-out reverse';
+            setTimeout(() => {
+                notification.remove();
+                style.remove();
+            }, 300);
+        }, 3000);
     }
     
     // Listen for messages from extension

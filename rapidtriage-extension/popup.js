@@ -11,19 +11,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Attach event listeners to buttons (Chrome extensions block inline onclick)
     attachButtonListeners();
     
-    // Check if there's a stored selected element
+    // Check if there's a stored selected element in Chrome storage
+    chrome.storage.local.get(['rapidtriage_selected_element', 'rapidtriage_selected_time'], function(result) {
+        if (result.rapidtriage_selected_element) {
+            const element = result.rapidtriage_selected_element;
+            const timeAgo = result.rapidtriage_selected_time ? 
+                Math.round((Date.now() - result.rapidtriage_selected_time) / 1000) : 0;
+            
+            addLog('📍 Previously selected element found');
+            
+            // Show the stored element immediately
+            displayElementDetails(element, timeAgo);
+        }
+    });
+    
+    // Also check with background script for any recent selections
     chrome.runtime.sendMessage({type: 'GET_STORED_ELEMENT'}, function(response) {
         if (response && response.success && response.data) {
             const element = response.data;
-            addLog('📍 Previously selected element found');
-            
-            // Show a brief preview
-            const preview = `${element.tagName}${element.id ? '#' + element.id : ''}${element.className ? '.' + element.className.split(' ')[0] : ''}`;
-            showPreview('📍 Last Selected Element', `
-                <div class="info">Element: ${preview}</div>
-                <strong>XPath:</strong> <code style="font-size: 10px;">${element.xpath}</code><br>
-                Click "Inspect Element" to see full details
-            `, 'info');
+            // Update display if we have fresher data
+            displayElementDetails(element, 0);
         }
     });
     
@@ -33,13 +40,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const element = message.data;
             addLog('🎯 New element selected');
             
-            // Update the preview with the new element
-            const preview = `${element.tagName}${element.id ? '#' + element.id : ''}${element.className ? '.' + element.className.split(' ')[0] : ''}`;
-            showPreview('🎯 Element Selected', `
-                <div class="success">New element selected: ${preview}</div>
-                <strong>XPath:</strong> <code style="font-size: 10px;">${element.xpath}</code><br>
-                Click "Inspect Element" for full details
-            `, 'success');
+            // Store in Chrome storage
+            chrome.storage.local.set({
+                'rapidtriage_selected_element': element,
+                'rapidtriage_selected_time': Date.now()
+            });
+            
+            // Display the full details
+            displayElementDetails(element, 0);
         }
     });
 });
@@ -79,6 +87,119 @@ function showPreview(title, content, type = 'info') {
     }, 50);
     
     console.log('Preview updated successfully');
+}
+
+// Copy text to clipboard
+function copyToClipboard(text, button) {
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = button.textContent;
+        button.textContent = '✅ Copied!';
+        button.style.background = '#4CAF50';
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.style.background = '';
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        button.textContent = '❌ Failed';
+        setTimeout(() => {
+            button.textContent = 'Copy';
+            button.style.background = '';
+        }, 2000);
+    });
+}
+
+// Display detailed element information with copy buttons
+function displayElementDetails(element, timeAgo = 0) {
+    if (!element) return;
+    
+    // Format attributes for display
+    let attributesHtml = '';
+    if (element.attributes && Object.keys(element.attributes).length > 0) {
+        const attrs = Object.entries(element.attributes)
+            .slice(0, 5)
+            .map(([key, value]) => `${key}="${value.substring(0, 30)}${value.length > 30 ? '...' : ''}"`)
+            .join(' ');
+        attributesHtml = attrs;
+    }
+    
+    // Build detailed preview with copy buttons
+    const content = `
+        <div class="success">✅ Element Selected ${timeAgo > 0 ? `(${timeAgo}s ago)` : ''}</div>
+        <div style="margin-top: 10px;">
+            <strong>🏷️ Tag:</strong> &lt;${element.tagName}&gt;<br>
+            ${element.id ? `<strong>🆔 ID:</strong> #${element.id}<br>` : ''}
+            ${element.className ? `<strong>📝 Class:</strong> .${element.className.split(' ').join('.')}<br>` : ''}
+            
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #444;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <strong>🎯 XPath:</strong>
+                    <button class="copy-btn" data-copy="${element.xpath.replace(/"/g, '&quot;')}" 
+                            style="padding: 2px 8px; font-size: 10px; margin-left: 5px;">Copy</button>
+                </div>
+                <code style="font-size: 10px; word-break: break-all; display: block; margin-top: 4px;">${element.xpath}</code>
+            </div>
+            
+            <div style="margin-top: 8px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <strong>🎨 CSS Selector:</strong>
+                    <button class="copy-btn" data-copy="${element.cssSelector.replace(/"/g, '&quot;')}"
+                            style="padding: 2px 8px; font-size: 10px; margin-left: 5px;">Copy</button>
+                </div>
+                <code style="font-size: 10px; word-break: break-all; display: block; margin-top: 4px;">${element.cssSelector}</code>
+            </div>
+            
+            ${attributesHtml ? `
+            <div style="margin-top: 8px;">
+                <strong>📋 Attributes:</strong><br>
+                <code style="font-size: 10px;">${attributesHtml}</code>
+            </div>` : ''}
+            
+            <div style="margin-top: 8px;">
+                <strong>📐 Position:</strong> ${Math.round(element.position.left)}x${Math.round(element.position.top)}<br>
+                <strong>📏 Size:</strong> ${Math.round(element.position.width)}x${Math.round(element.position.height)}px
+            </div>
+            
+            ${element.text ? `
+            <div style="margin-top: 8px;">
+                <strong>📄 Text:</strong><br>
+                <span style="font-size: 10px;">${element.text.substring(0, 50)}${element.text.length > 50 ? '...' : ''}</span>
+            </div>` : ''}
+            
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #444;">
+                <button class="clear-btn" style="padding: 4px 10px; font-size: 11px; background: #666;">Clear Selection</button>
+            </div>
+        </div>
+    `;
+    
+    showPreview('🔍 Element Inspector', content, 'success');
+    
+    // Also log to activity
+    addLog(`📊 XPath: ${element.xpath}`);
+    addLog(`🎨 Selector: ${element.cssSelector}`);
+    
+    // Attach event listeners to copy buttons
+    setTimeout(() => {
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const textToCopy = this.getAttribute('data-copy');
+                copyToClipboard(textToCopy, this);
+            });
+        });
+        
+        // Attach clear button listener
+        const clearBtn = document.querySelector('.clear-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                chrome.storage.local.remove(['rapidtriage_selected_element', 'rapidtriage_selected_time'], () => {
+                    addLog('🧹 Selection cleared');
+                    showPreview('🔍 Element Inspector', 
+                        '<div class="info">Selection cleared. Click "Inspect Element" to select a new element.</div>', 
+                        'info');
+                });
+            });
+        }
+    }, 100);
 }
 
 function setButtonLoading(buttonElement, loading = true) {
@@ -631,58 +752,14 @@ function inspectElement(button) {
                 const element = response.data;
                 addLog('✅ Element found: ' + element.tagName);
                 
-                // Format attributes for display
-                let attributesHtml = '';
-                if (element.attributes && Object.keys(element.attributes).length > 0) {
-                    const attrs = Object.entries(element.attributes)
-                        .slice(0, 5)
-                        .map(([key, value]) => `${key}="${value.substring(0, 30)}${value.length > 30 ? '...' : ''}"`)
-                        .join(' ');
-                    attributesHtml = attrs;
-                }
+                // Store in Chrome storage for persistence
+                chrome.storage.local.set({
+                    'rapidtriage_selected_element': element,
+                    'rapidtriage_selected_time': Date.now()
+                });
                 
-                // Build detailed preview
-                const content = `
-                    <div class="success">✅ Element Selected</div>
-                    <div style="margin-top: 10px;">
-                        <strong>🏷️ Tag:</strong> &lt;${element.tagName}&gt;<br>
-                        ${element.id ? `<strong>🆔 ID:</strong> #${element.id}<br>` : ''}
-                        ${element.className ? `<strong>📝 Class:</strong> .${element.className.split(' ').join('.')}<br>` : ''}
-                        
-                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #444;">
-                            <strong>🎯 XPath:</strong><br>
-                            <code style="font-size: 10px; word-break: break-all;">${element.xpath}</code>
-                        </div>
-                        
-                        <div style="margin-top: 8px;">
-                            <strong>🎨 CSS Selector:</strong><br>
-                            <code style="font-size: 10px; word-break: break-all;">${element.cssSelector}</code>
-                        </div>
-                        
-                        ${attributesHtml ? `
-                        <div style="margin-top: 8px;">
-                            <strong>📋 Attributes:</strong><br>
-                            <code style="font-size: 10px;">${attributesHtml}</code>
-                        </div>` : ''}
-                        
-                        <div style="margin-top: 8px;">
-                            <strong>📐 Position:</strong> ${Math.round(element.position.left)}x${Math.round(element.position.top)}<br>
-                            <strong>📏 Size:</strong> ${Math.round(element.position.width)}x${Math.round(element.position.height)}px
-                        </div>
-                        
-                        ${element.text ? `
-                        <div style="margin-top: 8px;">
-                            <strong>📄 Text:</strong><br>
-                            <span style="font-size: 10px;">${element.text.substring(0, 50)}${element.text.length > 50 ? '...' : ''}</span>
-                        </div>` : ''}
-                    </div>
-                `;
-                
-                showPreview('🔍 Element Inspector', content, 'success');
-                
-                // Also log to activity
-                addLog(`📊 XPath: ${element.xpath}`);
-                addLog(`🎨 Selector: ${element.cssSelector}`);
+                // Display using the enhanced function
+                displayElementDetails(element, 0);
             } else {
                 // No element selected, start inspect mode
                 addLog('⚡ Starting inspect mode...');
