@@ -337,18 +337,118 @@ function takeScreenshot(button) {
                     })
                     .then(result => {
                         addLog('✅ Screenshot sent to server successfully');
-                        addLog(`📁 Saved as: ${result.path || 'screenshot.png'}`);
+                        addLog(`📁 Saved as: ${result.filename || 'screenshot.png'}`);
                         document.getElementById('status').textContent = 'Screenshot completed';
                         
-                        // Update preview with final result
+                        // Store screenshot data for copying
+                        window.lastScreenshot = {
+                            path: result.path,
+                            filename: result.filename,
+                            directory: result.directory,
+                            dataUrl: dataUrl,
+                            url: currentUrl
+                        };
+                        
+                        // Update preview with enhanced result
                         const content = `
                             <div class="success">✅ Screenshot Complete</div>
-                            <strong>File:</strong> ${result.path}<br>
-                            <strong>Size:</strong> ~${Math.round(result.size/1024)}KB<br>
-                            <strong>URL:</strong> ${currentUrl}<br>
-                            <strong>Time:</strong> ${new Date().toLocaleTimeString()}
+                            <div style="margin-top: 10px;">
+                                <strong>📁 Saved to:</strong><br>
+                                <code style="font-size: 10px; word-break: break-all; display: block; margin: 4px 0; padding: 4px; background: #2d2d2d; border-radius: 3px;">
+                                    ${result.path}
+                                </code>
+                                
+                                <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+                                    <button class="copy-path-btn" data-path="${result.path}" 
+                                            style="padding: 4px 10px; font-size: 11px;">📋 Copy Path</button>
+                                    <button class="copy-image-btn" data-url="${dataUrl}"
+                                            style="padding: 4px 10px; font-size: 11px;">🖼️ Copy Image</button>
+                                    <button class="open-folder-btn" data-dir="${result.directory}"
+                                            style="padding: 4px 10px; font-size: 11px;">📂 Open Folder</button>
+                                    <button class="view-image-btn" data-url="${dataUrl}"
+                                            style="padding: 4px 10px; font-size: 11px;">👁️ Preview</button>
+                                </div>
+                                
+                                <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #444;">
+                                    <strong>📏 Size:</strong> ${Math.round(result.size/1024)}KB<br>
+                                    <strong>🌐 URL:</strong> ${currentUrl}<br>
+                                    <strong>⏰ Time:</strong> ${new Date().toLocaleTimeString()}
+                                </div>
+                                
+                                <div id="image-preview" style="margin-top: 10px; display: none;">
+                                    <img src="${dataUrl}" style="max-width: 100%; border: 1px solid #444; border-radius: 4px;">
+                                </div>
+                            </div>
                         `;
                         showPreview('📷 Screenshot Capture', content, 'success');
+                        
+                        // Attach event listeners for the new buttons
+                        setTimeout(() => {
+                            // Copy path button
+                            document.querySelector('.copy-path-btn')?.addEventListener('click', function() {
+                                const path = this.getAttribute('data-path');
+                                copyToClipboard(path, this);
+                            });
+                            
+                            // Copy image button - copies as base64
+                            document.querySelector('.copy-image-btn')?.addEventListener('click', function() {
+                                const btn = this;
+                                const dataUrl = btn.getAttribute('data-url');
+                                
+                                // Try to copy as image blob
+                                fetch(dataUrl)
+                                    .then(res => res.blob())
+                                    .then(blob => {
+                                        const item = new ClipboardItem({'image/png': blob});
+                                        navigator.clipboard.write([item]).then(() => {
+                                            btn.textContent = '✅ Copied!';
+                                            btn.style.background = '#4CAF50';
+                                            setTimeout(() => {
+                                                btn.textContent = '🖼️ Copy Image';
+                                                btn.style.background = '';
+                                            }, 2000);
+                                        });
+                                    })
+                                    .catch(err => {
+                                        console.error('Failed to copy image:', err);
+                                        btn.textContent = '❌ Failed';
+                                        setTimeout(() => {
+                                            btn.textContent = '🖼️ Copy Image';
+                                        }, 2000);
+                                    });
+                            });
+                            
+                            // Open folder button
+                            document.querySelector('.open-folder-btn')?.addEventListener('click', function() {
+                                const dir = this.getAttribute('data-dir');
+                                // Send message to open folder (requires native messaging or server endpoint)
+                                fetch('http://localhost:3025/open-folder', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({path: dir})
+                                }).then(() => {
+                                    this.textContent = '✅ Opened';
+                                    setTimeout(() => {
+                                        this.textContent = '📂 Open Folder';
+                                    }, 2000);
+                                }).catch(() => {
+                                    // Fallback: copy path so user can paste in explorer
+                                    copyToClipboard(dir, this);
+                                });
+                            });
+                            
+                            // View image button
+                            document.querySelector('.view-image-btn')?.addEventListener('click', function() {
+                                const preview = document.getElementById('image-preview');
+                                if (preview.style.display === 'none') {
+                                    preview.style.display = 'block';
+                                    this.textContent = '🙈 Hide';
+                                } else {
+                                    preview.style.display = 'none';
+                                    this.textContent = '👁️ Preview';
+                                }
+                            });
+                        }, 100);
                     })
                     .catch(err => {
                         addLog(`❌ Failed to send screenshot: ${err.message}`);

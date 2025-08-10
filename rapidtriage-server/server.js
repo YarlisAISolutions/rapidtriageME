@@ -189,6 +189,49 @@ app.get('/api/latest-console', (req, res) => {
     });
 });
 
+// Open folder endpoint for screenshots
+app.post('/open-folder', (req, res) => {
+    const { exec } = require('child_process');
+    const { path: folderPath } = req.body;
+    
+    if (!folderPath) {
+        return res.status(400).json({
+            success: false,
+            error: 'Folder path is required'
+        });
+    }
+    
+    // Determine the command based on the platform
+    let command;
+    if (process.platform === 'darwin') {
+        // macOS
+        command = `open "${folderPath}"`;
+    } else if (process.platform === 'win32') {
+        // Windows
+        command = `explorer "${folderPath}"`;
+    } else {
+        // Linux
+        command = `xdg-open "${folderPath}"`;
+    }
+    
+    exec(command, (error) => {
+        if (error) {
+            console.error('Error opening folder:', error);
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to open folder'
+            });
+        }
+        
+        console.log('📂 Opened folder:', folderPath);
+        res.json({
+            success: true,
+            message: 'Folder opened successfully',
+            path: folderPath
+        });
+    });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.json({
@@ -245,7 +288,11 @@ app.get('/api/tools', (req, res) => {
 
 // Screenshot endpoint for Chrome extension data
 app.post('/screenshot', (req, res) => {
-    const { data, path, timestamp, url } = req.body;
+    const fs = require('fs');
+    const path = require('path');
+    const os = require('os');
+    
+    const { data, timestamp, url } = req.body;
     
     if (!data) {
         return res.status(400).json({
@@ -254,25 +301,46 @@ app.post('/screenshot', (req, res) => {
         });
     }
     
+    // Create screenshots directory in user's home folder
+    const screenshotsDir = path.join(os.homedir(), 'RapidTriage_Screenshots');
+    if (!fs.existsSync(screenshotsDir)) {
+        fs.mkdirSync(screenshotsDir, { recursive: true });
+    }
+    
+    // Generate filename with timestamp
+    const date = new Date();
+    const filename = `screenshot_${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}_${String(date.getHours()).padStart(2,'0')}${String(date.getMinutes()).padStart(2,'0')}${String(date.getSeconds()).padStart(2,'0')}.png`;
+    const filepath = path.join(screenshotsDir, filename);
+    
+    // Convert base64 to buffer and save
+    const base64Data = data.replace(/^data:image\/png;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    fs.writeFileSync(filepath, buffer);
+    
     // Store screenshot data for IDE access
     latestScreenshotData = {
         data,
-        path: path || 'screenshot.png',
+        path: filepath,
+        filename: filename,
+        directory: screenshotsDir,
         timestamp: timestamp || new Date().toISOString(),
         url: url || currentTabUrl,
-        size: Math.round(data.length * 0.75) // Approximate size in bytes
+        size: buffer.length
     };
     
-    console.log('📷 Screenshot received from extension:', {
+    console.log('📷 Screenshot saved:', {
         url: latestScreenshotData.url,
         size: `${Math.round(latestScreenshotData.size / 1024)}KB`,
-        timestamp: latestScreenshotData.timestamp
+        path: filepath
     });
     
     res.json({
         success: true,
-        message: 'Screenshot received and stored',
-        path: latestScreenshotData.path,
+        message: 'Screenshot saved successfully',
+        path: filepath,
+        filename: filename,
+        directory: screenshotsDir,
         timestamp: latestScreenshotData.timestamp,
         size: latestScreenshotData.size
     });
