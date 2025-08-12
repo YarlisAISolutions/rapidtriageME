@@ -191,6 +191,7 @@ export function generateLandingPage(env: any): string {
       display: flex;
       align-items: center;
       gap: 10px;
+      line-height: 1.2;
     }
     .section h3 {
       color: #4a5568;
@@ -571,7 +572,7 @@ export function generateLandingPage(env: any): string {
     </div>
 
     <div class="section">
-      <h2>🔧 Configuration & Setup</h2>
+      <h2>🔧 Configuration &amp; Setup</h2>
       
       <div class="tabs">
         <button class="tab active" data-tab="mcp-config" onclick="switchTab('mcp-config')">MCP Client</button>
