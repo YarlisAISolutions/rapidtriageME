@@ -1,0 +1,999 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="AI-Powered Browser Debugging Platform - Complete Documentation" name="description"/>
+<meta content="YarlisAISolutions" name="author"/>
+<link href="https://rapidtriage.me/docs/architecture/" rel="canonical"/>
+<link href="../getting-started/configuration/" rel="prev"/>
+<link href="overview/" rel="next"/>
+<link href="../assets/favicon.ico" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.6.16" name="generator"/>
+<title>Architecture Overview - RapidTriageME Documentation</title>
+<link href="../assets/stylesheets/main.7e37652d.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.06af60db.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-XXXXXXXXXX"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-XXXXXXXXXX",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+<script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#architecture-overview">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<div data-md-color-scheme="default" data-md-component="outdated" hidden="">
+</div>
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="RapidTriageME Documentation" class="md-header__button md-logo" data-md-component="logo" href=".." title="RapidTriageME Documentation">
+<img alt="logo" src="../assets/logo.png"/>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            RapidTriageME Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Architecture Overview
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<a aria-label="Share" class="md-search__icon md-icon" data-clipboard="" data-clipboard-text="" data-md-component="search-share" href="javascript:void(0)" tabindex="-1" title="Share">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"></path></svg>
+</a>
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/YarlisAISolutions/rapidtriageME" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4" fill="currentColor"></path></svg>
+</div>
+<div class="md-source__repository">
+    YarlisAISolutions/rapidtriageME
+  </div>
+</a>
+</div>
+</nav>
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../getting-started/">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="./">
+          
+  
+  
+    
+  
+  Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../components/">
+          
+  
+  
+    
+  
+  Components
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../testing/">
+          
+  
+  
+    
+  
+  Testing
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../deployment/">
+          
+  
+  
+    
+  
+  Deployment
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../api/">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../guides/">
+          
+  
+  
+    
+  
+  Guides
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../troubleshooting/">
+          
+  
+  
+    
+  
+  Troubleshooting
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../contributing/">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../changelog/">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+</li>
+</ul>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="RapidTriageME Documentation" class="md-nav__button md-logo" data-md-component="logo" href=".." title="RapidTriageME Documentation">
+<img alt="logo" src="../assets/logo.png"/>
+</a>
+    RapidTriageME Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/YarlisAISolutions/rapidtriageME" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4" fill="currentColor"></path></svg>
+</div>
+<div class="md-source__repository">
+    YarlisAISolutions/rapidtriageME
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="..">
+<span class="md-ellipsis">
+    Home
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../getting-started/">
+<span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<div class="md-nav__link md-nav__container">
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    Architecture
+    
+  </span>
+</a>
+<label class="md-nav__link md-nav__link--active" for="__nav_3" id="__nav_3_label" tabindex="">
+<span class="md-nav__icon md-icon"></span>
+</label>
+</div>
+<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="overview/">
+<span class="md-ellipsis">
+    System Overview
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="components/">
+<span class="md-ellipsis">
+    Components
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="data-flow/">
+<span class="md-ellipsis">
+    Data Flow
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../components/">
+<span class="md-ellipsis">
+    Components
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../testing/">
+<span class="md-ellipsis">
+    Testing
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../deployment/">
+<span class="md-ellipsis">
+    Deployment
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../api/">
+<span class="md-ellipsis">
+    API Reference
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../guides/">
+<span class="md-ellipsis">
+    Guides
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../troubleshooting/">
+<span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../contributing/">
+<span class="md-ellipsis">
+    Contributing
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../changelog/">
+<span class="md-ellipsis">
+    Changelog
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="architecture-overview">Architecture Overview<a class="headerlink" href="#architecture-overview" title="Permanent link">¶</a></h1>
+<p>RapidTriageME is designed with a modular, distributed architecture that enables seamless AI-powered browser debugging. This section provides a comprehensive overview of the system design, component interactions, and architectural decisions.</p>
+<h2 id="system-architecture">System Architecture<a class="headerlink" href="#system-architecture" title="Permanent link">¶</a></h2>
+<h3 id="high-level-overview">High-Level Overview<a class="headerlink" href="#high-level-overview" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Browser Environment"
+        WP[Web Page]
+        CE[Chrome Extension]
+        DT[DevTools API]
+        WP --&gt;|DOM Events| DT
+        DT --&gt;|Browser Data| CE
+    end
+
+    subgraph "Local Environment"
+        BC[Browser Connector&lt;br/&gt;Port 3025]
+        MCP[MCP Server]
+        CE --&gt;|WebSocket| BC
+        BC &lt;--&gt;|HTTP/REST| MCP
+    end
+
+    subgraph "Cloud Infrastructure"
+        CF[Cloudflare Worker]
+        KV[(KV Storage)]
+        DO[Durable Objects]
+        CF --&gt; KV
+        CF --&gt; DO
+    end
+
+    subgraph "AI Integration Layer"
+        IDE[IDE/Editor]
+        Claude[Claude Desktop]
+        API[AI APIs]
+        MCP --&gt;|MCP Protocol| IDE
+        MCP --&gt;|MCP Protocol| Claude
+        MCP --&gt;|HTTP/SSE| API
+    end
+
+    BC -.-&gt;|Optional Remote| CF
+    CF -.-&gt;|Webhook/SSE| API
+
+    style WP fill:#e3f2fd
+    style CE fill:#f3e5f5
+    style BC fill:#e8f5e8
+    style MCP fill:#fff3e0
+    style CF fill:#fce4ec
+    style IDE fill:#f1f8e9</code></pre>
+<h2 id="core-design-principles">Core Design Principles<a class="headerlink" href="#core-design-principles" title="Permanent link">¶</a></h2>
+<h3 id="1-modularity">1. Modularity<a class="headerlink" href="#1-modularity" title="Permanent link">¶</a></h3>
+<p>Each component has a single, well-defined responsibility:
+- <strong>Chrome Extension</strong> - Browser data capture only
+- <strong>Browser Connector</strong> - Data processing and aggregation
+- <strong>MCP Server</strong> - AI integration abstraction
+- <strong>Cloudflare Worker</strong> - Remote access and scaling</p>
+<h3 id="2-loose-coupling">2. Loose Coupling<a class="headerlink" href="#2-loose-coupling" title="Permanent link">¶</a></h3>
+<p>Components communicate through well-defined interfaces:
+- WebSocket for real-time browser communication
+- REST API for request/response patterns
+- MCP protocol for AI assistant integration
+- SSE for server-to-client streaming</p>
+<h3 id="3-fault-tolerance">3. Fault Tolerance<a class="headerlink" href="#3-fault-tolerance" title="Permanent link">¶</a></h3>
+<p>The system gracefully handles failures:
+- Connection loss auto-recovery
+- Data persistence during disconnections
+- Fallback mechanisms for cloud services
+- Graceful degradation of features</p>
+<h3 id="4-extensibility">4. Extensibility<a class="headerlink" href="#4-extensibility" title="Permanent link">¶</a></h3>
+<p>New features can be added without major changes:
+- Plugin system for custom tools
+- Configurable audit categories
+- Custom MCP tool definitions
+- Webhook integration points</p>
+<h2 id="component-architecture">Component Architecture<a class="headerlink" href="#component-architecture" title="Permanent link">¶</a></h2>
+<h3 id="chrome-extension-layer">Chrome Extension Layer<a class="headerlink" href="#chrome-extension-layer" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph LR
+    subgraph "Chrome Extension"
+        BG[Background Script]
+        CS[Content Script]
+        DT[DevTools Panel]
+        PP[Popup UI]
+
+        BG &lt;--&gt; CS
+        BG &lt;--&gt; DT
+        BG &lt;--&gt; PP
+    end
+
+    subgraph "Browser APIs"
+        DTAPI[DevTools API]
+        WSAPI[WebSocket API]
+        STORAGEAPI[Storage API]
+    end
+
+    DT --&gt; DTAPI
+    BG --&gt; WSAPI
+    PP --&gt; STORAGEAPI</code></pre>
+<p><strong>Key Components:</strong>
+- <strong>Background Script</strong> - Manages WebSocket connections and data flow
+- <strong>DevTools Panel</strong> - User interface within Chrome DevTools
+- <strong>Content Script</strong> - Injects monitoring code into web pages
+- <strong>Popup UI</strong> - Extension configuration and status interface</p>
+<h3 id="local-server-layer">Local Server Layer<a class="headerlink" href="#local-server-layer" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Browser Connector Server"
+        WS[WebSocket Handler]
+        HTTP[HTTP Server]
+        PROC[Data Processor]
+        CACHE[Memory Cache]
+        LH[Lighthouse Runner]
+
+        WS --&gt; PROC
+        HTTP --&gt; PROC
+        PROC --&gt; CACHE
+        PROC --&gt; LH
+    end
+
+    subgraph "External Services"
+        CHROME[Chrome/Chromium]
+        PUPPETEER[Puppeteer]
+    end
+
+    LH --&gt; CHROME
+    LH --&gt; PUPPETEER</code></pre>
+<p><strong>Key Features:</strong>
+- <strong>Real-time Processing</strong> - Immediate data transformation and filtering
+- <strong>Caching</strong> - In-memory storage for recent browser data
+- <strong>Lighthouse Integration</strong> - Performance and accessibility audits
+- <strong>Multi-session Support</strong> - Handle multiple browser connections</p>
+<h3 id="mcp-integration-layer">MCP Integration Layer<a class="headerlink" href="#mcp-integration-layer" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph LR
+    subgraph "MCP Server"
+        TOOLS[Tool Registry]
+        HANDLER[Request Handler]
+        TRANSPORT[Transport Layer]
+        VALIDATOR[Input Validator]
+
+        TRANSPORT --&gt; HANDLER
+        HANDLER --&gt; VALIDATOR
+        HANDLER --&gt; TOOLS
+    end
+
+    subgraph "AI Clients"
+        CURSOR[Cursor IDE]
+        CLAUDE[Claude Desktop]
+        VSC[VS Code]
+        ZED[Zed Editor]
+    end
+
+    TRANSPORT &lt;--&gt; CURSOR
+    TRANSPORT &lt;--&gt; CLAUDE
+    TRANSPORT &lt;--&gt; VSC
+    TRANSPORT &lt;--&gt; ZED</code></pre>
+<p><strong>Tool Categories:</strong>
+- <strong>Browser Control</strong> - Navigation, screenshot capture
+- <strong>Data Retrieval</strong> - Console logs, network requests
+- <strong>Analysis Tools</strong> - Performance audits, accessibility checks
+- <strong>Debugging Utilities</strong> - Element inspection, JavaScript execution</p>
+<h2 id="data-flow-architecture">Data Flow Architecture<a class="headerlink" href="#data-flow-architecture" title="Permanent link">¶</a></h2>
+<h3 id="request-flow-patterns">Request Flow Patterns<a class="headerlink" href="#request-flow-patterns" title="Permanent link">¶</a></h3>
+<h4 id="1-synchronous-tool-execution">1. Synchronous Tool Execution<a class="headerlink" href="#1-synchronous-tool-execution" title="Permanent link">¶</a></h4>
+<pre class="mermaid"><code>sequenceDiagram
+    participant AI as AI Assistant
+    participant MCP as MCP Server
+    participant BC as Browser Connector
+    participant EXT as Chrome Extension
+
+    AI-&gt;&gt;MCP: Take Screenshot
+    MCP-&gt;&gt;BC: POST /screenshot
+    BC-&gt;&gt;EXT: Screenshot Request (WebSocket)
+    EXT-&gt;&gt;EXT: Capture Screenshot
+    EXT--&gt;&gt;BC: Screenshot Data
+    BC--&gt;&gt;MCP: Base64 Image
+    MCP--&gt;&gt;AI: Tool Response</code></pre>
+<h4 id="2-asynchronous-data-streaming">2. Asynchronous Data Streaming<a class="headerlink" href="#2-asynchronous-data-streaming" title="Permanent link">¶</a></h4>
+<pre class="mermaid"><code>sequenceDiagram
+    participant AI as AI Assistant
+    participant MCP as MCP Server
+    participant BC as Browser Connector
+    participant EXT as Chrome Extension
+    participant PAGE as Web Page
+
+    PAGE-&gt;&gt;EXT: Console Error
+    EXT-&gt;&gt;BC: Log Event (WebSocket)
+    BC-&gt;&gt;BC: Store in Cache
+    AI-&gt;&gt;MCP: Get Console Logs
+    MCP-&gt;&gt;BC: GET /console-logs
+    BC--&gt;&gt;MCP: Recent Logs
+    MCP--&gt;&gt;AI: Formatted Response</code></pre>
+<h3 id="data-transformation-pipeline">Data Transformation Pipeline<a class="headerlink" href="#data-transformation-pipeline" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph LR
+    RAW[Raw Browser Data] --&gt; FILTER[Filter &amp; Sanitize]
+    FILTER --&gt; TRANSFORM[Transform Structure]
+    TRANSFORM --&gt; ENRICH[Enrich Metadata]
+    ENRICH --&gt; CACHE[Cache Storage]
+    CACHE --&gt; FORMAT[Format for MCP]
+    FORMAT --&gt; RESPONSE[Tool Response]
+
+    style RAW fill:#ffebee
+    style FILTER fill:#e8f5e8
+    style TRANSFORM fill:#e3f2fd
+    style ENRICH fill:#fff3e0
+    style CACHE fill:#f3e5f5
+    style FORMAT fill:#e1f5fe
+    style RESPONSE fill:#f1f8e9</code></pre>
+<h2 id="deployment-architectures">Deployment Architectures<a class="headerlink" href="#deployment-architectures" title="Permanent link">¶</a></h2>
+<h3 id="local-development-architecture">Local Development Architecture<a class="headerlink" href="#local-development-architecture" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Developer Machine"
+        BROWSER[Chrome Browser]
+        EXT[Extension]
+        SERVER[Local Server :3025]
+        MCP[MCP Server]
+        IDE[IDE/Editor]
+
+        BROWSER &lt;--&gt; EXT
+        EXT &lt;--&gt; SERVER
+        SERVER &lt;--&gt; MCP
+        MCP &lt;--&gt; IDE
+    end
+
+    style BROWSER fill:#e3f2fd
+    style SERVER fill:#e8f5e8
+    style MCP fill:#fff3e0
+    style IDE fill:#f1f8e9</code></pre>
+<p><strong>Benefits:</strong>
+- Ultra-low latency
+- Complete privacy
+- No internet dependency
+- Simple debugging</p>
+<h3 id="hybrid-architecture">Hybrid Architecture<a class="headerlink" href="#hybrid-architecture" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Local Environment"
+        BROWSER[Chrome Browser]
+        EXT[Extension]
+        SERVER[Local Server :3025]
+
+        BROWSER &lt;--&gt; EXT
+        EXT &lt;--&gt; SERVER
+    end
+
+    subgraph "Cloud Environment"
+        CF[Cloudflare Worker]
+        KV[(KV Storage)]
+        DO[Durable Objects]
+
+        CF --&gt; KV
+        CF --&gt; DO
+    end
+
+    subgraph "AI Services"
+        MCP[Remote MCP]
+        API[AI APIs]
+
+        MCP &lt;--&gt; API
+    end
+
+    SERVER &lt;--&gt; CF
+    CF &lt;--&gt; MCP
+
+    style BROWSER fill:#e3f2fd
+    style SERVER fill:#e8f5e8
+    style CF fill:#fce4ec
+    style MCP fill:#fff3e0</code></pre>
+<p><strong>Benefits:</strong>
+- Local data capture
+- Remote processing power
+- Global accessibility
+- Team collaboration</p>
+<h3 id="full-cloud-architecture">Full Cloud Architecture<a class="headerlink" href="#full-cloud-architecture" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Edge Network"
+        CDN[Cloudflare CDN]
+        WORKER[Cloudflare Worker]
+        KV[(KV Storage)]
+        DO[Durable Objects]
+
+        CDN --&gt; WORKER
+        WORKER --&gt; KV
+        WORKER --&gt; DO
+    end
+
+    subgraph "Client Applications"
+        WEB[Web Dashboard]
+        API[API Clients]
+        MOBILE[Mobile App]
+
+        WEB &lt;--&gt; CDN
+        API &lt;--&gt; WORKER
+        MOBILE &lt;--&gt; WORKER
+    end
+
+    subgraph "AI Integration"
+        MCP[MCP over SSE]
+        LLM[LLM APIs]
+
+        WORKER &lt;--&gt; MCP
+        MCP &lt;--&gt; LLM
+    end
+
+    style WORKER fill:#fce4ec
+    style KV fill:#e1f5fe
+    style DO fill:#f3e5f5
+    style MCP fill:#fff3e0</code></pre>
+<p><strong>Benefits:</strong>
+- Global scale
+- High availability
+- Managed infrastructure
+- Auto-scaling</p>
+<h2 id="security-architecture">Security Architecture<a class="headerlink" href="#security-architecture" title="Permanent link">¶</a></h2>
+<h3 id="authentication-authorization">Authentication &amp; Authorization<a class="headerlink" href="#authentication-authorization" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph LR
+    CLIENT[Client] --&gt; AUTH[Auth Layer]
+    AUTH --&gt; JWT[JWT Validation]
+    AUTH --&gt; APIKEY[API Key Check]
+    AUTH --&gt; RBAC[Role-Based Access]
+
+    JWT --&gt; ALLOW[Allow Request]
+    APIKEY --&gt; ALLOW
+    RBAC --&gt; ALLOW
+
+    AUTH --&gt; DENY[Deny Request]
+
+    style AUTH fill:#ffebee
+    style ALLOW fill:#e8f5e8
+    style DENY fill:#ffcdd2</code></pre>
+<h3 id="data-protection">Data Protection<a class="headerlink" href="#data-protection" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Data Protection Layers"
+        INPUT[Input Validation]
+        SANITIZE[Data Sanitization]
+        ENCRYPT[Encryption at Rest]
+        TLS[TLS in Transit]
+        AUDIT[Audit Logging]
+    end
+
+    DATA[Raw Data] --&gt; INPUT
+    INPUT --&gt; SANITIZE
+    SANITIZE --&gt; ENCRYPT
+    ENCRYPT --&gt; TLS
+    TLS --&gt; AUDIT</code></pre>
+<h2 id="performance-architecture">Performance Architecture<a class="headerlink" href="#performance-architecture" title="Permanent link">¶</a></h2>
+<h3 id="caching-strategy">Caching Strategy<a class="headerlink" href="#caching-strategy" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph LR
+    REQUEST[Request] --&gt; L1[L1: Memory Cache]
+    L1 --&gt; L2[L2: Redis Cache]
+    L2 --&gt; L3[L3: Database]
+    L3 --&gt; ORIGIN[Origin Data]
+
+    L1 -.-&gt; RESPONSE[Response]
+    L2 -.-&gt; RESPONSE
+    L3 -.-&gt; RESPONSE
+    ORIGIN -.-&gt; RESPONSE
+
+    style L1 fill:#e8f5e8
+    style L2 fill:#fff3e0
+    style L3 fill:#e3f2fd</code></pre>
+<h3 id="load-balancing">Load Balancing<a class="headerlink" href="#load-balancing" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    LB[Load Balancer] --&gt; S1[Server 1]
+    LB --&gt; S2[Server 2]
+    LB --&gt; S3[Server 3]
+
+    S1 --&gt; DB[(Shared Database)]
+    S2 --&gt; DB
+    S3 --&gt; DB
+
+    style LB fill:#fce4ec
+    style S1 fill:#e8f5e8
+    style S2 fill:#e8f5e8
+    style S3 fill:#e8f5e8</code></pre>
+<h2 id="monitoring-observability">Monitoring &amp; Observability<a class="headerlink" href="#monitoring-observability" title="Permanent link">¶</a></h2>
+<h3 id="system-monitoring">System Monitoring<a class="headerlink" href="#system-monitoring" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    APP[Application] --&gt; METRICS[Metrics Collection]
+    APP --&gt; LOGS[Log Aggregation]
+    APP --&gt; TRACES[Distributed Tracing]
+
+    METRICS --&gt; PROMETHEUS[Prometheus]
+    LOGS --&gt; ELK[ELK Stack]
+    TRACES --&gt; JAEGER[Jaeger]
+
+    PROMETHEUS --&gt; GRAFANA[Grafana Dashboard]
+    ELK --&gt; KIBANA[Kibana Dashboard]
+    JAEGER --&gt; JAEGER_UI[Jaeger UI]
+
+    style PROMETHEUS fill:#fff3e0
+    style ELK fill:#e3f2fd
+    style JAEGER fill:#e8f5e8</code></pre>
+<h2 id="technology-stack">Technology Stack<a class="headerlink" href="#technology-stack" title="Permanent link">¶</a></h2>
+<h3 id="core-technologies">Core Technologies<a class="headerlink" href="#core-technologies" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+<th>Purpose</th>
+<th>Alternatives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Browser</strong></td>
+<td>Chrome Extensions API</td>
+<td>Browser integration</td>
+<td>Firefox WebExtensions</td>
+</tr>
+<tr>
+<td><strong>Runtime</strong></td>
+<td>Node.js 18+</td>
+<td>Server runtime</td>
+<td>Deno, Bun</td>
+</tr>
+<tr>
+<td><strong>Protocol</strong></td>
+<td>WebSocket</td>
+<td>Real-time communication</td>
+<td>Server-Sent Events</td>
+</tr>
+<tr>
+<td><strong>Web Server</strong></td>
+<td>Express.js</td>
+<td>HTTP server framework</td>
+<td>Fastify, Hapi</td>
+</tr>
+<tr>
+<td><strong>AI Integration</strong></td>
+<td>MCP SDK</td>
+<td>AI assistant protocol</td>
+<td>Custom protocols</td>
+</tr>
+<tr>
+<td><strong>Cloud</strong></td>
+<td>Cloudflare Workers</td>
+<td>Edge computing</td>
+<td>AWS Lambda, Vercel</td>
+</tr>
+<tr>
+<td><strong>Storage</strong></td>
+<td>KV + Durable Objects</td>
+<td>Distributed storage</td>
+<td>Redis, PostgreSQL</td>
+</tr>
+</tbody>
+</table>
+<h3 id="development-tools">Development Tools<a class="headerlink" href="#development-tools" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Language</strong></td>
+<td>TypeScript</td>
+<td>Type safety and developer experience</td>
+</tr>
+<tr>
+<td><strong>Build</strong></td>
+<td>esbuild</td>
+<td>Fast bundling and compilation</td>
+</tr>
+<tr>
+<td><strong>Testing</strong></td>
+<td>Jest + Playwright</td>
+<td>Unit and integration testing</td>
+</tr>
+<tr>
+<td><strong>Linting</strong></td>
+<td>ESLint + Prettier</td>
+<td>Code quality and formatting</td>
+</tr>
+<tr>
+<td><strong>Documentation</strong></td>
+<td>MkDocs Material</td>
+<td>Documentation generation</td>
+</tr>
+</tbody>
+</table>
+<h2 id="architectural-decisions">Architectural Decisions<a class="headerlink" href="#architectural-decisions" title="Permanent link">¶</a></h2>
+<h3 id="why-chrome-extensions">Why Chrome Extensions?<a class="headerlink" href="#why-chrome-extensions" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Native Integration</strong> - Direct access to DevTools API</li>
+<li><strong>Security Model</strong> - Sandboxed execution environment</li>
+<li><strong>Cross-Platform</strong> - Works on all desktop platforms</li>
+<li><strong>Established Ecosystem</strong> - Well-documented APIs and tooling</li>
+</ul>
+<h3 id="why-mcp-protocol">Why MCP Protocol?<a class="headerlink" href="#why-mcp-protocol" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Standardization</strong> - Industry-standard protocol for AI integration</li>
+<li><strong>Flexibility</strong> - Works with multiple AI assistants</li>
+<li><strong>Future-Proof</strong> - Evolving standard with broad adoption</li>
+<li><strong>Tool Discovery</strong> - Self-describing capabilities</li>
+</ul>
+<h3 id="why-cloudflare-workers">Why Cloudflare Workers?<a class="headerlink" href="#why-cloudflare-workers" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Global Edge Network</strong> - Low latency worldwide</li>
+<li><strong>Serverless Architecture</strong> - Automatic scaling and cost efficiency</li>
+<li><strong>Modern Runtime</strong> - V8 isolates with fast cold starts</li>
+<li><strong>Integrated Services</strong> - KV storage, Durable Objects, R2</li>
+</ul>
+<h2 id="scalability-considerations">Scalability Considerations<a class="headerlink" href="#scalability-considerations" title="Permanent link">¶</a></h2>
+<h3 id="horizontal-scaling">Horizontal Scaling<a class="headerlink" href="#horizontal-scaling" title="Permanent link">¶</a></h3>
+<ul>
+<li>Stateless server design</li>
+<li>Session affinity via Durable Objects</li>
+<li>Database read replicas</li>
+<li>CDN for static assets</li>
+</ul>
+<h3 id="vertical-scaling">Vertical Scaling<a class="headerlink" href="#vertical-scaling" title="Permanent link">¶</a></h3>
+<ul>
+<li>Memory optimization</li>
+<li>Connection pooling</li>
+<li>Efficient data structures</li>
+<li>CPU-intensive task offloading</li>
+</ul>
+<h3 id="auto-scaling-triggers">Auto-Scaling Triggers<a class="headerlink" href="#auto-scaling-triggers" title="Permanent link">¶</a></h3>
+<ul>
+<li>Request volume</li>
+<li>Response time thresholds</li>
+<li>Error rate limits</li>
+<li>Resource utilization</li>
+</ul>
+<h2 id="future-architecture-evolution">Future Architecture Evolution<a class="headerlink" href="#future-architecture-evolution" title="Permanent link">¶</a></h2>
+<h3 id="planned-enhancements">Planned Enhancements<a class="headerlink" href="#planned-enhancements" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Multi-Browser Support</strong> - Firefox, Safari integration</li>
+<li><strong>Plugin System</strong> - Custom tool development</li>
+<li><strong>Distributed Caching</strong> - Redis cluster integration</li>
+<li><strong>Real-time Collaboration</strong> - Multiple users on same session</li>
+<li><strong>Advanced Analytics</strong> - Machine learning insights</li>
+</ol>
+<h3 id="migration-paths">Migration Paths<a class="headerlink" href="#migration-paths" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Kubernetes Deployment</strong> - Container orchestration</li>
+<li><strong>Microservices Architecture</strong> - Service decomposition</li>
+<li><strong>Event-Driven Architecture</strong> - Message queue integration</li>
+<li><strong>GraphQL API</strong> - Unified data access layer</li>
+</ul>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong><a href="components/">Component Details</a></strong> - Deep dive into each component</li>
+<li><strong><a href="data-flow/">Data Flow</a></strong> - Detailed interaction patterns</li>
+<li><strong><a href="overview/">System Overview</a></strong> - Technical implementation details</li>
+</ul>
+<hr/>
+<p>This architecture enables RapidTriageME to provide fast, reliable, and scalable AI-powered browser debugging across multiple platforms and deployment scenarios.</p>
+</article>
+</div>
+<script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+<button class="md-top md-icon" data-md-component="top" hidden="" type="button">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+  Back to top
+</button>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+<div class="md-copyright__highlight">
+      © 2025 <a href="https://yarlis.ai" rel="noopener" target="_blank">YarlisAISolutions</a>
+</div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+<div class="md-social">
+<a class="md-social__link" href="https://github.com/yarlisai" rel="noopener" target="_blank" title="github.com">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2" fill="currentColor"></path></svg>
+</a>
+<a class="md-social__link" href="https://twitter.com/yarlisai" rel="noopener" target="_blank" title="twitter.com">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3" fill="currentColor"></path></svg>
+</a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.prune", "navigation.indexes", "navigation.top", "toc.follow", "toc.integrate", "search.suggest", "search.highlight", "search.share", "header.autohide", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+<script src="../assets/javascripts/bundle.50899def.min.js"></script>
+</body>
+</html>
