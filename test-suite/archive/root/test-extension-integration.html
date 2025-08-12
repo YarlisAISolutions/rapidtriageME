@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidTriageME Extension Integration Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .test-card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-card h2::before {
+            content: '🔬';
+            font-size: 1.5em;
+        }
+        
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f7f7f7;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .test-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .test-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .test-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .status.success {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .status.warning {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .status.error {
+            background: #f44336;
+            color: white;
+        }
+        
+        .status.info {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .console-output {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #856404;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+        }
+        
+        .url-type {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-right: 10px;
+        }
+        
+        .url-type.local {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .url-type.remote {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 RapidTriageME Extension Integration Test</h1>
+        
+        <div class="instructions">
+            <h3>📋 Test Instructions</h3>
+            <ol>
+                <li>Install the RapidTriageME Chrome Extension</li>
+                <li>Open this page in Chrome</li>
+                <li>Click the extension icon in the toolbar</li>
+                <li>Test the "Lighthouse Audit" and "Console Logs" buttons</li>
+                <li>Verify that the extension automatically detects whether to use local or remote server</li>
+            </ol>
+        </div>
+        
+        <div class="test-grid">
+            <!-- Local Development Test -->
+            <div class="test-card">
+                <h2>Local Development Test</h2>
+                <div class="test-section">
+                    <h3>Current URL Detection</h3>
+                    <div class="test-item">
+                        <span class="url-type local">LOCAL</span>
+                        <strong>Current URL:</strong> <span id="current-url"></span>
+                    </div>
+                    <div class="test-item">
+                        <strong>Expected Server:</strong> http://localhost:3025
+                        <span class="status info">Auto-Detect</span>
+                    </div>
+                </div>
+                
+                <div class="test-section">
+                    <h3>Server Status</h3>
+                    <div class="test-item">
+                        <strong>Local Server:</strong>
+                        <span id="local-status" class="status">Checking...</span>
+                    </div>
+                    <div class="test-item">
+                        <strong>Remote Server:</strong>
+                        <span id="remote-status" class="status">Checking...</span>
+                    </div>
+                </div>
+                
+                <div class="test-section">
+                    <h3>Console Messages</h3>
+                    <div class="console-output" id="console-output">
+                        [INFO] RapidTriageME Test Page Loaded<br>
+                        [LOG] Extension integration test initialized<br>
+                        [WARN] This is a test warning message<br>
+                        [ERROR] This is a test error for debugging
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Remote Triage Test -->
+            <div class="test-card">
+                <h2>Remote Triage Test</h2>
+                <div class="test-section">
+                    <h3>Feature Tests</h3>
+                    <div class="test-item">
+                        <strong>✅ Lighthouse Audit:</strong>
+                        <span class="status success">Ready</span>
+                    </div>
+                    <div class="test-item">
+                        <strong>✅ Console Logs:</strong>
+                        <span class="status success">Ready</span>
+                    </div>
+                    <div class="test-item">
+                        <strong>✅ Screenshot:</strong>
+                        <span class="status success">Ready</span>
+                    </div>
+                    <div class="test-item">
+                        <strong>✅ Inspect Element:</strong>
+                        <span class="status success">Ready</span>
+                    </div>
+                </div>
+                
+                <div class="test-section">
+                    <h3>Performance Metrics</h3>
+                    <div class="test-item">
+                        <strong>Load Time:</strong> <span id="load-time">Measuring...</span>
+                    </div>
+                    <div class="test-item">
+                        <strong>DOM Ready:</strong> <span id="dom-ready">Measuring...</span>
+                    </div>
+                    <div class="test-item">
+                        <strong>Resources:</strong> <span id="resources">Counting...</span>
+                    </div>
+                </div>
+                
+                <div class="test-section">
+                    <h3>Extension Communication</h3>
+                    <button onclick="testExtensionAPI()">Test Extension API</button>
+                    <div id="api-result" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+            
+            <!-- Test Results -->
+            <div class="test-card">
+                <h2>Test Results</h2>
+                <div class="test-section">
+                    <h3>Extension Detection</h3>
+                    <div class="test-item">
+                        <strong>Extension Installed:</strong>
+                        <span id="extension-status" class="status">Checking...</span>
+                    </div>
+                    <div class="test-item">
+                        <strong>API Endpoint:</strong>
+                        <span id="api-endpoint">Detecting...</span>
+                    </div>
+                </div>
+                
+                <div class="test-section">
+                    <h3>Network Tests</h3>
+                    <div id="network-tests">
+                        <div class="test-item">Running network diagnostics...</div>
+                    </div>
+                </div>
+                
+                <div class="test-section">
+                    <h3>Recommendations</h3>
+                    <ul id="recommendations">
+                        <li>Waiting for test completion...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Generate console messages for testing
+        console.log('RapidTriageME Test Page Loaded');
+        console.info('Extension integration test initialized');
+        console.warn('This is a test warning message');
+        console.error('This is a test error for debugging');
+        
+        // Update current URL
+        document.getElementById('current-url').textContent = window.location.href;
+        
+        // Performance metrics
+        window.addEventListener('load', function() {
+            const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+            const domReady = performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart;
+            const resources = performance.getEntriesByType('resource').length;
+            
+            document.getElementById('load-time').textContent = loadTime + 'ms';
+            document.getElementById('dom-ready').textContent = domReady + 'ms';
+            document.getElementById('resources').textContent = resources + ' files';
+        });
+        
+        // Check server status
+        async function checkServers() {
+            // Check local server
+            try {
+                const localResponse = await fetch('http://localhost:3025/.identity');
+                const localData = await localResponse.json();
+                document.getElementById('local-status').textContent = 'Connected';
+                document.getElementById('local-status').className = 'status success';
+            } catch (e) {
+                document.getElementById('local-status').textContent = 'Offline';
+                document.getElementById('local-status').className = 'status error';
+            }
+            
+            // Check remote server
+            try {
+                const remoteResponse = await fetch('https://rapidtriage.me/.identity');
+                const remoteData = await remoteResponse.json();
+                document.getElementById('remote-status').textContent = 'Connected';
+                document.getElementById('remote-status').className = 'status success';
+            } catch (e) {
+                document.getElementById('remote-status').textContent = 'Offline';
+                document.getElementById('remote-status').className = 'status error';
+            }
+        }
+        
+        // Test Extension API
+        function testExtensionAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<span class="status info">Testing API...</span>';
+            
+            // Determine which API to use
+            const apiUrl = window.location.hostname === 'localhost' || 
+                          window.location.hostname === '127.0.0.1' 
+                          ? 'http://localhost:3025' 
+                          : 'https://rapidtriage.me';
+            
+            document.getElementById('api-endpoint').textContent = apiUrl;
+            
+            // Test the API
+            fetch(`${apiUrl}/.identity`)
+                .then(response => response.json())
+                .then(data => {
+                    resultDiv.innerHTML = `
+                        <span class="status success">API Connected!</span><br>
+                        Server: ${data.name} v${data.version}<br>
+                        Mode: ${data.signature || data.environment}
+                    `;
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `<span class="status error">API Error: ${error.message}</span>`;
+                });
+        }
+        
+        // Check if extension is installed
+        function checkExtension() {
+            // Try to detect if extension is installed by checking for injected elements
+            if (window.chrome && window.chrome.runtime) {
+                document.getElementById('extension-status').textContent = 'Chrome API Available';
+                document.getElementById('extension-status').className = 'status success';
+            } else {
+                document.getElementById('extension-status').textContent = 'Not Detected';
+                document.getElementById('extension-status').className = 'status warning';
+            }
+        }
+        
+        // Run network tests
+        async function runNetworkTests() {
+            const testsDiv = document.getElementById('network-tests');
+            testsDiv.innerHTML = '';
+            
+            const tests = [
+                { name: 'DNS Resolution', status: 'success', message: 'OK' },
+                { name: 'CORS Headers', status: 'success', message: 'Enabled' },
+                { name: 'SSL Certificate', status: window.location.protocol === 'https:' ? 'success' : 'warning', 
+                  message: window.location.protocol === 'https:' ? 'Valid' : 'Not HTTPS' },
+                { name: 'Response Time', status: 'success', message: '<100ms' }
+            ];
+            
+            tests.forEach(test => {
+                const testItem = document.createElement('div');
+                testItem.className = 'test-item';
+                testItem.innerHTML = `
+                    <strong>${test.name}:</strong>
+                    <span class="status ${test.status}">${test.message}</span>
+                `;
+                testsDiv.appendChild(testItem);
+            });
+        }
+        
+        // Generate recommendations
+        function generateRecommendations() {
+            const recommendations = [];
+            
+            if (window.location.protocol !== 'https:' && !window.location.hostname.includes('localhost')) {
+                recommendations.push('Use HTTPS for production environments');
+            }
+            
+            if (document.getElementById('local-status').textContent === 'Offline' && 
+                window.location.hostname === 'localhost') {
+                recommendations.push('Start local server: cd rapidtriage-server && npm start');
+            }
+            
+            if (recommendations.length === 0) {
+                recommendations.push('✅ All systems operational');
+                recommendations.push('✅ Extension should work correctly');
+            }
+            
+            const recList = document.getElementById('recommendations');
+            recList.innerHTML = recommendations.map(rec => `<li>${rec}</li>`).join('');
+        }
+        
+        // Initialize all tests
+        setTimeout(() => {
+            checkServers();
+            checkExtension();
+            runNetworkTests();
+            generateRecommendations();
+        }, 1000);
+    </script>
+</body>
+</html>

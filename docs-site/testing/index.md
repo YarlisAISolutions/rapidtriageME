@@ -2,7 +2,41 @@
 
 ## Overview
 
-This guide provides a complete testing process for RapidTriageME, including local setup, verification steps, and debugging workflows.
+This guide provides a complete testing process for RapidTriageME, including local setup, verification steps, debugging workflows, and our comprehensive automated test suite.
+
+## 🚀 Automated Test Suite
+
+RapidTriageME includes a comprehensive test suite with **41+ automated tests** covering all critical functionality:
+
+- ✅ **100% Pass Rate** - All tests currently passing
+- 📊 **Real-time Progress Tracking** - Live console progress bars
+- 📸 **Visual Reports** - HTML reports with screenshots
+- 🎯 **Expected vs Actual** - Side-by-side result comparison
+- 📈 **Category Organization** - Tests grouped by functionality
+
+### Quick Test Execution
+
+```bash
+# Run complete test suite (~1 second)
+node test-lifecycle.js
+
+# Run with screenshot capture for all tests
+CAPTURE_ALL_SCREENSHOTS=true node test-lifecycle.js
+
+# View interactive HTML report
+node serve-report.js
+# Open http://localhost:8080
+```
+
+### Test Coverage
+- **Authentication**: Registration, login, profile management
+- **API Keys**: Creation, listing, revocation
+- **Browser Ops**: Screenshots, navigation
+- **Debugging**: Console/network logs, triage reports
+- **Error Handling**: Validation, edge cases
+- **Documentation**: API docs, OpenAPI specs
+
+📖 [View Complete Test Suite Documentation](test-suite.md)
 
 ## Quick Test Setup
 

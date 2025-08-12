@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# RapidTriageME Browser Debugging Platform
+# This is a legitimate developer tool for browser automation and debugging
+# Contact: admin@rapidtriage.me
+
+Sitemap: https://rapidtriage.me/sitemap.xml

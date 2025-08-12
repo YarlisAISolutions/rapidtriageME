@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidTriageME Test Suite</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1>🚀 RapidTriageME Test Suite</h1>
+                <p>Comprehensive Testing Platform for Browser Debugging Tools</p>
+                <div class="connection-status">
+                    <span class="status-indicator" id="local-status"></span>
+                    <span class="status-indicator" id="remote-status"></span>
+                    <span class="status-indicator" id="extension-status"></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="test-nav">
+        <div class="container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="overview">Overview</button>
+                <button class="nav-tab" data-tab="extension">Extension</button>
+                <button class="nav-tab" data-tab="console">Console</button>
+                <button class="nav-tab" data-tab="network">Network</button>
+                <button class="nav-tab" data-tab="streaming">Streaming</button>
+                <button class="nav-tab" data-tab="devtools">DevTools</button>
+                <button class="nav-tab" data-tab="performance">Performance</button>
+                <button class="nav-tab" data-tab="integration">Integration</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Overview Tab -->
+            <div class="tab-content active" id="overview-tab">
+                <div class="dashboard">
+                    <h2>📊 Test Dashboard</h2>
+                    
+                    <!-- System Status -->
+                    <div class="status-grid">
+                        <div class="status-card">
+                            <h3>🖥️ System Status</h3>
+                            <div class="status-item">
+                                <span>Browser:</span>
+                                <span id="browser-info">Detecting...</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Current URL:</span>
+                                <span id="current-url">-</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Environment:</span>
+                                <span id="environment">-</span>
+                            </div>
+                        </div>
+
+                        <div class="status-card">
+                            <h3>🔌 Connection Status</h3>
+                            <div class="status-item">
+                                <span>Local Server:</span>
+                                <span id="local-server-status" class="badge">Checking...</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Remote Server:</span>
+                                <span id="remote-server-status" class="badge">Checking...</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Extension:</span>
+                                <span id="extension-detection" class="badge">Checking...</span>
+                            </div>
+                        </div>
+
+                        <div class="status-card">
+                            <h3>⚡ Quick Tests</h3>
+                            <button class="test-btn" onclick="testRunner.runQuickTest('console')">Test Console</button>
+                            <button class="test-btn" onclick="testRunner.runQuickTest('network')">Test Network</button>
+                            <button class="test-btn" onclick="testRunner.runQuickTest('error')">Test Error</button>
+                            <button class="test-btn" onclick="testRunner.runAllTests()">Run All Tests</button>
+                        </div>
+
+                        <div class="status-card">
+                            <h3>📈 Test Results</h3>
+                            <div class="test-summary">
+                                <div class="summary-item">
+                                    <span class="count" id="tests-passed">0</span>
+                                    <span class="label">Passed</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="count" id="tests-failed">0</span>
+                                    <span class="label">Failed</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="count" id="tests-pending">0</span>
+                                    <span class="label">Pending</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Log -->
+                    <div class="activity-section">
+                        <h3>📝 Activity Log</h3>
+                        <div class="activity-log" id="activity-log">
+                            <div class="log-entry info">Test suite initialized</div>
+                        </div>
+                        <div class="log-controls">
+                            <button onclick="clearActivityLog()">Clear Log</button>
+                            <button onclick="exportActivityLog()">Export Log</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extension Tab -->
+            <div class="tab-content" id="extension-tab">
+                <div class="test-panel">
+                    <h2>🧩 Extension Tests</h2>
+                    <div class="test-controls">
+                        <button class="test-btn" onclick="extensionTests.checkInstalled()">Check Installation</button>
+                        <button class="test-btn" onclick="extensionTests.testButtons()">Test All Buttons</button>
+                        <button class="test-btn" onclick="extensionTests.testAPI()">Test API Communication</button>
+                    </div>
+                    
+                    <div class="test-grid">
+                        <div class="test-item">
+                            <h4>Lighthouse Audit</h4>
+                            <button onclick="extensionTests.testLighthouse()">Run Test</button>
+                            <div class="test-result" id="lighthouse-result">Not tested</div>
+                        </div>
+                        
+                        <div class="test-item">
+                            <h4>Console Logs</h4>
+                            <button onclick="extensionTests.testConsoleLogs()">Run Test</button>
+                            <div class="test-result" id="console-logs-result">Not tested</div>
+                        </div>
+                        
+                        <div class="test-item">
+                            <h4>Screenshot</h4>
+                            <button onclick="extensionTests.testScreenshot()">Run Test</button>
+                            <div class="test-result" id="screenshot-result">Not tested</div>
+                        </div>
+                        
+                        <div class="test-item">
+                            <h4>Element Inspection</h4>
+                            <button onclick="extensionTests.testInspect()">Run Test</button>
+                            <div class="test-result" id="inspect-result">Not tested</div>
+                        </div>
+                    </div>
+                    
+                    <div class="output-panel">
+                        <h4>Extension Output</h4>
+                        <div class="output" id="extension-output"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Console Tab -->
+            <div class="tab-content" id="console-tab">
+                <div class="test-panel">
+                    <h2>📋 Console Tests</h2>
+                    <div class="test-controls">
+                        <button onclick="consoleTests.log()">Log Message</button>
+                        <button onclick="consoleTests.info()">Info Message</button>
+                        <button onclick="consoleTests.warn()">Warning Message</button>
+                        <button onclick="consoleTests.error()">Error Message</button>
+                        <button onclick="consoleTests.group()">Group Messages</button>
+                        <button onclick="consoleTests.table()">Table Output</button>
+                        <button onclick="consoleTests.clear()">Clear Console</button>
+                    </div>
+                    
+                    <div class="console-viewer">
+                        <h4>Console Output Monitor</h4>
+                        <div class="console-output" id="console-monitor">
+                            <div class="console-entry log">[LOG] Console test initialized</div>
+                        </div>
+                    </div>
+                    
+                    <div class="test-controls">
+                        <h4>Advanced Console Tests</h4>
+                        <button onclick="consoleTests.testTrace()">Stack Trace</button>
+                        <button onclick="consoleTests.testTime()">Timer Test</button>
+                        <button onclick="consoleTests.testAssert()">Assertion Test</button>
+                        <button onclick="consoleTests.testCount()">Counter Test</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Tab -->
+            <div class="tab-content" id="network-tab">
+                <div class="test-panel">
+                    <h2>🌐 Network Tests</h2>
+                    <div class="test-controls">
+                        <button onclick="networkTests.testGET()">GET Request</button>
+                        <button onclick="networkTests.testPOST()">POST Request</button>
+                        <button onclick="networkTests.testTimeout()">Timeout Test</button>
+                        <button onclick="networkTests.testError()">Error Test</button>
+                        <button onclick="networkTests.testCORS()">CORS Test</button>
+                        <button onclick="networkTests.testLargePayload()">Large Payload</button>
+                    </div>
+                    
+                    <div class="network-monitor">
+                        <h4>Network Activity</h4>
+                        <table class="network-table">
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>URL</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                    <th>Size</th>
+                                </tr>
+                            </thead>
+                            <tbody id="network-log">
+                                <tr><td colspan="5">No network activity yet</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="api-tester">
+                        <h4>API Endpoint Tester</h4>
+                        <div class="form-group">
+                            <select id="api-endpoint">
+                                <option value="/.identity">Identity</option>
+                                <option value="/api/console-logs">Console Logs</option>
+                                <option value="/api/lighthouse">Lighthouse</option>
+                                <option value="/api/screenshot">Screenshot</option>
+                                <option value="/api/network-logs">Network Logs</option>
+                            </select>
+                            <select id="api-server">
+                                <option value="local">Local Server</option>
+                                <option value="remote">Remote Server</option>
+                            </select>
+                            <button onclick="networkTests.testAPIEndpoint()">Test Endpoint</button>
+                        </div>
+                        <div class="api-response" id="api-response"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Streaming Tab -->
+            <div class="tab-content" id="streaming-tab">
+                <div class="test-panel">
+                    <h2>📡 HTTP Streaming Tests</h2>
+                    <div class="test-controls">
+                        <button onclick="streamingTests.testSSE()">Test SSE</button>
+                        <button onclick="streamingTests.testWebSocket()">Test WebSocket</button>
+                        <button onclick="streamingTests.testLongPolling()">Test Long Polling</button>
+                        <button onclick="streamingTests.stopAll()">Stop All Streams</button>
+                    </div>
+                    
+                    <div class="streaming-grid">
+                        <div class="stream-panel">
+                            <h4>Server-Sent Events (SSE)</h4>
+                            <div class="stream-status" id="sse-status">Disconnected</div>
+                            <div class="stream-messages" id="sse-messages"></div>
+                        </div>
+                        
+                        <div class="stream-panel">
+                            <h4>WebSocket</h4>
+                            <div class="stream-status" id="ws-status">Disconnected</div>
+                            <div class="stream-messages" id="ws-messages"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stream-controls">
+                        <h4>Stream Configuration</h4>
+                        <label>
+                            <input type="checkbox" id="auto-reconnect" checked> Auto-reconnect
+                        </label>
+                        <label>
+                            <input type="number" id="reconnect-delay" value="5000" min="1000" max="30000">
+                            Reconnect delay (ms)
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DevTools Tab -->
+            <div class="tab-content" id="devtools-tab">
+                <div class="test-panel">
+                    <h2>🔧 DevTools Integration Tests</h2>
+                    <div class="test-controls">
+                        <button onclick="devtoolsTests.checkAPI()">Check DevTools API</button>
+                        <button onclick="devtoolsTests.testInspector()">Test Inspector</button>
+                        <button onclick="devtoolsTests.testProfiler()">Test Profiler</button>
+                        <button onclick="devtoolsTests.testDebugger()">Test Debugger</button>
+                    </div>
+                    
+                    <div class="devtools-grid">
+                        <div class="devtools-panel">
+                            <h4>Elements Panel</h4>
+                            <button onclick="devtoolsTests.inspectElement()">Inspect This Button</button>
+                            <div id="element-info"></div>
+                        </div>
+                        
+                        <div class="devtools-panel">
+                            <h4>Console Panel</h4>
+                            <button onclick="devtoolsTests.evaluateCode()">Evaluate Code</button>
+                            <input type="text" id="code-input" placeholder="Enter JS code" value="1 + 1">
+                            <div id="eval-result"></div>
+                        </div>
+                        
+                        <div class="devtools-panel">
+                            <h4>Network Panel</h4>
+                            <button onclick="devtoolsTests.monitorNetwork()">Start Monitoring</button>
+                            <div id="network-monitor-status"></div>
+                        </div>
+                        
+                        <div class="devtools-panel">
+                            <h4>Performance Panel</h4>
+                            <button onclick="devtoolsTests.recordPerformance()">Record Performance</button>
+                            <div id="performance-data"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Tab -->
+            <div class="tab-content" id="performance-tab">
+                <div class="test-panel">
+                    <h2>⚡ Performance Tests</h2>
+                    <div class="test-controls">
+                        <button onclick="performanceTests.measureLoad()">Measure Load Time</button>
+                        <button onclick="performanceTests.measureFCP()">Measure FCP</button>
+                        <button onclick="performanceTests.measureLCP()">Measure LCP</button>
+                        <button onclick="performanceTests.measureCLS()">Measure CLS</button>
+                        <button onclick="performanceTests.runBenchmark()">Run Full Benchmark</button>
+                    </div>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h4>Load Time</h4>
+                            <div class="metric-value" id="load-time">-</div>
+                            <div class="metric-status" id="load-status"></div>
+                        </div>
+                        
+                        <div class="metric-card">
+                            <h4>First Contentful Paint</h4>
+                            <div class="metric-value" id="fcp-time">-</div>
+                            <div class="metric-status" id="fcp-status"></div>
+                        </div>
+                        
+                        <div class="metric-card">
+                            <h4>Largest Contentful Paint</h4>
+                            <div class="metric-value" id="lcp-time">-</div>
+                            <div class="metric-status" id="lcp-status"></div>
+                        </div>
+                        
+                        <div class="metric-card">
+                            <h4>Cumulative Layout Shift</h4>
+                            <div class="metric-value" id="cls-score">-</div>
+                            <div class="metric-status" id="cls-status"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="performance-chart">
+                        <h4>Performance Timeline</h4>
+                        <canvas id="perf-chart"></canvas>
+                    </div>
+                    
+                    <div class="resource-timing">
+                        <h4>Resource Timing</h4>
+                        <div id="resource-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integration Tab -->
+            <div class="tab-content" id="integration-tab">
+                <div class="test-panel">
+                    <h2>🔗 Integration Tests</h2>
+                    <div class="test-scenarios">
+                        <h3>Test Scenarios</h3>
+                        
+                        <div class="scenario-card">
+                            <h4>Scenario 1: Full Extension Flow</h4>
+                            <p>Tests complete extension workflow from installation to API calls</p>
+                            <button onclick="integrationTests.runScenario1()">Run Scenario</button>
+                            <div class="scenario-result" id="scenario1-result"></div>
+                        </div>
+                        
+                        <div class="scenario-card">
+                            <h4>Scenario 2: Server Failover</h4>
+                            <p>Tests automatic failover from local to remote server</p>
+                            <button onclick="integrationTests.runScenario2()">Run Scenario</button>
+                            <div class="scenario-result" id="scenario2-result"></div>
+                        </div>
+                        
+                        <div class="scenario-card">
+                            <h4>Scenario 3: Error Recovery</h4>
+                            <p>Tests error handling and recovery mechanisms</p>
+                            <button onclick="integrationTests.runScenario3()">Run Scenario</button>
+                            <div class="scenario-result" id="scenario3-result"></div>
+                        </div>
+                        
+                        <div class="scenario-card">
+                            <h4>Scenario 4: Performance Under Load</h4>
+                            <p>Tests system performance with multiple concurrent operations</p>
+                            <button onclick="integrationTests.runScenario4()">Run Scenario</button>
+                            <div class="scenario-result" id="scenario4-result"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="integration-matrix">
+                        <h3>Compatibility Matrix</h3>
+                        <table class="matrix-table">
+                            <thead>
+                                <tr>
+                                    <th>Feature</th>
+                                    <th>Chrome</th>
+                                    <th>Firefox</th>
+                                    <th>Safari</th>
+                                    <th>Edge</th>
+                                </tr>
+                            </thead>
+                            <tbody id="compatibility-matrix">
+                                <tr>
+                                    <td>Extension</td>
+                                    <td class="status-check">✓</td>
+                                    <td class="status-pending">?</td>
+                                    <td class="status-fail">✗</td>
+                                    <td class="status-check">✓</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>RapidTriageME Test Suite v1.0.0 | 
+                   <a href="https://rapidtriage.me" target="_blank">Main Site</a> | 
+                   <a href="https://github.com/yourusername/rapidtriage" target="_blank">GitHub</a> |
+                   <a href="/archive" target="_blank">Test Archives</a>
+                </p>
+                <p class="timestamp">Last updated: <span id="last-updated"></span></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Load Scripts -->
+    <script src="assets/test-utils.js"></script>
+    <script src="assets/test-runner.js"></script>
+    <script src="modules/console-tests.js"></script>
+    <script src="modules/network-tests.js"></script>
+    <script src="modules/extension-tests.js"></script>
+    <script src="modules/streaming-tests.js"></script>
+    <script src="modules/devtools-tests.js"></script>
+    <script src="modules/performance-tests.js"></script>
+    <script src="modules/integration-tests.js"></script>
+    <script>
+        // Initialize test suite on load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 RapidTriageME Test Suite Initialized');
+            testRunner.initialize();
+            document.getElementById('last-updated').textContent = new Date().toLocaleString();
+        });
+    </script>
+</body>
+</html>

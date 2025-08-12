@@ -110,12 +110,16 @@ nav:
     - Cloudflare Worker: components/cloudflare-worker.md
   - Testing:
     - Testing Process: testing/index.md
+    - Comprehensive Test Suite: testing/test-suite.md
   - Deployment:
     - deployment/index.md
+    - Complete Deployment Guide: deployment/complete-deployment.md
     - Local Testing: deployment/local-testing.md
     - Cloudflare Setup: deployment/cloudflare.md
     - Domain Configuration: deployment/domain.md
     - Production: deployment/production.md
+    - Domain & Subdomain Setup: deployment/domain-setup.md
+    - SSL/TLS Configuration: deployment/ssl-configuration.md
   - API Reference:
     - api/index.md
     - REST Endpoints: api/rest.md

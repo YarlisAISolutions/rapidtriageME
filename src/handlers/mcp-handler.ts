@@ -8,10 +8,10 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 export class RemoteBrowserMCPHandler {
   private server!: Server;
-  // private env: any;
+  private env: any;
   
-  constructor(_env: any) {
-    // this.env = _env;
+  constructor(env: any) {
+    this.env = env;
     this.initializeServer();
   }
   
@@ -34,6 +34,69 @@ export class RemoteBrowserMCPHandler {
     if (!(this.server as any).requestHandlers) {
       (this.server as any).requestHandlers = new Map();
     }
+    
+    // Define available resources for browser triage
+    (this.server as any).requestHandlers.set('resources/list', async () => ({
+      resources: [
+        {
+          uri: "browser://status",
+          name: "Browser Status",
+          description: "Current browser connection status and metrics",
+          mimeType: "application/json"
+        },
+        {
+          uri: "browser://logs",
+          name: "Browser Logs",
+          description: "Recent browser console logs and errors",
+          mimeType: "application/json"
+        },
+        {
+          uri: "browser://network",
+          name: "Network Activity",
+          description: "Recent network requests and responses",
+          mimeType: "application/json"
+        }
+      ]
+    }));
+    
+    // Define available prompts for browser triage
+    (this.server as any).requestHandlers.set('prompts/list', async () => ({
+      prompts: [
+        {
+          name: "debug_page",
+          description: "Debug a webpage by analyzing console logs, network requests, and performance",
+          arguments: [
+            {
+              name: "url",
+              description: "URL of the page to debug",
+              required: true
+            }
+          ]
+        },
+        {
+          name: "accessibility_audit",
+          description: "Run comprehensive accessibility audit on a webpage",
+          arguments: [
+            {
+              name: "url",
+              description: "URL to audit",
+              required: true
+            }
+          ]
+        },
+        {
+          name: "performance_analysis",
+          description: "Analyze page load performance and provide optimization recommendations",
+          arguments: [
+            {
+              name: "url",
+              description: "URL to analyze",
+              required: true
+            }
+          ]
+        }
+      ]
+    }));
     
     // Define available tools for browser triage
     (this.server as any).requestHandlers.set('tools/list', async () => ({
@@ -387,12 +450,20 @@ export class RemoteBrowserMCPHandler {
     try {
       const result = await this.executeTool(toolName, body);
       return new Response(JSON.stringify(result), {
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        }
       });
     } catch (error) {
       return new Response(JSON.stringify({ error: (error as Error).message }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
       });
     }
   }
@@ -411,16 +482,73 @@ export class RemoteBrowserMCPHandler {
         };
         
       case 'remote_capture_screenshot':
+        // Handle screenshot data if provided (from extension)
+        if (args.data) {
+          // Use the screenshot storage service if available
+          if (this.env.SCREENSHOTS && this.env.SESSIONS) {
+            try {
+              const { ScreenshotStorageService } = await import('../services/screenshot-storage');
+              const storageService = new ScreenshotStorageService(this.env.SCREENSHOTS, this.env.SESSIONS);
+              
+              const result = await storageService.storeScreenshot({
+                data: args.data,
+                url: args.url || 'unknown',
+                title: args.title || 'untitled',
+                tenant: args.tenant,
+                project: args.project || 'goflyplan',
+                session: args.session,
+                tags: args.tags
+              });
+              
+              return {
+                content: [
+                  {
+                    type: "text", 
+                    text: `Screenshot stored successfully: ${result.id}`
+                  },
+                  {
+                    type: "text",
+                    text: `Path: ${result.path}\nURL: ${result.url}\nExpires: ${result.expires}`
+                  }
+                ]
+              };
+            } catch (error) {
+              console.error('Failed to store screenshot:', error);
+              return {
+                content: [{
+                  type: "text",
+                  text: `Screenshot storage failed: ${(error as Error).message}`
+                }]
+              };
+            }
+          }
+          
+          // Fallback if R2 not configured
+          const timestamp = new Date().toISOString();
+          const filename = `screenshot-${Date.now()}.png`;
+          
+          console.log(`Received screenshot data (R2 not configured): ${args.data.substring(0, 50)}...`);
+          
+          return {
+            content: [
+              {
+                type: "text", 
+                text: `Screenshot received (storage pending): ${filename}`
+              },
+              {
+                type: "text",
+                text: `URL: ${args.url || 'unknown'}\nTitle: ${args.title || 'untitled'}\nTimestamp: ${timestamp}`
+              }
+            ]
+          };
+        }
+        
+        // If no data provided, return placeholder
         return {
           content: [
             {
               type: "text", 
-              text: "Screenshot captured successfully"
-            },
-            {
-              type: "image",
-              data: "base64_image_data_here",
-              mimeType: `image/${args.format || 'png'}`
+              text: "Screenshot capture request received (remote server cannot capture directly)"
             }
           ]
         };

@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "RapidTriage DevTools",
-    "version": "2.3.0",
+    "version": "2.5.0",
     "description": "YarlisAISolutions RapidTriage - Browser debugging and monitoring tools",
     "devtools_page": "devtools.html",
     "permissions": [
@@ -26,8 +26,8 @@
         {
             "matches": ["<all_urls>"],
             "js": ["content.js"],
-            "run_at": "document_start",
-            "all_frames": true
+            "run_at": "document_idle",
+            "all_frames": false
         }
     ]
 }

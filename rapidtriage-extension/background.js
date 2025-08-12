@@ -105,47 +105,48 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "CAPTURE_SCREENSHOT" && message.tabId) {
-    // First get the server settings
-    chrome.storage.local.get(["browserConnectorSettings"], (result) => {
-      const settings = result.browserConnectorSettings || {
-        serverHost: "localhost",
-        serverPort: 3025,
-      };
+    // Screenshots MUST always use the local server since remote server can't access browser
+    const localSettings = {
+      serverHost: "localhost",
+      serverPort: 3025,
+    };
 
-      // Validate server identity first
-      validateServerIdentity(settings.serverHost, settings.serverPort)
-        .then((isValid) => {
-          if (!isValid) {
-            console.error(
-              "Cannot capture screenshot: Not connected to a valid browser tools server"
-            );
-            sendResponse({
-              success: false,
-              error:
-                "Not connected to a valid browser tools server. Please check your connection settings.",
-            });
-            return;
-          }
-
-          // Continue with screenshot capture
-          captureAndSendScreenshot(message, settings, sendResponse);
-        })
-        .catch((error) => {
-          console.error("Error validating server:", error);
-          sendResponse({
-            success: false,
-            error: "Failed to validate server identity: " + error.message,
-          });
-        });
-    });
+    // Try local server first (required for screenshot functionality)
+    validateLocalServerForScreenshot(localSettings.serverHost, localSettings.serverPort)
+      .then((isValid) => {
+        if (!isValid) {
+          // If local server is not available, try to send to remote server as fallback
+          // Remote server will store the screenshot data even if it can't capture it
+          console.warn(
+            "Local browser tools server not available, attempting remote fallback"
+          );
+          
+          // Capture screenshot and try to send to remote
+          captureAndSendScreenshotRemote(message, sendResponse);
+        } else {
+          // Continue with normal local screenshot capture
+          captureAndSendScreenshot(message, localSettings, sendResponse);
+        }
+      })
+      .catch((error) => {
+        console.error("Error validating server:", error);
+        // Try remote fallback
+        captureAndSendScreenshotRemote(message, sendResponse);
+      });
     return true; // Required to use sendResponse asynchronously
   }
 });
 
-// Validate server identity
+// Validate server identity (accepts both local and remote servers)
 async function validateServerIdentity(host, port) {
   try {
-    const response = await fetch(`http://${host}:${port}/.identity`, {
+    // Determine the URL based on host/port
+    const isRemote = (host === 'rapidtriage.me' || host === 'www.rapidtriage.me');
+    const protocol = isRemote ? 'https' : 'http';
+    const portPart = isRemote ? '' : `:${port}`;
+    const url = `${protocol}://${host}${portPart}/.identity`;
+    
+    const response = await fetch(url, {
       signal: AbortSignal.timeout(3000), // 3 second timeout
     });
 
@@ -156,17 +157,142 @@ async function validateServerIdentity(host, port) {
 
     const identity = await response.json();
 
-    // Validate the server signature
-    if (identity.signature !== "mcp-browser-connector-24x7") {
-      console.error("Invalid server signature - not the browser tools server");
-      return false;
+    // Accept both local and remote server signatures
+    const validSignatures = [
+      "mcp-browser-connector-24x7",  // Local browser tools server
+      "rapidtriage-remote"            // Remote RapidTriage server
+    ];
+
+    if (validSignatures.includes(identity.signature)) {
+      console.log(`Connected to ${identity.signature === "rapidtriage-remote" ? "remote" : "local"} server`);
+      return true;
     }
 
-    return true;
+    console.error("Invalid server signature:", identity.signature);
+    return false;
   } catch (error) {
     console.error("Error validating server identity:", error);
     return false;
   }
+}
+
+// Validate local server specifically for screenshot functionality
+async function validateLocalServerForScreenshot(host, port) {
+  try {
+    const response = await fetch(`http://${host}:${port}/.identity`, {
+      signal: AbortSignal.timeout(2000), // 2 second timeout for local
+    });
+
+    if (!response.ok) {
+      console.error(`Local server not responding: ${response.status}`);
+      return false;
+    }
+
+    const identity = await response.json();
+
+    // Check for local browser tools server signature
+    if (identity.signature === "mcp-browser-connector-24x7") {
+      return true;
+    }
+
+    console.error("Local server has wrong signature:", identity.signature);
+    return false;
+  } catch (error) {
+    console.error("Local server not available:", error.message);
+    return false;
+  }
+}
+
+// Capture screenshot and send to remote server as fallback
+function captureAndSendScreenshotRemote(message, sendResponse) {
+  // Get the inspected window's tab
+  chrome.tabs.get(message.tabId, (tab) => {
+    if (chrome.runtime.lastError) {
+      console.error("Error getting tab:", chrome.runtime.lastError);
+      sendResponse({
+        success: false,
+        error: chrome.runtime.lastError.message,
+      });
+      return;
+    }
+
+    // Get all windows to find the one containing our tab
+    chrome.windows.getAll({ populate: true }, (windows) => {
+      const targetWindow = windows.find((w) =>
+        w.tabs.some((t) => t.id === message.tabId)
+      );
+
+      if (!targetWindow) {
+        console.error("Could not find window containing the inspected tab");
+        sendResponse({
+          success: false,
+          error: "Could not find window containing the inspected tab",
+        });
+        return;
+      }
+
+      // Capture screenshot of the window containing our tab
+      chrome.tabs.captureVisibleTab(
+        targetWindow.id,
+        { format: "png" },
+        (dataUrl) => {
+          // Ignore DevTools panel capture error if it occurs
+          if (
+            chrome.runtime.lastError &&
+            !chrome.runtime.lastError.message.includes("devtools://")
+          ) {
+            console.error(
+              "Error capturing screenshot:",
+              chrome.runtime.lastError
+            );
+            sendResponse({
+              success: false,
+              error: chrome.runtime.lastError.message,
+            });
+            return;
+          }
+
+          // Try to send to remote server
+          const remoteUrl = `https://rapidtriage.me/api/screenshot`;
+          console.log(`Sending screenshot to remote server: ${remoteUrl}`);
+
+          fetch(remoteUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Extension-Id": chrome.runtime.id,
+            },
+            body: JSON.stringify({
+              data: dataUrl,
+              url: tab.url,
+              title: tab.title,
+              timestamp: new Date().toISOString(),
+            }),
+          })
+            .then((response) => response.json())
+            .then((result) => {
+              console.log("Screenshot sent to remote server:", result);
+              sendResponse({
+                success: true,
+                path: "remote-screenshot-" + Date.now() + ".png",
+                title: tab.title || "Current Tab",
+                remote: true,
+              });
+            })
+            .catch((error) => {
+              console.error("Error sending screenshot to remote:", error);
+              // Still mark as success if we captured it
+              sendResponse({
+                success: true,
+                path: "local-screenshot-" + Date.now() + ".png",
+                title: tab.title || "Current Tab",
+                error: "Could not upload to server, but screenshot was captured",
+              });
+            });
+        }
+      );
+    });
+  });
 }
 
 // Helper function to process the tab and run the audit

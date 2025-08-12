@@ -19,32 +19,73 @@ export class RateLimiter {
     const key = `rate_limit:${clientId}`;
     const now = Date.now();
     
-    // Get current rate limit data
-    const data = await this.storage.get(key, { type: 'json' }) as any;
-    
-    if (!data || now - data.windowStart > this.windowMs) {
-      // New window
-      await this.storage.put(key, JSON.stringify({
-        windowStart: now,
-        count: 1
-      }), { expirationTtl: Math.max(60, Math.ceil(this.windowMs / 1000)) });
+    try {
+      // Get current rate limit data
+      const data = await this.storage.get(key, { type: 'json' }) as any;
+      
+      if (!data || now - data.windowStart > this.windowMs) {
+        // New window - use exponential backoff for KV operations
+        let retries = 0;
+        const maxRetries = 3;
+        
+        while (retries < maxRetries) {
+          try {
+            await this.storage.put(key, JSON.stringify({
+              windowStart: now,
+              count: 1
+            }), { expirationTtl: Math.max(60, Math.ceil(this.windowMs / 1000)) });
+            break;
+          } catch (error: any) {
+            if (error.message?.includes('429') && retries < maxRetries - 1) {
+              // Exponential backoff: 100ms, 200ms, 400ms
+              await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, retries)));
+              retries++;
+            } else {
+              // Log error but allow request to proceed
+              console.error('Rate limiter KV write failed:', error);
+              return { allowed: true };
+            }
+          }
+        }
+        
+        return { allowed: true };
+      }
+      
+      if (data.count >= this.limit) {
+        // Rate limit exceeded
+        const retryAfter = Math.ceil((data.windowStart + this.windowMs - now) / 1000);
+        return { allowed: false, retryAfter };
+      }
+      
+      // Increment counter with retry logic
+      data.count++;
+      let retries = 0;
+      const maxRetries = 3;
+      
+      while (retries < maxRetries) {
+        try {
+          await this.storage.put(key, JSON.stringify(data), {
+            expirationTtl: Math.max(60, Math.ceil((data.windowStart + this.windowMs - now) / 1000))
+          });
+          break;
+        } catch (error: any) {
+          if (error.message?.includes('429') && retries < maxRetries - 1) {
+            await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, retries)));
+            retries++;
+          } else {
+            console.error('Rate limiter KV update failed:', error);
+            // Still allow the request even if we can't update the counter
+            break;
+          }
+        }
+      }
       
       return { allowed: true };
+    } catch (error) {
+      // If rate limiting fails, allow the request but log the error
+      console.error('Rate limiter error:', error);
+      return { allowed: true };
     }
-    
-    if (data.count >= this.limit) {
-      // Rate limit exceeded
-      const retryAfter = Math.ceil((data.windowStart + this.windowMs - now) / 1000);
-      return { allowed: false, retryAfter };
-    }
-    
-    // Increment counter
-    data.count++;
-    await this.storage.put(key, JSON.stringify(data), {
-      expirationTtl: Math.max(60, Math.ceil((data.windowStart + this.windowMs - now) / 1000))
-    });
-    
-    return { allowed: true };
   }
   
   private getClientId(request: Request): string {

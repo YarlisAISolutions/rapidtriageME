@@ -503,9 +503,14 @@ async function testConnection(host, port) {
       const identity = await response.json();
 
       // Verify this is actually our server by checking the signature
-      if (identity.signature !== "mcp-browser-connector-24x7") {
+      const validSignatures = [
+        "mcp-browser-connector-24x7",  // Local browser tools server
+        "rapidtriage-remote"            // Remote RapidTriage server
+      ];
+      
+      if (!validSignatures.includes(identity.signature)) {
         statusIcon.className = "status-indicator status-disconnected";
-        statusText.textContent = `Connection failed: Found a server at ${host}:${port} but it's not the Browser Tools server`;
+        statusText.textContent = `Connection failed: Found a server at ${host}:${port} but it's not a valid RapidTriage server`;
         serverConnected = false;
         updateConnectionBanner(false, null);
         scheduleReconnectAttempt();
@@ -610,9 +615,14 @@ async function tryServerConnection(host, port) {
         const identity = await response.json();
 
         // Verify this is actually our server by checking the signature
-        if (identity.signature !== "mcp-browser-connector-24x7") {
+        const validSignatures = [
+          "mcp-browser-connector-24x7",  // Local browser tools server
+          "rapidtriage-remote"            // Remote RapidTriage server
+        ];
+        
+        if (!validSignatures.includes(identity.signature)) {
           console.log(
-            `Found a server at ${host}:${port} but it's not the Browser Tools server`
+            `Found a server at ${host}:${port} but it's not a valid RapidTriage server`
           );
           return false;
         }

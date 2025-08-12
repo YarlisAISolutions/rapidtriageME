@@ -52,6 +52,47 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Function to determine the correct API base URL
+function getApiBaseUrl(url) {
+    // Check if URL is local development
+    if (!url || 
+        url.startsWith('http://localhost') || 
+        url.startsWith('http://127.0.0.1') || 
+        url.startsWith('file://') ||
+        url.startsWith('chrome://') ||
+        url.startsWith('chrome-extension://')) {
+        // Use local server for local development
+        return 'http://localhost:3025';
+    }
+    // Use remote server for all other URLs
+    return 'https://rapidtriage.me';
+}
+
+// Function to test connection with fallback
+async function fetchWithFallback(primaryUrl, fallbackUrl, options = {}) {
+    try {
+        const response = await fetch(primaryUrl, { ...options, timeout: 5000 });
+        if (response.ok) {
+            return { response, usedUrl: primaryUrl };
+        }
+        throw new Error(`Server returned ${response.status}`);
+    } catch (primaryError) {
+        console.log(`Primary server failed (${primaryUrl}):`, primaryError.message);
+        if (fallbackUrl && fallbackUrl !== primaryUrl) {
+            try {
+                console.log(`Trying fallback server (${fallbackUrl})...`);
+                const response = await fetch(fallbackUrl, options);
+                if (response.ok) {
+                    return { response, usedUrl: fallbackUrl };
+                }
+            } catch (fallbackError) {
+                console.log(`Fallback server also failed:`, fallbackError.message);
+            }
+        }
+        throw primaryError;
+    }
+}
+
 function addLog(message) {
     const logs = document.getElementById('logs');
     const logDiv = document.createElement('div');
@@ -220,47 +261,60 @@ function setButtonLoading(buttonElement, loading = true) {
     }
 }
 
-function testServer(button) {
+async function testServer(button) {
     console.log('testServer called with button:', button);
     if (button) setButtonLoading(button, true);
     
     addLog('Testing server connection...');
     document.getElementById('status').textContent = 'Testing...';
     
-    // Show immediate preview
-    showPreview('🔍 Server Connection Test', 'Testing connection to http://localhost:3025...<br>Please wait...', 'info');
-    
-    fetch('http://localhost:3025/.identity')
-        .then(response => response.json())
-        .then(data => {
-            addLog(`✅ Connected: ${data.name} v${data.version}`);
-            document.getElementById('status').textContent = 'Connected';
-            
-            // Update preview with results
-            const content = `
-                <div class="success">✅ Connection Successful</div>
-                <strong>Server:</strong> ${data.name}<br>
-                <strong>Version:</strong> ${data.version}<br>
-                <strong>Port:</strong> ${data.port}<br>
-                <strong>Signature:</strong> ${data.signature}
-            `;
-            showPreview('🔍 Server Connection Test', content, 'success');
-        })
-        .catch(error => {
-            addLog(`❌ Connection failed: ${error.message}`);
-            document.getElementById('status').textContent = 'Disconnected';
-            
-            // Update preview with error
-            const content = `
-                <div class="error">❌ Connection Failed</div>
-                <strong>Error:</strong> ${error.message}<br>
-                <strong>Solution:</strong> Make sure the server is running on port 3025
-            `;
-            showPreview('🔍 Server Connection Test', content, 'error');
-        })
-        .finally(() => {
-            if (button) setButtonLoading(button, false);
-        });
+    try {
+        // Get current tab URL to determine which server to test
+        const tabs = await chrome.tabs.query({active: true, currentWindow: true});
+        const currentUrl = tabs[0]?.url || '';
+        const primaryUrl = getApiBaseUrl(currentUrl);
+        const fallbackUrl = primaryUrl === 'http://localhost:3025' 
+            ? 'https://rapidtriage.me' 
+            : 'http://localhost:3025';
+        
+        // Show immediate preview
+        showPreview('🔍 Server Connection Test', `Testing connection to ${primaryUrl}...<br>Please wait...`, 'info');
+        
+        const { response, usedUrl } = await fetchWithFallback(
+            `${primaryUrl}/.identity`,
+            `${fallbackUrl}/.identity`
+        );
+        
+        const data = await response.json();
+        
+        addLog(`✅ Connected to ${usedUrl}: ${data.name} v${data.version}`);
+        document.getElementById('status').textContent = `Connected (${usedUrl.includes('localhost') ? 'Local' : 'Remote'})`;
+        
+        // Update preview with results
+        const content = `
+            <div class="success">✅ Connection Successful</div>
+            <strong>Server:</strong> ${data.name}<br>
+            <strong>Version:</strong> ${data.version}<br>
+            <strong>URL:</strong> ${usedUrl}<br>
+            <strong>Mode:</strong> ${usedUrl.includes('localhost') ? 'Local Development' : 'Remote Triage'}<br>
+            <strong>Signature:</strong> ${data.signature || 'N/A'}
+        `;
+        showPreview('🔍 Server Connection Test', content, 'success');
+        
+    } catch (error) {
+        addLog(`❌ Connection failed: ${error.message}`);
+        document.getElementById('status').textContent = 'Disconnected';
+        
+        // Update preview with error
+        const content = `
+            <div class="error">❌ Connection Failed</div>
+            <strong>Error:</strong> ${error.message}<br>
+            <strong>Solution:</strong> Make sure either local server (port 3025) or remote server (rapidtriage.me) is accessible
+        `;
+        showPreview('🔍 Server Connection Test', content, 'error');
+    } finally {
+        if (button) setButtonLoading(button, false);
+    }
 }
 
 function takeScreenshot(button) {
@@ -320,13 +374,22 @@ function takeScreenshot(button) {
                     showPreview('📷 Screenshot Capture', content, 'success');
                     
                     // Send to server
-                    fetch('http://localhost:3025/screenshot', {
+                    // Determine API endpoint
+                    const apiBaseUrl = getApiBaseUrl(currentUrl);
+                    
+                    // Use different endpoint based on server type
+                    const screenshotEndpoint = apiBaseUrl.includes('localhost') 
+                        ? `${apiBaseUrl}/screenshot`  // Local server uses /screenshot
+                        : `${apiBaseUrl}/api/screenshot`;  // Remote server uses /api/screenshot
+                    
+                    fetch(screenshotEndpoint, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
                             data: dataUrl,
                             timestamp: new Date().toISOString(),
-                            url: currentUrl
+                            url: currentUrl,
+                            title: tab?.title || 'Screenshot'
                         })
                     })
                     .then(response => {
@@ -656,12 +719,25 @@ function runLighthouseAudit(button) {
             `;
             showPreview('🔍 Lighthouse Audit', content, 'info');
             
-            fetch('http://localhost:3025/api/lighthouse', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url: currentUrl})
-            })
-            .then(response => {
+            // Determine API endpoint based on URL
+            const apiBaseUrl = getApiBaseUrl(currentUrl);
+            const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
+                ? 'https://rapidtriage.me' 
+                : 'http://localhost:3025';
+            
+            addLog(`🔗 Using API: ${apiBaseUrl}`);
+            
+            fetchWithFallback(
+                `${apiBaseUrl}/api/lighthouse`,
+                `${fallbackUrl}/api/lighthouse`,
+                {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: currentUrl})
+                }
+            )
+            .then(({response, usedUrl}) => {
+                addLog(`✅ Connected to: ${usedUrl}`);
                 if (!response.ok) {
                     throw new Error(`Server error: ${response.status}`);
                 }
@@ -768,12 +844,25 @@ function getConsoleLogs(button) {
             `;
             showPreview('📋 Console Logs', content, 'info');
             
-            fetch('http://localhost:3025/api/console-logs', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url: currentUrl})
-            })
-            .then(response => {
+            // Determine API endpoint based on URL
+            const apiBaseUrl = getApiBaseUrl(currentUrl);
+            const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
+                ? 'https://rapidtriage.me' 
+                : 'http://localhost:3025';
+            
+            addLog(`🔗 Using API: ${apiBaseUrl}`);
+            
+            fetchWithFallback(
+                `${apiBaseUrl}/api/console-logs`,
+                `${fallbackUrl}/api/console-logs`,
+                {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: currentUrl})
+                }
+            )
+            .then(({response, usedUrl}) => {
+                addLog(`✅ Connected to: ${usedUrl}`);
                 if (!response.ok) {
                     throw new Error(`Server error: ${response.status}`);
                 }

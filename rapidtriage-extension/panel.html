@@ -109,6 +109,47 @@
         const chromeVersion = navigator.userAgent.match(/Chrome\/(\d+)/);
         document.getElementById('chrome-version').textContent = chromeVersion ? chromeVersion[1] : 'Unknown';
         
+        // Function to determine the correct API base URL
+        function getApiBaseUrl(url) {
+            // Check if URL is local development
+            if (!url || 
+                url.startsWith('http://localhost') || 
+                url.startsWith('http://127.0.0.1') || 
+                url.startsWith('file://') ||
+                url.startsWith('chrome://') ||
+                url.startsWith('chrome-extension://')) {
+                // Use local server for local development
+                return 'http://localhost:3025';
+            }
+            // Use remote server for all other URLs
+            return 'https://rapidtriage.me';
+        }
+        
+        // Function to test connection with fallback
+        async function fetchWithFallback(primaryUrl, fallbackUrl, options = {}) {
+            try {
+                const response = await fetch(primaryUrl, { ...options, timeout: 5000 });
+                if (response.ok) {
+                    return { response, usedUrl: primaryUrl };
+                }
+                throw new Error(`Server returned ${response.status}`);
+            } catch (primaryError) {
+                console.log(`Primary server failed (${primaryUrl}):`, primaryError.message);
+                if (fallbackUrl && fallbackUrl !== primaryUrl) {
+                    try {
+                        console.log(`Trying fallback server (${fallbackUrl})...`);
+                        const response = await fetch(fallbackUrl, options);
+                        if (response.ok) {
+                            return { response, usedUrl: fallbackUrl };
+                        }
+                    } catch (fallbackError) {
+                        console.log(`Fallback server also failed:`, fallbackError.message);
+                    }
+                }
+                throw primaryError;
+            }
+        }
+        
         function addLog(message, type = 'info') {
             const logs = document.getElementById('logs');
             const logDiv = document.createElement('div');
@@ -134,21 +175,31 @@
             }
         }
         
-        function testServer(button) {
+        async function testServer(button) {
             if (button) setButtonLoading(button, true);
             addLog('Testing server connection...');
             
-            fetch('http://localhost:3025/.identity')
-                .then(response => response.json())
-                .then(data => {
-                    addLog(`✅ Connected: ${data.name} v${data.version}`);
-                })
-                .catch(error => {
-                    addLog(`❌ Connection failed: ${error.message}`);
-                })
-                .finally(() => {
-                    if (button) setButtonLoading(button, false);
-                });
+            try {
+                // Get current URL
+                const currentUrl = window.location?.href || '';
+                const primaryUrl = getApiBaseUrl(currentUrl);
+                const fallbackUrl = primaryUrl === 'http://localhost:3025' 
+                    ? 'https://rapidtriage.me' 
+                    : 'http://localhost:3025';
+                
+                const { response, usedUrl } = await fetchWithFallback(
+                    `${primaryUrl}/.identity`,
+                    `${fallbackUrl}/.identity`
+                );
+                
+                const data = await response.json();
+                addLog(`✅ Connected to ${usedUrl}: ${data.name} v${data.version}`);
+                
+            } catch (error) {
+                addLog(`❌ Connection failed: ${error.message}`);
+            } finally {
+                if (button) setButtonLoading(button, false);
+            }
         }
         
         function clearLogs(button) {
@@ -195,25 +246,40 @@
             });
         }
         
-        function runLighthouseAudit() {
+        async function runLighthouseAudit() {
             addLog('🔍 Starting Lighthouse audit...');
             
-            // Get URL from inspected window
-            const currentUrl = chrome.devtools.inspectedWindow.location.href;
-            addLog(`📊 Auditing: ${currentUrl}`);
-            
-            fetch('http://localhost:3025/api/lighthouse', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url: currentUrl})
-            })
-            .then(response => {
+            try {
+                // Get URL from inspected window
+                const currentUrl = window.location?.href || '';
+                addLog(`📊 Auditing: ${currentUrl}`);
+                
+                // Determine API endpoint based on URL
+                const apiBaseUrl = getApiBaseUrl(currentUrl);
+                const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
+                    ? 'https://rapidtriage.me' 
+                    : 'http://localhost:3025';
+                
+                addLog(`🔗 Using API: ${apiBaseUrl}`);
+                
+                const { response, usedUrl } = await fetchWithFallback(
+                    `${apiBaseUrl}/api/lighthouse`,
+                    `${fallbackUrl}/api/lighthouse`,
+                    {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({url: currentUrl})
+                    }
+                );
+                
+                addLog(`✅ Connected to: ${usedUrl}`);
+                
                 if (!response.ok) {
                     throw new Error(`Server error: ${response.status}`);
                 }
-                return response.json();
-            })
-            .then(data => {
+                
+                const data = await response.json();
+                
                 if (data.success) {
                     const scores = data.data.scores;
                     const metrics = data.data.metrics;
@@ -227,31 +293,46 @@
                 } else {
                     addLog(`❌ Lighthouse failed: ${data.error}`);
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 addLog(`❌ Lighthouse error: ${error.message}`);
-            });
+                addLog(`💡 Tip: Check if server is accessible`);
+            }
         }
         
-        function getConsoleLogs() {
+        async function getConsoleLogs() {
             addLog('📋 Getting console logs...');
             
-            // Get URL from inspected window
-            const currentUrl = chrome.devtools.inspectedWindow.location.href;
-            addLog(`🔍 Analyzing console logs for: ${currentUrl}`);
-            
-            fetch('http://localhost:3025/api/console-logs', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url: currentUrl})
-            })
-            .then(response => {
+            try {
+                // Get URL from inspected window
+                const currentUrl = window.location?.href || '';
+                addLog(`🔍 Analyzing console logs for: ${currentUrl}`);
+                
+                // Determine API endpoint based on URL
+                const apiBaseUrl = getApiBaseUrl(currentUrl);
+                const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
+                    ? 'https://rapidtriage.me' 
+                    : 'http://localhost:3025';
+                
+                addLog(`🔗 Using API: ${apiBaseUrl}`);
+                
+                const { response, usedUrl } = await fetchWithFallback(
+                    `${apiBaseUrl}/api/console-logs`,
+                    `${fallbackUrl}/api/console-logs`,
+                    {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({url: currentUrl})
+                    }
+                );
+                
+                addLog(`✅ Connected to: ${usedUrl}`);
+                
                 if (!response.ok) {
                     throw new Error(`Server error: ${response.status}`);
                 }
-                return response.json();
-            })
-            .then(data => {
+                
+                const data = await response.json();
+                
                 if (data.success) {
                     const logs = data.data.logs;
                     addLog(`✅ Found ${logs.length} console entries:`);
@@ -280,10 +361,10 @@
                 } else {
                     addLog(`❌ Console logs failed: ${data.error}`);
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 addLog(`❌ Console logs error: ${error.message}`);
-            });
+                addLog(`💡 Tip: Check if server is accessible`);
+            }
         }
         
         function inspectElement() {

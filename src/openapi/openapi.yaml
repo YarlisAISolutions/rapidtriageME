@@ -1,0 +1,1099 @@
+openapi: 3.0.3
+info:
+  title: RapidTriageME API
+  description: |
+    Enterprise-grade browser automation and debugging platform with MCP protocol support.
+    
+    RapidTriageME enables developers and QA engineers to:
+    - Remotely control browsers through secure APIs
+    - Capture screenshots with automatic storage
+    - Analyze performance metrics and run audits
+    - Debug web applications at scale
+    - Integrate with AI assistants via MCP protocol
+    
+    ## Authentication
+    All API endpoints require Bearer token authentication. Include your token in the Authorization header:
+    ```
+    Authorization: Bearer YOUR_AUTH_TOKEN
+    ```
+    
+    ## Rate Limiting
+    Default rate limit: 100 requests per minute per token
+    
+    ## Base URLs
+    - Production: https://rapidtriage.me
+    - Staging: https://rapidtriage-me.sireesh-yarlagadda-d3f.workers.dev
+  version: 1.0.0
+  contact:
+    name: YarlisAISolutions Support
+    email: support@rapidtriage.me
+    url: https://rapidtriage.me
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://rapidtriage.me
+    description: Production server
+  - url: https://rapidtriage-me.sireesh-yarlagadda-d3f.workers.dev
+    description: Staging server
+  - url: http://localhost:8787
+    description: Local development
+
+tags:
+  - name: Core
+    description: Core platform endpoints
+  - name: MCP
+    description: Model Context Protocol endpoints
+  - name: Browser Operations
+    description: Browser automation and control
+  - name: Screenshots
+    description: Screenshot capture and storage
+  - name: Monitoring
+    description: Health and metrics endpoints
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer token authentication
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type: object
+          description: Additional error details
+        code:
+          type: string
+          description: Error code
+      example:
+        error: "Invalid request"
+        code: "INVALID_REQUEST"
+        details:
+          field: "url"
+          reason: "URL is required"
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        version:
+          type: string
+        environment:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        services:
+          type: object
+          properties:
+            api:
+              type: string
+              enum: [operational, degraded, down]
+            storage:
+              type: string
+              enum: [operational, degraded, down]
+            mcp:
+              type: string
+              enum: [operational, degraded, down]
+        uptime:
+          type: number
+          description: Uptime in seconds
+
+    Metrics:
+      type: object
+      properties:
+        requests:
+          type: object
+          properties:
+            total:
+              type: integer
+            successful:
+              type: integer
+            failed:
+              type: integer
+            rate:
+              type: number
+              description: Requests per minute
+        performance:
+          type: object
+          properties:
+            avgResponseTime:
+              type: number
+              description: Average response time in ms
+            p95ResponseTime:
+              type: number
+              description: 95th percentile response time in ms
+            p99ResponseTime:
+              type: number
+              description: 99th percentile response time in ms
+        errors:
+          type: object
+          properties:
+            rate:
+              type: number
+              description: Error rate percentage
+            lastError:
+              type: string
+              format: date-time
+
+    Screenshot:
+      type: object
+      required:
+        - data
+        - url
+        - title
+      properties:
+        data:
+          type: string
+          description: Base64 encoded image data
+        url:
+          type: string
+          description: URL of the captured page
+        title:
+          type: string
+          description: Page title
+        timestamp:
+          type: string
+          format: date-time
+        format:
+          type: string
+          enum: [png, jpeg]
+          default: png
+        fullPage:
+          type: boolean
+          default: false
+        viewport:
+          type: object
+          properties:
+            width:
+              type: integer
+            height:
+              type: integer
+        tenant:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [extension, cli, api, public]
+            identifier:
+              type: string
+        project:
+          type: string
+
+    ConsoleLog:
+      type: object
+      properties:
+        level:
+          type: string
+          enum: [log, info, warn, error]
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        source:
+          type: string
+        stackTrace:
+          type: string
+
+    NetworkLog:
+      type: object
+      properties:
+        requestId:
+          type: string
+        method:
+          type: string
+          enum: [GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD]
+        url:
+          type: string
+        status:
+          type: integer
+        responseTime:
+          type: number
+          description: Response time in ms
+        size:
+          type: integer
+          description: Response size in bytes
+        type:
+          type: string
+          enum: [xhr, fetch, script, stylesheet, image, font, document, websocket, other]
+        timestamp:
+          type: string
+          format: date-time
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+
+    LighthouseReport:
+      type: object
+      properties:
+        url:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        scores:
+          type: object
+          properties:
+            performance:
+              type: number
+              minimum: 0
+              maximum: 100
+            accessibility:
+              type: number
+              minimum: 0
+              maximum: 100
+            bestPractices:
+              type: number
+              minimum: 0
+              maximum: 100
+            seo:
+              type: number
+              minimum: 0
+              maximum: 100
+        metrics:
+          type: object
+          properties:
+            firstContentfulPaint:
+              type: number
+            largestContentfulPaint:
+              type: number
+            totalBlockingTime:
+              type: number
+            cumulativeLayoutShift:
+              type: number
+            speedIndex:
+              type: number
+        audits:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              score:
+                type: number
+              description:
+                type: string
+
+    ElementInspection:
+      type: object
+      properties:
+        selector:
+          type: string
+        tagName:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        computedStyles:
+          type: object
+          additionalProperties:
+            type: string
+        innerText:
+          type: string
+        innerHTML:
+          type: string
+        boundingBox:
+          type: object
+          properties:
+            x:
+              type: number
+            y:
+              type: number
+            width:
+              type: number
+            height:
+              type: number
+        isVisible:
+          type: boolean
+        isInteractable:
+          type: boolean
+
+    MCPRequest:
+      type: object
+      required:
+        - jsonrpc
+        - method
+        - id
+      properties:
+        jsonrpc:
+          type: string
+          enum: ["2.0"]
+        method:
+          type: string
+          description: MCP method name
+        params:
+          type: object
+          description: Method parameters
+        id:
+          type: string
+          description: Request ID
+
+    MCPResponse:
+      type: object
+      required:
+        - jsonrpc
+        - id
+      properties:
+        jsonrpc:
+          type: string
+          enum: ["2.0"]
+        result:
+          type: object
+          description: Method result
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+            message:
+              type: string
+            data:
+              type: object
+        id:
+          type: string
+          description: Request ID
+
+    TriageReport:
+      type: object
+      properties:
+        url:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        screenshot:
+          type: string
+          description: Screenshot URL
+        consoleLogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsoleLog'
+        networkLogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/NetworkLog'
+        lighthouse:
+          $ref: '#/components/schemas/LighthouseReport'
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              message:
+                type: string
+              stack:
+                type: string
+        performance:
+          type: object
+          properties:
+            loadTime:
+              type: number
+            domContentLoaded:
+              type: number
+            memoryUsage:
+              type: number
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Unauthorized"
+            code: "AUTH_REQUIRED"
+
+    RateLimitError:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          description: Number of seconds to wait before retrying
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Too Many Requests"
+            code: "RATE_LIMIT_EXCEEDED"
+            details:
+              retryAfter: 60
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Not Found"
+            code: "NOT_FOUND"
+
+paths:
+  /:
+    get:
+      tags:
+        - Core
+      summary: Landing page
+      description: Returns the main documentation and setup instructions page
+      responses:
+        '200':
+          description: HTML landing page
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /.identity:
+    get:
+      tags:
+        - Core
+      summary: Service identity
+      description: Returns service identity information for extension connection testing
+      responses:
+        '200':
+          description: Service identity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  version:
+                    type: string
+                  signature:
+                    type: string
+                  environment:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+              example:
+                name: "RapidTriageME"
+                version: "1.0.0"
+                signature: "rapidtriage-remote"
+                environment: "production"
+                timestamp: "2024-01-20T10:30:00Z"
+
+  /health:
+    get:
+      tags:
+        - Monitoring
+      summary: Health check
+      description: Returns the health status of the service and its dependencies
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /metrics:
+    get:
+      tags:
+        - Monitoring
+      summary: Service metrics
+      description: Returns detailed metrics about service performance and usage
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Service metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /sse:
+    get:
+      tags:
+        - MCP
+      summary: SSE connection for MCP
+      description: Establishes a Server-Sent Events connection for MCP protocol communication
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: header
+          name: Accept
+          required: true
+          schema:
+            type: string
+            enum: [text/event-stream]
+      responses:
+        '200':
+          description: SSE stream established
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Server-Sent Events stream
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /mcp:
+    post:
+      tags:
+        - MCP
+      summary: MCP HTTP endpoint
+      description: JSON-RPC endpoint for MCP protocol commands
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MCPRequest'
+            examples:
+              listTools:
+                summary: List available tools
+                value:
+                  jsonrpc: "2.0"
+                  method: "tools/list"
+                  params: {}
+                  id: "1"
+              callTool:
+                summary: Call a tool
+                value:
+                  jsonrpc: "2.0"
+                  method: "tools/call"
+                  params:
+                    name: "remote_capture_screenshot"
+                    arguments:
+                      url: "https://example.com"
+                      fullPage: true
+                  id: "2"
+      responses:
+        '200':
+          description: MCP response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MCPResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /api/screenshot:
+    post:
+      tags:
+        - Screenshots
+      summary: Upload screenshot
+      description: Store a screenshot with metadata
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Screenshot'
+      responses:
+        '200':
+          description: Screenshot stored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Screenshot ID
+                  url:
+                    type: string
+                    description: Public URL to access the screenshot
+                  expiresAt:
+                    type: string
+                    format: date-time
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '503':
+          description: Storage service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /screenshot/{id}:
+    get:
+      tags:
+        - Screenshots
+      summary: Get screenshot
+      description: Retrieve a stored screenshot by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Screenshot ID
+      responses:
+        '200':
+          description: Screenshot image
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/console-logs:
+    post:
+      tags:
+        - Browser Operations
+      summary: Get console logs
+      description: Retrieve browser console logs from the current or specified page
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  description: URL to navigate to before getting logs
+                level:
+                  type: string
+                  enum: [all, error, warn, info, log]
+                  default: all
+                limit:
+                  type: integer
+                  default: 100
+      responses:
+        '200':
+          description: Console logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ConsoleLog'
+                  url:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/network-logs:
+    post:
+      tags:
+        - Browser Operations
+      summary: Get network logs
+      description: Retrieve network request logs from the browser
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  description: URL to navigate to before getting logs
+                filter:
+                  type: object
+                  properties:
+                    status:
+                      type: array
+                      items:
+                        type: integer
+                    method:
+                      type: string
+                    type:
+                      type: string
+                limit:
+                  type: integer
+                  default: 50
+      responses:
+        '200':
+          description: Network logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NetworkLog'
+                  url:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/lighthouse:
+    post:
+      tags:
+        - Browser Operations
+      summary: Run Lighthouse audit
+      description: Run a comprehensive Lighthouse audit on a specified URL
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  description: URL to audit
+                categories:
+                  type: array
+                  items:
+                    type: string
+                    enum: [performance, accessibility, best-practices, seo]
+                  default: [performance, accessibility]
+                device:
+                  type: string
+                  enum: [mobile, desktop]
+                  default: desktop
+      responses:
+        '200':
+          description: Lighthouse audit completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LighthouseReport'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          description: Invalid URL or parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/inspect-element:
+    post:
+      tags:
+        - Browser Operations
+      summary: Inspect DOM element
+      description: Get detailed information about a DOM element
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - selector
+              properties:
+                url:
+                  type: string
+                  description: URL to navigate to first
+                selector:
+                  type: string
+                  description: CSS selector for the element
+                includeStyles:
+                  type: boolean
+                  default: true
+                includeAttributes:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Element inspection data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ElementInspection'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Element not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/execute-js:
+    post:
+      tags:
+        - Browser Operations
+      summary: Execute JavaScript
+      description: Execute JavaScript code in the browser context
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - script
+              properties:
+                url:
+                  type: string
+                  description: URL to navigate to first
+                script:
+                  type: string
+                  description: JavaScript code to execute
+                awaitPromise:
+                  type: boolean
+                  default: false
+                  description: Wait for promise resolution
+      responses:
+        '200':
+          description: Script execution result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    description: Script execution result
+                  error:
+                    type: string
+                    description: Error message if execution failed
+                  console:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ConsoleLog'
+                    description: Console output during execution
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          description: Script execution error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/navigate:
+    post:
+      tags:
+        - Browser Operations
+      summary: Navigate browser
+      description: Navigate the browser to a specified URL
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  description: URL to navigate to
+                waitUntil:
+                  type: string
+                  enum: [load, domcontentloaded, networkidle0, networkidle2]
+                  default: load
+                  description: When to consider navigation complete
+                timeout:
+                  type: integer
+                  default: 30000
+                  description: Navigation timeout in milliseconds
+      responses:
+        '200':
+          description: Navigation successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  title:
+                    type: string
+                  loadTime:
+                    type: number
+                    description: Page load time in milliseconds
+                  status:
+                    type: string
+                    enum: [success, timeout, error]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          description: Navigation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/triage-report:
+    post:
+      tags:
+        - Browser Operations
+      summary: Generate triage report
+      description: Generate a comprehensive debugging report for a webpage
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  description: URL to analyze
+                includeScreenshot:
+                  type: boolean
+                  default: true
+                includeLogs:
+                  type: boolean
+                  default: true
+                includeLighthouse:
+                  type: boolean
+                  default: false
+                format:
+                  type: string
+                  enum: [json, html, pdf]
+                  default: json
+      responses:
+        '200':
+          description: Triage report generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TriageReport'
+            text/html:
+              schema:
+                type: string
+                description: HTML formatted report
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+                description: PDF report
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api-docs:
+    get:
+      tags:
+        - Core
+      summary: API documentation
+      description: Interactive API documentation using Swagger UI
+      responses:
+        '200':
+          description: API documentation page
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /openapi.json:
+    get:
+      tags:
+        - Core
+      summary: OpenAPI specification (JSON)
+      description: Get the OpenAPI specification in JSON format
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /openapi.yaml:
+    get:
+      tags:
+        - Core
+      summary: OpenAPI specification (YAML)
+      description: Get the OpenAPI specification in YAML format
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/x-yaml:
+              schema:
+                type: string
+
+  /status:
+    get:
+      tags:
+        - Monitoring
+      summary: Status page
+      description: Comprehensive status page with service health and metrics
+      responses:
+        '200':
+          description: Status page HTML
+          content:
+            text/html:
+              schema:
+                type: string
+
+security:
+  - bearerAuth: []
+
+externalDocs:
+  description: Full documentation
+  url: https://docs.rapidtriage.me

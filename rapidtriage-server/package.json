@@ -10,9 +10,11 @@
     "docker:run": "docker run -p 3025:3025 rapidtriage-backend"
   },
   "dependencies": {
+    "chrome-launcher": "^1.2.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "puppeteer": "^21.0.0"
+    "lighthouse": "^12.8.1",
+    "puppeteer": "^21.11.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

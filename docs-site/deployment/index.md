@@ -243,6 +243,8 @@ vars = { BROWSER_TOOLS_PORT = "3025" }
 - ☁️ [Cloudflare Setup](cloudflare.md)
 - 🌐 [Domain Configuration](domain.md)
 - 🚀 [Production Deployment](production.md)
+- 🔧 [Domain & Subdomain Setup](domain-setup.md) - **NEW: Complete domain deployment guide**
+- 🔐 [SSL/TLS Configuration](ssl-configuration.md) - **NEW: Fix SSL issues and configure HTTPS**
 
 ## Support
 

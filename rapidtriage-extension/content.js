@@ -126,22 +126,40 @@
     let lastClickedElement = null;
     let isInspectMode = false;
     
-    // Highlight styles
-    const highlightStyles = document.createElement('style');
-    highlightStyles.innerHTML = `
-        .rapidtriage-highlight {
-            outline: 2px solid #007ACC !important;
-            outline-offset: 2px !important;
-            background-color: rgba(0, 122, 204, 0.1) !important;
-            cursor: crosshair !important;
+    // Highlight styles - add when DOM is ready
+    function addHighlightStyles() {
+        const highlightStyles = document.createElement('style');
+        highlightStyles.innerHTML = `
+            .rapidtriage-highlight {
+                outline: 2px solid #007ACC !important;
+                outline-offset: 2px !important;
+                background-color: rgba(0, 122, 204, 0.1) !important;
+                cursor: crosshair !important;
+            }
+            .rapidtriage-selected {
+                outline: 3px solid #4CAF50 !important;
+                outline-offset: 2px !important;
+                background-color: rgba(76, 175, 80, 0.1) !important;
+            }
+        `;
+        
+        // Wait for head to be available
+        if (document.head) {
+            document.head.appendChild(highlightStyles);
+        } else if (document.documentElement) {
+            document.documentElement.appendChild(highlightStyles);
+        } else {
+            // Fallback: wait for DOM to be ready
+            setTimeout(addHighlightStyles, 100);
         }
-        .rapidtriage-selected {
-            outline: 3px solid #4CAF50 !important;
-            outline-offset: 2px !important;
-            background-color: rgba(76, 175, 80, 0.1) !important;
-        }
-    `;
-    document.head.appendChild(highlightStyles);
+    }
+    
+    // Add styles when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addHighlightStyles);
+    } else {
+        addHighlightStyles();
+    }
     
     // Element hover handler for inspect mode
     function handleMouseOver(e) {
@@ -209,6 +227,12 @@
     
     // Show a temporary notification when element is selected
     function showSelectionNotification(elementInfo) {
+        // Ensure DOM is ready
+        if (!document.body) {
+            console.warn('[RapidTriage] Cannot show notification - DOM not ready');
+            return;
+        }
+        
         // Create notification element
         const notification = document.createElement('div');
         notification.style.cssText = `
@@ -239,7 +263,13 @@
                 to { transform: translateX(0); opacity: 1; }
             }
         `;
-        document.head.appendChild(style);
+        
+        // Safely append style
+        if (document.head) {
+            document.head.appendChild(style);
+        } else if (document.documentElement) {
+            document.documentElement.appendChild(style);
+        }
         
         document.body.appendChild(notification);
         
@@ -247,8 +277,12 @@
         setTimeout(() => {
             notification.style.animation = 'slideIn 0.3s ease-out reverse';
             setTimeout(() => {
-                notification.remove();
-                style.remove();
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+                if (style.parentNode) {
+                    style.remove();
+                }
             }, 300);
         }, 3000);
     }
