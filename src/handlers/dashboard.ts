@@ -651,8 +651,8 @@ curl -X POST ${baseUrl}/api/console-logs \\
           (userProfile.subscription?.plan || 'free').slice(1);
         document.getElementById('daysRemaining').textContent = userProfile.subscription?.daysRemaining || 30;
         
-        // Update request count (would need actual metrics API)
-        document.getElementById('requestCount').textContent = Math.floor(Math.random() * 1000);
+        // Update request count with real data from profile
+        document.getElementById('requestCount').textContent = userProfile.requestsToday || 0;
         
       } catch (error) {
         console.error('Error loading profile:', error);

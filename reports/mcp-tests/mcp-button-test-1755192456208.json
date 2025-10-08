@@ -1,0 +1,833 @@
+{
+  "metadata": {
+    "startTime": "2025-08-14T17:27:33.166Z",
+    "endTime": "2025-08-14T17:27:36.208Z",
+    "testSuite": "MCP Button Integration Tests",
+    "version": "1.0.0",
+    "serverUrl": "http://localhost:3025",
+    "apiUrl": "https://rapidtriage.me",
+    "duration": 3042
+  },
+  "statistics": {
+    "totalTests": 18,
+    "passed": 5,
+    "failed": 13,
+    "skipped": 0
+  },
+  "buttonTests": {
+    "coreFunction": [
+      {
+        "id": "test-1",
+        "name": "Test Server",
+        "category": "coreFunction",
+        "timestamp": "2025-08-14T17:27:34.393Z",
+        "config": {
+          "endpoint": "/health",
+          "method": "GET",
+          "auth": false
+        },
+        "status": "passed",
+        "passed": true,
+        "response": {
+          "success": true,
+          "status": 200,
+          "data": {
+            "status": "healthy",
+            "timestamp": "2025-08-14T17:27:34.987Z",
+            "environment": "production",
+            "version": "1.0.0",
+            "service": "RapidTriageME",
+            "provider": "YarlisAISolutions",
+            "endpoints": {
+              "sse": "/sse",
+              "health": "/health",
+              "metrics": "/metrics"
+            },
+            "checks": {
+              "kv_storage": "ok",
+              "durable_objects": "ok"
+            }
+          }
+        },
+        "error": null,
+        "duration": 881
+      },
+      {
+        "id": "test-2",
+        "name": "Screenshot",
+        "category": "coreFunction",
+        "timestamp": "2025-08-14T17:27:35.274Z",
+        "config": {
+          "endpoint": "/api/screenshot",
+          "method": "POST",
+          "auth": true
+        },
+        "status": "passed",
+        "passed": true,
+        "response": {
+          "success": true,
+          "status": 200,
+          "data": {
+            "success": true,
+            "id": "497790947d466676",
+            "path": "test/test-suite/rapidtriage-test/example-com/2025/08/11/session-1754882128486-x1l87qi/2025-08-11-0315-49779094-full.png",
+            "url": "https://screenshots.rapidtriage.me/test/test-suite/rapidtriage-test/example-com/2025/08/11/session-1754882128486-x1l87qi/2025-08-11-0315-49779094-full.png",
+            "expires": "2025-08-14T18:27:35.853Z",
+            "metadata": {
+              "id": "497790947d466676",
+              "path": "test/test-suite/rapidtriage-test/example-com/2025/08/11/session-1754882128486-x1l87qi/2025-08-11-0315-49779094-full.png",
+              "tenant": {
+                "type": "test",
+                "identifier": "test-suite"
+              },
+              "project": {
+                "name": "rapidtriage-test"
+              },
+              "domain": {
+                "url": "https://example.com/test-page",
+                "hostname": "example.com",
+                "environment": "production"
+              },
+              "session": {
+                "id": "1754882128486-x1l87qi",
+                "type": "session",
+                "startTime": "2025-08-11T03:15:28.486Z"
+              },
+              "file": {
+                "originalName": "screenshot-497790947d466676.png",
+                "size": 70,
+                "mimeType": "image/png",
+                "formats": {
+                  "full": "test/test-suite/rapidtriage-test/example-com/2025/08/11/session-1754882128486-x1l87qi/2025-08-11-0315-49779094-full.png"
+                }
+              },
+              "page": {
+                "title": "Test Page Screenshot",
+                "url": "https://example.com/test-page"
+              },
+              "capturedAt": "2025-08-11T03:15:28.717Z",
+              "expiresAt": "2025-08-18T03:15:28.717Z",
+              "permissions": {
+                "public": false,
+                "requiresAuth": true
+              },
+              "analytics": {
+                "views": 0,
+                "downloads": 0
+              }
+            }
+          }
+        },
+        "error": null,
+        "duration": 487
+      },
+      {
+        "id": "test-3",
+        "name": "Clear",
+        "category": "coreFunction",
+        "timestamp": "2025-08-14T17:27:35.761Z",
+        "config": {
+          "tool": "wipeLogs",
+          "local": true
+        },
+        "status": "passed",
+        "passed": true,
+        "response": {
+          "success": true,
+          "data": "Clear action simulated"
+        },
+        "error": null,
+        "duration": 0
+      },
+      {
+        "id": "test-4",
+        "name": "DevTools",
+        "category": "coreFunction",
+        "timestamp": "2025-08-14T17:27:35.761Z",
+        "config": {
+          "tool": "openDevTools",
+          "local": true
+        },
+        "status": "passed",
+        "passed": true,
+        "response": {
+          "success": true,
+          "data": "DevTools action simulated"
+        },
+        "error": null,
+        "duration": 0
+      }
+    ],
+    "auditTools": [
+      {
+        "id": "test-5",
+        "name": "Accessibility",
+        "category": "auditTools",
+        "timestamp": "2025-08-14T17:27:35.761Z",
+        "config": {
+          "tool": "runAccessibilityAudit",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 2
+      },
+      {
+        "id": "test-6",
+        "name": "Performance",
+        "category": "auditTools",
+        "timestamp": "2025-08-14T17:27:35.763Z",
+        "config": {
+          "tool": "runPerformanceAudit",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 1
+      },
+      {
+        "id": "test-7",
+        "name": "SEO",
+        "category": "auditTools",
+        "timestamp": "2025-08-14T17:27:35.764Z",
+        "config": {
+          "tool": "runSEOAudit",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 1
+      },
+      {
+        "id": "test-8",
+        "name": "Best Practices",
+        "category": "auditTools",
+        "timestamp": "2025-08-14T17:27:35.765Z",
+        "config": {
+          "tool": "runBestPracticesAudit",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 1
+      },
+      {
+        "id": "test-9",
+        "name": "NextJS",
+        "category": "auditTools",
+        "timestamp": "2025-08-14T17:27:35.766Z",
+        "config": {
+          "tool": "runNextJSAudit",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 2
+      },
+      {
+        "id": "test-10",
+        "name": "Lighthouse",
+        "category": "auditTools",
+        "timestamp": "2025-08-14T17:27:35.768Z",
+        "config": {
+          "endpoint": "/api/lighthouse",
+          "method": "POST",
+          "auth": true
+        },
+        "status": "passed",
+        "passed": true,
+        "response": {
+          "success": true,
+          "status": 200,
+          "data": {
+            "content": [
+              {
+                "type": "text",
+                "text": "Lighthouse Audit Results:\nPerformance: 92/100\nAccessibility: 88/100\nBest Practices: 95/100\nSEO: 100/100"
+              }
+            ]
+          }
+        },
+        "error": null,
+        "duration": 432
+      }
+    ],
+    "debugTools": [
+      {
+        "id": "test-11",
+        "name": "Console Logs",
+        "category": "debugTools",
+        "timestamp": "2025-08-14T17:27:36.200Z",
+        "config": {
+          "tool": "getConsoleLogs",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 1
+      },
+      {
+        "id": "test-12",
+        "name": "Console Errors",
+        "category": "debugTools",
+        "timestamp": "2025-08-14T17:27:36.201Z",
+        "config": {
+          "tool": "getConsoleErrors",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 1
+      },
+      {
+        "id": "test-13",
+        "name": "Inspect",
+        "category": "debugTools",
+        "timestamp": "2025-08-14T17:27:36.202Z",
+        "config": {
+          "tool": "getSelectedElement",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 1
+      },
+      {
+        "id": "test-14",
+        "name": "Network Logs",
+        "category": "debugTools",
+        "timestamp": "2025-08-14T17:27:36.203Z",
+        "config": {
+          "tool": "getNetworkLogs",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 1
+      },
+      {
+        "id": "test-15",
+        "name": "Network Errors",
+        "category": "debugTools",
+        "timestamp": "2025-08-14T17:27:36.204Z",
+        "config": {
+          "tool": "getNetworkErrors",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 2
+      },
+      {
+        "id": "test-16",
+        "name": "Wipe Logs",
+        "category": "debugTools",
+        "timestamp": "2025-08-14T17:27:36.206Z",
+        "config": {
+          "tool": "wipeLogs",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 0
+      }
+    ],
+    "modes": [
+      {
+        "id": "test-17",
+        "name": "Debug Mode",
+        "category": "modes",
+        "timestamp": "2025-08-14T17:27:36.206Z",
+        "config": {
+          "tool": "runDebuggerMode",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 1
+      },
+      {
+        "id": "test-18",
+        "name": "Audit Mode",
+        "category": "modes",
+        "timestamp": "2025-08-14T17:27:36.207Z",
+        "config": {
+          "tool": "runAuditMode",
+          "mcp": true
+        },
+        "status": "failed",
+        "passed": false,
+        "response": {
+          "success": false,
+          "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        "duration": 1
+      }
+    ]
+  },
+  "testCases": [
+    {
+      "id": "test-1",
+      "name": "Test Server",
+      "category": "coreFunction",
+      "timestamp": "2025-08-14T17:27:34.393Z",
+      "config": {
+        "endpoint": "/health",
+        "method": "GET",
+        "auth": false
+      },
+      "status": "passed",
+      "passed": true,
+      "response": {
+        "success": true,
+        "status": 200,
+        "data": {
+          "status": "healthy",
+          "timestamp": "2025-08-14T17:27:34.987Z",
+          "environment": "production",
+          "version": "1.0.0",
+          "service": "RapidTriageME",
+          "provider": "YarlisAISolutions",
+          "endpoints": {
+            "sse": "/sse",
+            "health": "/health",
+            "metrics": "/metrics"
+          },
+          "checks": {
+            "kv_storage": "ok",
+            "durable_objects": "ok"
+          }
+        }
+      },
+      "error": null,
+      "duration": 881
+    },
+    {
+      "id": "test-2",
+      "name": "Screenshot",
+      "category": "coreFunction",
+      "timestamp": "2025-08-14T17:27:35.274Z",
+      "config": {
+        "endpoint": "/api/screenshot",
+        "method": "POST",
+        "auth": true
+      },
+      "status": "passed",
+      "passed": true,
+      "response": {
+        "success": true,
+        "status": 200,
+        "data": {
+          "success": true,
+          "id": "497790947d466676",
+          "path": "test/test-suite/rapidtriage-test/example-com/2025/08/11/session-1754882128486-x1l87qi/2025-08-11-0315-49779094-full.png",
+          "url": "https://screenshots.rapidtriage.me/test/test-suite/rapidtriage-test/example-com/2025/08/11/session-1754882128486-x1l87qi/2025-08-11-0315-49779094-full.png",
+          "expires": "2025-08-14T18:27:35.853Z",
+          "metadata": {
+            "id": "497790947d466676",
+            "path": "test/test-suite/rapidtriage-test/example-com/2025/08/11/session-1754882128486-x1l87qi/2025-08-11-0315-49779094-full.png",
+            "tenant": {
+              "type": "test",
+              "identifier": "test-suite"
+            },
+            "project": {
+              "name": "rapidtriage-test"
+            },
+            "domain": {
+              "url": "https://example.com/test-page",
+              "hostname": "example.com",
+              "environment": "production"
+            },
+            "session": {
+              "id": "1754882128486-x1l87qi",
+              "type": "session",
+              "startTime": "2025-08-11T03:15:28.486Z"
+            },
+            "file": {
+              "originalName": "screenshot-497790947d466676.png",
+              "size": 70,
+              "mimeType": "image/png",
+              "formats": {
+                "full": "test/test-suite/rapidtriage-test/example-com/2025/08/11/session-1754882128486-x1l87qi/2025-08-11-0315-49779094-full.png"
+              }
+            },
+            "page": {
+              "title": "Test Page Screenshot",
+              "url": "https://example.com/test-page"
+            },
+            "capturedAt": "2025-08-11T03:15:28.717Z",
+            "expiresAt": "2025-08-18T03:15:28.717Z",
+            "permissions": {
+              "public": false,
+              "requiresAuth": true
+            },
+            "analytics": {
+              "views": 0,
+              "downloads": 0
+            }
+          }
+        }
+      },
+      "error": null,
+      "duration": 487
+    },
+    {
+      "id": "test-3",
+      "name": "Clear",
+      "category": "coreFunction",
+      "timestamp": "2025-08-14T17:27:35.761Z",
+      "config": {
+        "tool": "wipeLogs",
+        "local": true
+      },
+      "status": "passed",
+      "passed": true,
+      "response": {
+        "success": true,
+        "data": "Clear action simulated"
+      },
+      "error": null,
+      "duration": 0
+    },
+    {
+      "id": "test-4",
+      "name": "DevTools",
+      "category": "coreFunction",
+      "timestamp": "2025-08-14T17:27:35.761Z",
+      "config": {
+        "tool": "openDevTools",
+        "local": true
+      },
+      "status": "passed",
+      "passed": true,
+      "response": {
+        "success": true,
+        "data": "DevTools action simulated"
+      },
+      "error": null,
+      "duration": 0
+    },
+    {
+      "id": "test-5",
+      "name": "Accessibility",
+      "category": "auditTools",
+      "timestamp": "2025-08-14T17:27:35.761Z",
+      "config": {
+        "tool": "runAccessibilityAudit",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 2
+    },
+    {
+      "id": "test-6",
+      "name": "Performance",
+      "category": "auditTools",
+      "timestamp": "2025-08-14T17:27:35.763Z",
+      "config": {
+        "tool": "runPerformanceAudit",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 1
+    },
+    {
+      "id": "test-7",
+      "name": "SEO",
+      "category": "auditTools",
+      "timestamp": "2025-08-14T17:27:35.764Z",
+      "config": {
+        "tool": "runSEOAudit",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 1
+    },
+    {
+      "id": "test-8",
+      "name": "Best Practices",
+      "category": "auditTools",
+      "timestamp": "2025-08-14T17:27:35.765Z",
+      "config": {
+        "tool": "runBestPracticesAudit",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 1
+    },
+    {
+      "id": "test-9",
+      "name": "NextJS",
+      "category": "auditTools",
+      "timestamp": "2025-08-14T17:27:35.766Z",
+      "config": {
+        "tool": "runNextJSAudit",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 2
+    },
+    {
+      "id": "test-10",
+      "name": "Lighthouse",
+      "category": "auditTools",
+      "timestamp": "2025-08-14T17:27:35.768Z",
+      "config": {
+        "endpoint": "/api/lighthouse",
+        "method": "POST",
+        "auth": true
+      },
+      "status": "passed",
+      "passed": true,
+      "response": {
+        "success": true,
+        "status": 200,
+        "data": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Lighthouse Audit Results:\nPerformance: 92/100\nAccessibility: 88/100\nBest Practices: 95/100\nSEO: 100/100"
+            }
+          ]
+        }
+      },
+      "error": null,
+      "duration": 432
+    },
+    {
+      "id": "test-11",
+      "name": "Console Logs",
+      "category": "debugTools",
+      "timestamp": "2025-08-14T17:27:36.200Z",
+      "config": {
+        "tool": "getConsoleLogs",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 1
+    },
+    {
+      "id": "test-12",
+      "name": "Console Errors",
+      "category": "debugTools",
+      "timestamp": "2025-08-14T17:27:36.201Z",
+      "config": {
+        "tool": "getConsoleErrors",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 1
+    },
+    {
+      "id": "test-13",
+      "name": "Inspect",
+      "category": "debugTools",
+      "timestamp": "2025-08-14T17:27:36.202Z",
+      "config": {
+        "tool": "getSelectedElement",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 1
+    },
+    {
+      "id": "test-14",
+      "name": "Network Logs",
+      "category": "debugTools",
+      "timestamp": "2025-08-14T17:27:36.203Z",
+      "config": {
+        "tool": "getNetworkLogs",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 1
+    },
+    {
+      "id": "test-15",
+      "name": "Network Errors",
+      "category": "debugTools",
+      "timestamp": "2025-08-14T17:27:36.204Z",
+      "config": {
+        "tool": "getNetworkErrors",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 2
+    },
+    {
+      "id": "test-16",
+      "name": "Wipe Logs",
+      "category": "debugTools",
+      "timestamp": "2025-08-14T17:27:36.206Z",
+      "config": {
+        "tool": "wipeLogs",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 0
+    },
+    {
+      "id": "test-17",
+      "name": "Debug Mode",
+      "category": "modes",
+      "timestamp": "2025-08-14T17:27:36.206Z",
+      "config": {
+        "tool": "runDebuggerMode",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 1
+    },
+    {
+      "id": "test-18",
+      "name": "Audit Mode",
+      "category": "modes",
+      "timestamp": "2025-08-14T17:27:36.207Z",
+      "config": {
+        "tool": "runAuditMode",
+        "mcp": true
+      },
+      "status": "failed",
+      "passed": false,
+      "response": {
+        "success": false,
+        "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "error": "invalid json response body at http://localhost:3025/mcp/tool reason: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "duration": 1
+    }
+  ]
+}

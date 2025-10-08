@@ -8,9 +8,10 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const config = require('../config/test.config');
 
-const BASE_URL = 'https://rapidtriage.me';
-const AUTH_TOKEN = 'KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8';
+const BASE_URL = config.api.baseUrl;
+const AUTH_TOKEN = config.api.token;
 
 const colors = {
   reset: '\x1b[0m',

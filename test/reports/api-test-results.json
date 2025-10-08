@@ -1,0 +1,64 @@
+{
+  "timestamp": "2025-08-15T02:29:44.112Z",
+  "environment": "development",
+  "summary": {
+    "total": 13,
+    "passed": 13,
+    "failed": 0,
+    "successRate": "100.0"
+  },
+  "results": [
+    {
+      "name": "Health Check",
+      "status": "passed"
+    },
+    {
+      "name": "Screenshot Upload",
+      "status": "passed"
+    },
+    {
+      "name": "Console Logs Endpoint",
+      "status": "passed"
+    },
+    {
+      "name": "Console Errors Endpoint",
+      "status": "passed"
+    },
+    {
+      "name": "Network Logs Endpoint",
+      "status": "passed"
+    },
+    {
+      "name": "Network Errors Endpoint",
+      "status": "passed"
+    },
+    {
+      "name": "Lighthouse Audit",
+      "status": "passed"
+    },
+    {
+      "name": "Lighthouse accessibility Audit",
+      "status": "passed"
+    },
+    {
+      "name": "Lighthouse performance Audit",
+      "status": "passed"
+    },
+    {
+      "name": "Lighthouse seo Audit",
+      "status": "passed"
+    },
+    {
+      "name": "Lighthouse best-practices Audit",
+      "status": "passed"
+    },
+    {
+      "name": "Authentication (Invalid Token)",
+      "status": "passed"
+    },
+    {
+      "name": "CORS Headers",
+      "status": "passed"
+    }
+  ]
+}

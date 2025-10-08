@@ -20,11 +20,13 @@ interface ApiKey {
 
 export class AuthMiddleware {
   private authToken: string;
+  private apiToken: string;
   private jwtSecret: string;
   private env: any;
   
   constructor(authToken: string, jwtSecret: string, env?: any) {
     this.authToken = authToken;
+    this.apiToken = env?.RAPIDTRIAGE_API_TOKEN || authToken; // Use RAPIDTRIAGE_API_TOKEN if available
     this.jwtSecret = jwtSecret;
     this.env = env;
   }
@@ -90,10 +92,29 @@ export class AuthMiddleware {
         return null;
       }
       
-      // Update last used timestamp
+      // Update last used timestamp and request counts
       apiKey.lastUsedAt = new Date().toISOString();
       apiKey.requestCount++;
       await this.env.SESSIONS.put(`apikey:${keyId}`, JSON.stringify(apiKey));
+      
+      // Track daily requests for the user
+      const today = new Date().toISOString().split('T')[0];
+      const dailyUserKey = `user:${apiKey.userId}:requests:${today}`;
+      const dailyApiKeyKey = `apikey:${keyId}:requests:${today}`;
+      
+      // Get and increment daily user request count
+      const currentUserCount = await this.env.SESSIONS.get(dailyUserKey);
+      const newUserCount = (parseInt(currentUserCount || '0') + 1).toString();
+      await this.env.SESSIONS.put(dailyUserKey, newUserCount, {
+        expirationTtl: 86400 * 30 // Keep for 30 days
+      });
+      
+      // Get and increment daily API key request count
+      const currentKeyCount = await this.env.SESSIONS.get(dailyApiKeyKey);
+      const newKeyCount = (parseInt(currentKeyCount || '0') + 1).toString();
+      await this.env.SESSIONS.put(dailyApiKeyKey, newKeyCount, {
+        expirationTtl: 86400 * 30 // Keep for 30 days
+      });
       
       return apiKey;
     } catch (error) {
@@ -110,6 +131,14 @@ export class AuthMiddleware {
     }
     
     const token = authHeader.replace('Bearer ', '');
+    
+    // Check against RAPIDTRIAGE_API_TOKEN first (primary API token)
+    if (token === this.apiToken) {
+      return { 
+        authenticated: true,
+        user: { type: 'api_token', source: 'rapidtriage' }
+      };
+    }
     
     // Simple token authentication (legacy support)
     if (token === this.authToken) {

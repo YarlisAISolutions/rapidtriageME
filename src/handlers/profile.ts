@@ -567,8 +567,8 @@ export class ProfileHandler {
       </nav>
       <div class="user-menu">
         <button class="user-button" onclick="toggleUserMenu()">
-          <div class="user-avatar" id="userAvatar">JD</div>
-          <span id="userNameHeader">John Doe</span>
+          <div class="user-avatar" id="userAvatar">U</div>
+          <span id="userNameHeader">Loading...</span>
           <span>▼</span>
         </button>
       </div>
@@ -579,12 +579,12 @@ export class ProfileHandler {
   <div class="container">
     <!-- Profile Header -->
     <div class="profile-header">
-      <div class="profile-avatar" id="profileAvatar">JD</div>
+      <div class="profile-avatar" id="profileAvatar">U</div>
       <div class="profile-info">
-        <h1 id="profileName">John Doe</h1>
-        <p id="profileEmail">john.doe@example.com</p>
-        <p id="profileCompany">Company Name</p>
-        <span class="profile-badge badge-free" id="profileBadge">FREE TIER</span>
+        <h1 id="profileName">Loading...</h1>
+        <p id="profileEmail">Loading...</p>
+        <p id="profileCompany">Loading...</p>
+        <span class="profile-badge badge-free" id="profileBadge">LOADING...</span>
       </div>
     </div>
 
@@ -593,10 +593,10 @@ export class ProfileHandler {
 
     <!-- Tabs -->
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('general')">General</button>
-      <button class="tab" onclick="switchTab('security')">Security</button>
-      <button class="tab" onclick="switchTab('subscription')">Subscription</button>
-      <button class="tab" onclick="switchTab('usage')">Usage & Billing</button>
+      <button class="tab active" onclick="switchTab('general', this)">General</button>
+      <button class="tab" onclick="switchTab('security', this)">Security</button>
+      <button class="tab" onclick="switchTab('subscription', this)">Subscription</button>
+      <button class="tab" onclick="switchTab('usage', this)">Usage & Billing</button>
     </div>
 
     <!-- General Tab -->
@@ -852,24 +852,18 @@ export class ProfileHandler {
       authToken = localStorage.getItem('rapidtriage_auth_token') || 
                   sessionStorage.getItem('rapidtriage_auth_token');
       
-      if (!authToken) {
-        console.log('No auth token found, redirecting to login');
-        window.location.href = '/login?redirect=/profile';
-        return;
-      }
-      
       // Try to load from localStorage first as a fallback
       const storedUser = localStorage.getItem('rapidtriage_user');
       if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
           console.log('Found stored user data:', userData);
-          // Use stored data as initial values
+          // Use stored data as initial values, but don't show defaults
           userProfile = {
             ...userData,
-            company: userData.company || 'Acme Corporation',
-            apiKeyCount: 2,
-            twoFactorEnabled: false
+            company: userData.company || userData.organization || '',
+            apiKeyCount: userData.apiKeyCount || 0,
+            twoFactorEnabled: userData.twoFactorEnabled || false
           };
           updateProfileUI();
         } catch (e) {
@@ -877,7 +871,7 @@ export class ProfileHandler {
         }
       }
       
-      // Then try to load fresh data from API
+      // Always try to load fresh data from API
       await loadProfile();
       loadUsageStats();
     }
@@ -889,7 +883,8 @@ export class ProfileHandler {
         
         const response = await fetch('/auth/profile', {
           headers: {
-            'Authorization': \`Bearer \${authToken}\`
+            'Authorization': \`Bearer \${authToken}\`,
+            'Content-Type': 'application/json'
           }
         });
         
@@ -900,21 +895,49 @@ export class ProfileHandler {
             console.log('Unauthorized, redirecting to login');
             localStorage.removeItem('rapidtriage_auth_token');
             sessionStorage.removeItem('rapidtriage_auth_token');
-            window.location.href = '/login?redirect=/profile';
+            localStorage.removeItem('rapidtriage_user');
+            showAlert('Session expired. Please login again.', 'error');
+            setTimeout(() => {
+              window.location.href = '/login?redirect=/profile';
+            }, 2000);
             return;
           }
+          const errorText = await response.text();
+          console.error('Profile load error response:', errorText);
           throw new Error('Failed to load profile: ' + response.status);
         }
         
-        userProfile = await response.json();
-        console.log('Profile loaded:', userProfile);
+        const data = await response.json();
+        console.log('Profile loaded:', data);
+        userProfile = data;
         
         // Update UI with profile data
         updateProfileUI();
         
       } catch (error) {
         console.error('Error loading profile:', error);
-        showAlert('Failed to load profile data: ' + error.message, 'error');
+        // If no token, show message but don't redirect immediately
+        if (!authToken) {
+          // Show placeholder data for demo purposes
+          userProfile = {
+            name: 'Demo User',
+            email: 'demo@rapidtriage.me',
+            username: 'Demo User',
+            company: 'RapidTriageME Demo',
+            organization: 'RapidTriageME Demo',
+            apiKeyCount: 3,
+            twoFactorEnabled: false,
+            subscription: {
+              plan: 'free',
+              status: 'active',
+              expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            }
+          };
+          updateProfileUI();
+          showAlert('Using demo data. Please login for full access.', 'info');
+        } else {
+          showAlert('Failed to load profile data: ' + error.message, 'error');
+        }
       }
     }
 
@@ -922,12 +945,14 @@ export class ProfileHandler {
     function updateProfileUI() {
       console.log('Updating UI with profile:', userProfile);
       
-      if (!userProfile || !userProfile.name) {
-        console.error('Invalid profile data:', userProfile);
+      if (!userProfile) {
+        console.error('No profile data available');
         return;
       }
       
-      const initials = userProfile.name.split(' ').map(n => n[0]).join('').toUpperCase();
+      // Use actual user data, not defaults
+      const displayName = userProfile.name || userProfile.username || 'User';
+      const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
       
       // Update avatars
       const userAvatar = document.getElementById('userAvatar');
@@ -937,16 +962,16 @@ export class ProfileHandler {
       
       // Update header
       const userNameHeader = document.getElementById('userNameHeader');
-      if (userNameHeader) userNameHeader.textContent = userProfile.name;
+      if (userNameHeader) userNameHeader.textContent = displayName;
       
       // Update profile info
       const profileName = document.getElementById('profileName');
       const profileEmail = document.getElementById('profileEmail');
       const profileCompany = document.getElementById('profileCompany');
       
-      if (profileName) profileName.textContent = userProfile.name;
-      if (profileEmail) profileEmail.textContent = userProfile.email;
-      if (profileCompany) profileCompany.textContent = userProfile.company || 'No company';
+      if (profileName) profileName.textContent = displayName;
+      if (profileEmail) profileEmail.textContent = userProfile.email || 'No email';
+      if (profileCompany) profileCompany.textContent = userProfile.company || userProfile.organization || 'No company specified';
       
       // Update badge
       const badge = document.getElementById('profileBadge');
@@ -961,9 +986,9 @@ export class ProfileHandler {
       const inputEmail = document.getElementById('inputEmail') as HTMLInputElement;
       const inputCompany = document.getElementById('inputCompany') as HTMLInputElement;
       
-      if (inputName) inputName.value = userProfile.name;
-      if (inputEmail) inputEmail.value = userProfile.email;
-      if (inputCompany) inputCompany.value = userProfile.company || '';
+      if (inputName) inputName.value = displayName;
+      if (inputEmail) inputEmail.value = userProfile.email || '';
+      if (inputCompany) inputCompany.value = userProfile.company || userProfile.organization || '';
       
       // Update security settings
       const twoFactorToggle = document.getElementById('twoFactorToggle') as HTMLInputElement;
@@ -1072,14 +1097,17 @@ export class ProfileHandler {
     }
 
     // Tab switching
-    function switchTab(tab) {
+    function switchTab(tab, element) {
       // Update tabs
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
+      // If element is not provided, find the tab button by tab name
+      const activeTab = element || document.querySelector(\`.tab[onclick*="'\${tab}'"]\`);
+      if (activeTab) activeTab.classList.add('active');
       
       // Update content
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      document.getElementById(tab + 'Tab').classList.add('active');
+      const tabContent = document.getElementById(tab + 'Tab');
+      if (tabContent) tabContent.classList.add('active');
     }
 
     // Save profile form
@@ -1213,7 +1241,7 @@ export class ProfileHandler {
     }
 
     function showUpgradeOptions() {
-      document.querySelector('[onclick="switchTab(\'subscription\')"]').click();
+      switchTab('subscription');
     }
 
     function selectPlan(plan) {

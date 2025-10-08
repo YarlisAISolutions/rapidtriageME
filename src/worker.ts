@@ -1452,6 +1452,13 @@ export default {
           }
           return new Response('Method not allowed', { status: 405 });
           
+        case '/auth/user-metrics':
+          const metricsHandler = new AuthHandler(env);
+          if (request.method === 'GET') {
+            return metricsHandler.handleUserMetrics(request);
+          }
+          return new Response('Method not allowed', { status: 405 });
+          
         case env.SSE_ENDPOINT:
           // Main SSE endpoint for MCP protocol
           if (auth) {
@@ -1524,12 +1531,20 @@ export default {
           }
           
         case '/api/console-logs':
+        case '/api/console-errors':
         case '/api/network-logs':
+        case '/api/network-errors':
         case '/api/lighthouse':
+        case '/api/lighthouse/accessibility':
+        case '/api/lighthouse/performance':
+        case '/api/lighthouse/seo':
+        case '/api/lighthouse/best-practices':
+        case '/api/lighthouse/nextjs':
         case '/api/inspect-element':
         case '/api/execute-js':
         case '/api/navigate':
         case '/api/triage-report':
+        case '/api/mode':
           // API endpoints for browser operations
           // Allow unauthenticated access from browser extensions (CORS)
           const origin = request.headers.get('Origin');
@@ -1544,6 +1559,91 @@ export default {
                 status: 401,
                 headers: corsHeaders 
               });
+            }
+          }
+          
+          // Handle mode switching
+          if (url.pathname === '/api/mode') {
+            try {
+              const body = await request.json() as any;
+              const mode = body.mode || 'normal';
+              const enabled = body.enabled !== false;
+              
+              // Store mode in KV or return success
+              const response = {
+                success: true,
+                mode: mode,
+                enabled: enabled,
+                message: `${mode} mode ${enabled ? 'activated' : 'deactivated'}`
+              };
+              
+              return new Response(JSON.stringify(response), {
+                status: 200,
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...corsHeaders
+                }
+              });
+            } catch (error) {
+              return new Response(JSON.stringify({ 
+                error: 'Invalid request body' 
+              }), {
+                status: 400,
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...corsHeaders
+                }
+              });
+            }
+          }
+          
+          // Handle individual Lighthouse audits
+          if (url.pathname.startsWith('/api/lighthouse/')) {
+            const auditType = url.pathname.split('/')[3];
+            const validAudits = ['accessibility', 'performance', 'seo', 'best-practices', 'nextjs'];
+            
+            if (validAudits.includes(auditType)) {
+              try {
+                const body = await request.json() as any;
+                
+                // Map audit types to Lighthouse categories
+                const categoryMap: Record<string, string> = {
+                  'accessibility': 'accessibility',
+                  'performance': 'performance',
+                  'seo': 'seo',
+                  'best-practices': 'best-practices',
+                  'nextjs': 'performance' // NextJS uses performance category with custom checks
+                };
+                
+                const category = categoryMap[auditType];
+                
+                // Create a modified request for the main lighthouse handler
+                const modifiedBody = {
+                  ...body,
+                  categories: [category],
+                  auditType: auditType
+                };
+                
+                const modifiedRequest = new Request(request.url.replace(url.pathname, '/api/lighthouse'), {
+                  method: request.method,
+                  headers: request.headers,
+                  body: JSON.stringify(modifiedBody)
+                });
+                
+                // Forward to browser tools handler
+                const mcpApiHandler = new RemoteBrowserMCPHandler(env);
+                return mcpApiHandler.handleAPI(modifiedRequest, '/api/lighthouse');
+              } catch (error) {
+                return new Response(JSON.stringify({ 
+                  error: 'Invalid request body' 
+                }), {
+                  status: 400,
+                  headers: {
+                    'Content-Type': 'application/json',
+                    ...corsHeaders
+                  }
+                });
+              }
             }
           }
           

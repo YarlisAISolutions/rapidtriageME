@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>RapidTriage Settings</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 600px;
+            width: 90%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .section-title {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title span {
+            margin-right: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        input[type="text"],
+        input[type="url"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus,
+        input[type="url"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+        
+        .btn-secondary:hover {
+            background: #e8e8e8;
+        }
+        
+        .btn-danger {
+            background: #ff4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #cc0000;
+        }
+        
+        .status-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .path-picker {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .path-picker input {
+            flex: 1;
+        }
+        
+        .path-picker button {
+            padding: 10px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .path-picker button:hover {
+            background: #5569d0;
+        }
+        
+        .shortcut-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+        
+        .shortcut-info h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .shortcut-info p {
+            margin: 5px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .shortcut-info code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ RapidTriage Settings</h1>
+        <p class="subtitle">Configure your browser debugging toolkit preferences</p>
+        
+        <div class="status-message" id="status-message"></div>
+        
+        <!-- Storage Settings -->
+        <div class="section">
+            <h3 class="section-title"><span>📁</span> Storage Settings</h3>
+            
+            <div class="form-group">
+                <label for="screenshot-path">Screenshot Storage Location</label>
+                <div class="path-picker">
+                    <input type="text" id="screenshot-path" placeholder="~/RapidTriage_Screenshots/">
+                    <button id="browse-path" type="button" title="Browse">📂 Browse</button>
+                </div>
+                <div class="help-text">
+                    Default: ~/RapidTriage_Screenshots/<br>
+                    Windows: %USERPROFILE%\RapidTriage_Screenshots\
+                </div>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="auto-save-screenshots">
+                <label for="auto-save-screenshots">Automatically save screenshots to local directory</label>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="timestamp-screenshots">
+                <label for="timestamp-screenshots">Add timestamp to screenshot filenames</label>
+            </div>
+        </div>
+        
+        <!-- Server Settings -->
+        <div class="section">
+            <h3 class="section-title"><span>🌐</span> Server Configuration</h3>
+            
+            <div class="form-group">
+                <label for="server-mode">Server Mode</label>
+                <select id="server-mode">
+                    <option value="auto">Auto-detect (Recommended)</option>
+                    <option value="local">Local Server Only</option>
+                    <option value="remote">Remote Server Only</option>
+                    <option value="custom">Custom Server</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="custom-server-group" style="display: none;">
+                <label for="custom-server-url">Custom Server URL</label>
+                <input type="url" id="custom-server-url" placeholder="http://localhost:3025">
+                <div class="help-text">Enter the full URL including port</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="local-port">Local Server Port</label>
+                <input type="text" id="local-port" placeholder="3025">
+                <div class="help-text">Default port for local RapidTriage server</div>
+            </div>
+        </div>
+        
+        <!-- Debug Settings -->
+        <div class="section">
+            <h3 class="section-title"><span>🐛</span> Debug & Logging</h3>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="enable-debug-mode">
+                <label for="enable-debug-mode">Enable debug mode by default</label>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="verbose-logging">
+                <label for="verbose-logging">Verbose console logging</label>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="persist-logs">
+                <label for="persist-logs">Persist activity logs between sessions</label>
+            </div>
+            
+            <div class="form-group">
+                <label for="log-limit">Maximum log entries</label>
+                <input type="text" id="log-limit" placeholder="100">
+                <div class="help-text">Number of log entries to keep (default: 100)</div>
+            </div>
+        </div>
+        
+        <!-- Audit Settings -->
+        <div class="section">
+            <h3 class="section-title"><span>📊</span> Audit Preferences</h3>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="auto-run-audits">
+                <label for="auto-run-audits">Run audits automatically on page load</label>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="save-audit-reports">
+                <label for="save-audit-reports">Save audit reports to local directory</label>
+            </div>
+            
+            <div class="form-group">
+                <label for="audit-categories">Default Audit Categories</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="audit-accessibility" checked>
+                    <label for="audit-accessibility">Accessibility</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="audit-performance" checked>
+                    <label for="audit-performance">Performance</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="audit-seo" checked>
+                    <label for="audit-seo">SEO</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="audit-best-practices" checked>
+                    <label for="audit-best-practices">Best Practices</label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Keyboard Shortcuts -->
+        <div class="section">
+            <h3 class="section-title"><span>⌨️</span> Keyboard Shortcuts</h3>
+            
+            <div class="shortcut-info">
+                <h4>Available Shortcuts:</h4>
+                <p><code>Alt+Shift+R</code> - Open RapidTriage popup</p>
+                <p><code>Alt+Shift+S</code> - Take screenshot</p>
+                <p><code>Alt+Shift+I</code> - Inspect element</p>
+                <p><code>Alt+Shift+D</code> - Toggle debug mode</p>
+                <p class="help-text">Note: Shortcuts can be customized in Chrome's extension shortcuts settings</p>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="button-group">
+            <button type="button" class="btn-primary" id="save-settings">💾 Save Settings</button>
+            <button type="button" class="btn-secondary" id="reset-defaults">🔄 Reset to Defaults</button>
+            <button type="button" class="btn-danger" id="clear-data">🗑️ Clear All Data</button>
+        </div>
+    </div>
+    
+    <script src="options.js"></script>
+</body>
+</html>

@@ -36,6 +36,8 @@ interface ApiKey {
   rateLimit: number;
   permissions: string[];
   ipWhitelist: string[];
+  status: 'active' | 'revoked' | 'expired';
+  revokedAt?: string;
 }
 
 export class AuthHandler {
@@ -272,6 +274,7 @@ export class AuthHandler {
           id: user.id,
           email: user.email,
           name: user.name,
+          username: user.name, // Add username field for consistency
           role: user.role,
           createdAt: user.createdAt,
           emailVerified: user.emailVerified,
@@ -454,6 +457,7 @@ export class AuthHandler {
           id: user.id,
           email: user.email,
           name: user.name,
+          username: user.name, // Add username field for consistency
           role: user.role,
           createdAt: user.createdAt,
           emailVerified: user.emailVerified,
@@ -567,13 +571,22 @@ export class AuthHandler {
                      user.subscription.plan === 'pro' ? 10 :
                      100; // enterprise
       
-      // Count existing keys
+      // Count existing active keys
       let keyCount = 0;
       if (this.env.SESSIONS) {
         const keysData = await this.env.SESSIONS.get(`user:${payload.sub}:apikeys`);
         if (keysData) {
-          const keys = JSON.parse(keysData);
-          keyCount = keys.length;
+          const keyIds = JSON.parse(keysData);
+          // Count only active keys
+          for (const keyId of keyIds) {
+            const keyData = await this.env.SESSIONS.get(`apikey:${keyId}`);
+            if (keyData) {
+              const key = JSON.parse(keyData);
+              if (key.status === 'active') {
+                keyCount++;
+              }
+            }
+          }
         }
       }
       
@@ -607,7 +620,8 @@ export class AuthHandler {
         requestCount: 0,
         rateLimit: rateLimit || user.subscription.requestLimit,
         permissions: permissions || ['read', 'write'],
-        ipWhitelist: ipWhitelist || []
+        ipWhitelist: ipWhitelist || [],
+        status: 'active'
       };
       
       // Store API key
@@ -707,9 +721,12 @@ export class AuthHandler {
             const keyData = await this.env.SESSIONS.get(`apikey:${keyId}`);
             if (keyData) {
               const key = JSON.parse(keyData);
-              // Don't return the actual key value
-              delete key.key;
-              apiKeys.push(key);
+              // Only include active keys
+              if (key.status === 'active') {
+                // Don't return the actual key value
+                delete key.key;
+                apiKeys.push(key);
+              }
             }
           }
         }
@@ -825,19 +842,40 @@ export class AuthHandler {
       // Get additional metadata
       let company = null;
       let apiKeyCount = 0;
+      let requestsToday = 0;
       if (this.env.SESSIONS) {
         company = await this.env.SESSIONS.get(`user:${payload.sub}:company`);
+        
+        // Get today's request count
+        const today = new Date().toISOString().split('T')[0];
+        const dailyKey = `user:${payload.sub}:requests:${today}`;
+        const todayCount = await this.env.SESSIONS.get(dailyKey);
+        requestsToday = parseInt(todayCount || '0');
+        
+        // Count active API keys
         const keysData = await this.env.SESSIONS.get(`user:${payload.sub}:apikeys`);
         if (keysData) {
-          const keys = JSON.parse(keysData);
-          apiKeyCount = keys.length;
+          const keyIds = JSON.parse(keysData);
+          // Count only active keys
+          for (const keyId of keyIds) {
+            const keyData = await this.env.SESSIONS.get(`apikey:${keyId}`);
+            if (keyData) {
+              const key = JSON.parse(keyData);
+              if (key.status === 'active') {
+                apiKeyCount++;
+              }
+            }
+          }
         }
       }
       
       return new Response(JSON.stringify({
         ...safeUser,
+        username: safeUser.name, // Add username field for compatibility
+        organization: company, // Add organization field for compatibility
         company,
         apiKeyCount,
+        requestsToday,
         subscription: {
           ...user.subscription,
           daysRemaining: Math.ceil((new Date(user.subscription.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
@@ -1051,19 +1089,20 @@ export class AuthHandler {
         });
       }
       
-      // Delete API key
+      // Revoke API key (mark as revoked instead of deleting)
       if (this.env.SESSIONS) {
-        // Delete key data
-        await this.env.SESSIONS.delete(`apikey:${keyId}`);
+        // Update key status to revoked
+        apiKey.status = 'revoked';
+        apiKey.revokedAt = new Date().toISOString();
+        
+        // Store updated key data
+        await this.env.SESSIONS.put(`apikey:${keyId}`, JSON.stringify(apiKey));
+        
+        // Delete the key value mapping so it can't be used for authentication
         await this.env.SESSIONS.delete(`apikey:value:${apiKey.key}`);
         
-        // Update user's key list
-        const keysData = await this.env.SESSIONS.get(`user:${payload.sub}:apikeys`);
-        if (keysData) {
-          const keys = JSON.parse(keysData);
-          const updatedKeys = keys.filter((id: string) => id !== keyId);
-          await this.env.SESSIONS.put(`user:${payload.sub}:apikeys`, JSON.stringify(updatedKeys));
-        }
+        // Keep the key in the user's list for historical record
+        // (no need to update the list since we're keeping it for history)
       }
       
       return new Response(null, {
@@ -1079,6 +1118,138 @@ export class AuthHandler {
         error: 'Internal Server Error',
         message: 'Failed to revoke API key',
         code: 'REVOKE_KEY_FAILED'
+      }), {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+  }
+  
+  /**
+   * Handle getting user metrics (request counts, usage stats)
+   */
+  async handleUserMetrics(request: Request): Promise<Response> {
+    try {
+      // Verify authentication
+      const authHeader = request.headers.get('Authorization');
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return new Response(JSON.stringify({
+          error: 'Unauthorized',
+          message: 'Authentication required',
+          code: 'AUTH_REQUIRED'
+        }), {
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        });
+      }
+      
+      const token = authHeader.replace('Bearer ', '');
+      const payload = await this.verifyJWT(token);
+      
+      if (!payload) {
+        return new Response(JSON.stringify({
+          error: 'Unauthorized',
+          message: 'Invalid or expired token',
+          code: 'INVALID_TOKEN'
+        }), {
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        });
+      }
+      
+      // Get date range from query params
+      const url = new URL(request.url);
+      const days = parseInt(url.searchParams.get('days') || '7');
+      
+      // Collect metrics
+      const metrics: any = {
+        userId: payload.sub,
+        period: {
+          days,
+          start: new Date(Date.now() - (days - 1) * 86400000).toISOString().split('T')[0],
+          end: new Date().toISOString().split('T')[0]
+        },
+        daily: [],
+        totalRequests: 0,
+        requestsToday: 0,
+        byApiKey: []
+      };
+      
+      if (this.env.SESSIONS) {
+        // Get daily request counts for the user
+        for (let i = 0; i < days; i++) {
+          const date = new Date(Date.now() - i * 86400000);
+          const dateKey = date.toISOString().split('T')[0];
+          const dailyKey = `user:${payload.sub}:requests:${dateKey}`;
+          
+          const count = await this.env.SESSIONS.get(dailyKey);
+          const requestCount = parseInt(count || '0');
+          
+          metrics.daily.unshift({
+            date: dateKey,
+            requests: requestCount
+          });
+          
+          metrics.totalRequests += requestCount;
+          
+          if (i === 0) {
+            metrics.requestsToday = requestCount;
+          }
+        }
+        
+        // Get per-API-key breakdown
+        const keysData = await this.env.SESSIONS.get(`user:${payload.sub}:apikeys`);
+        if (keysData) {
+          const keyIds = JSON.parse(keysData);
+          
+          for (const keyId of keyIds) {
+            const keyData = await this.env.SESSIONS.get(`apikey:${keyId}`);
+            if (keyData) {
+              const apiKey = JSON.parse(keyData);
+              
+              // Only include active keys
+              if (apiKey.status === 'active') {
+                const today = new Date().toISOString().split('T')[0];
+                const dailyKeyKey = `apikey:${keyId}:requests:${today}`;
+                const todayCount = await this.env.SESSIONS.get(dailyKeyKey);
+                
+                metrics.byApiKey.push({
+                  id: keyId,
+                  name: apiKey.name,
+                  totalRequests: apiKey.requestCount || 0,
+                  requestsToday: parseInt(todayCount || '0'),
+                  lastUsedAt: apiKey.lastUsedAt
+                });
+              }
+            }
+          }
+        }
+      }
+      
+      return new Response(JSON.stringify(metrics), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'max-age=60' // Cache for 1 minute
+        }
+      });
+      
+    } catch (error) {
+      console.error('Get user metrics error:', error);
+      return new Response(JSON.stringify({
+        error: 'Internal Server Error',
+        message: 'Failed to retrieve user metrics',
+        code: 'METRICS_FETCH_FAILED'
       }), {
         status: 500,
         headers: {

@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "RapidTriage DevTools",
-    "version": "2.5.0",
-    "description": "YarlisAISolutions RapidTriage - Browser debugging and monitoring tools",
+    "version": "3.0.0",
+    "description": "YarlisAISolutions RapidTriage - Complete browser debugging and monitoring toolkit",
     "devtools_page": "devtools.html",
     "permissions": [
         "scripting",
@@ -20,7 +20,17 @@
     },
     "action": {
         "default_popup": "popup.html",
-        "default_title": "RapidTriage Controls"
+        "default_title": "RapidTriage Controls",
+        "default_icon": {
+            "16": "icon16.png",
+            "48": "icon48.png",
+            "128": "icon128.png"
+        }
+    },
+    "options_page": "options.html",
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": true
     },
     "content_scripts": [
         {
@@ -29,5 +39,36 @@
             "run_at": "document_idle",
             "all_frames": false
         }
-    ]
+    ],
+    "icons": {
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
+    },
+    "commands": {
+        "_execute_action": {
+            "suggested_key": {
+                "default": "Alt+Shift+R"
+            },
+            "description": "Open RapidTriage popup"
+        },
+        "take-screenshot": {
+            "suggested_key": {
+                "default": "Alt+Shift+S"
+            },
+            "description": "Take screenshot"
+        },
+        "inspect-element": {
+            "suggested_key": {
+                "default": "Alt+Shift+I"
+            },
+            "description": "Inspect element"
+        },
+        "toggle-debug": {
+            "suggested_key": {
+                "default": "Alt+Shift+D"
+            },
+            "description": "Toggle debug mode"
+        }
+    }
 }

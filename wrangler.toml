@@ -16,13 +16,19 @@ routes = [
   { pattern = "www.rapidtriage.me/*", zone_id = "dba0cbc72f7f0b7727fbdb6f4d6d7901" }
 ]
 
-# Environment variables for production
+# Environment variables for production (non-sensitive)
 [vars]
 ENVIRONMENT = "production"
 BROWSER_TOOLS_PORT = "3025"
 SSE_ENDPOINT = "/sse"
 HEALTH_ENDPOINT = "/health"
 METRICS_ENDPOINT = "/metrics"
+
+# Secrets (set using wrangler secret put)
+# RAPIDTRIAGE_API_TOKEN - API authentication token
+# AUTH_TOKEN - Internal auth token
+# JWT_SECRET - JWT signing secret
+# CLOUDFLARE_API_TOKEN - Cloudflare API token
 
 # KV namespace for session storage
 [[kv_namespaces]]

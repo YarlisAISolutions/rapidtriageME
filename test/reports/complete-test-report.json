@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-08-15T02:29:37.770Z",
+  "environment": "test",
+  "suites": [
+    {
+      "name": "API Tests",
+      "status": "passed"
+    },
+    {
+      "name": "Extension Tests",
+      "status": "passed"
+    },
+    {
+      "name": "Integration Tests",
+      "status": "skipped",
+      "reason": "File not found"
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 1
+  }
+}
