@@ -710,7 +710,7 @@ export class LoginHandler {
         return;
       }
       
-      if (!email.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/)) {
+      if (!email.match(/^[^\\\\s@]+@[^\\\\s@]+\\\\.[^\\\\s@]+$/)) {
         showFormError('registerEmail', 'Please enter a valid email address');
         return;
       }

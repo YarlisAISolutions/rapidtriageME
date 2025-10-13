@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidTriageME - Test User Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .user-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .user-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .user-card.free { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .user-card.starter { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .user-card.pro { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .user-card.enterprise { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .user-card.org { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+
+        .user-card h3 {
+            color: white;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .user-card .email, .user-card .password {
+            background: rgba(255,255,255,0.9);
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        .copy-btn:hover {
+            background: #5a67d8;
+        }
+        .features {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+        .features h4 {
+            color: white;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .feature-list {
+            list-style: none;
+        }
+        .feature-list li {
+            color: white;
+            padding: 3px 0;
+            font-size: 0.9em;
+        }
+        .feature-list li:before {
+            content: "✓ ";
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .test-section {
+            background: #f7f7f7;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .test-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .test-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+        #output {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+        #output.show {
+            display: block;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+        .status-indicator.success { background: #48bb78; }
+        .status-indicator.error { background: #f56565; }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 RapidTriageME Test Users</h1>
+        <p class="subtitle">Click to copy credentials • Test authentication and permissions</p>
+
+        <div class="user-grid">
+            <!-- Free User -->
+            <div class="user-card free">
+                <h3>🆓 Free User</h3>
+                <div class="email">
+                    <span>free@rapidtriage.me</span>
+                    <button class="copy-btn" onclick="copyText('free@rapidtriage.me')">Copy</button>
+                </div>
+                <div class="password">
+                    <span>FreeUser123!</span>
+                    <button class="copy-btn" onclick="copyText('FreeUser123!')">Copy</button>
+                </div>
+                <div class="features">
+                    <h4>Features:</h4>
+                    <ul class="feature-list">
+                        <li>1 Project limit</li>
+                        <li>3 API keys</li>
+                        <li>Basic features</li>
+                        <li>100 sessions/month</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Starter User -->
+            <div class="user-card starter">
+                <h3>⭐ Starter User</h3>
+                <div class="email">
+                    <span>starter@rapidtriage.me</span>
+                    <button class="copy-btn" onclick="copyText('starter@rapidtriage.me')">Copy</button>
+                </div>
+                <div class="password">
+                    <span>StarterUser123!</span>
+                    <button class="copy-btn" onclick="copyText('StarterUser123!')">Copy</button>
+                </div>
+                <div class="features">
+                    <h4>Features:</h4>
+                    <ul class="feature-list">
+                        <li>5 Projects</li>
+                        <li>5 API keys</li>
+                        <li>Workspace access</li>
+                        <li>1000 sessions/month</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Pro User -->
+            <div class="user-card pro">
+                <h3>💎 Pro User</h3>
+                <div class="email">
+                    <span>pro@rapidtriage.me</span>
+                    <button class="copy-btn" onclick="copyText('pro@rapidtriage.me')">Copy</button>
+                </div>
+                <div class="password">
+                    <span>ProUser123!</span>
+                    <button class="copy-btn" onclick="copyText('ProUser123!')">Copy</button>
+                </div>
+                <div class="features">
+                    <h4>Features:</h4>
+                    <ul class="feature-list">
+                        <li>25 Projects</li>
+                        <li>10 API keys</li>
+                        <li>Analytics access</li>
+                        <li>Audit logs</li>
+                        <li>Team management</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Enterprise User -->
+            <div class="user-card enterprise">
+                <h3>🏢 Enterprise User</h3>
+                <div class="email">
+                    <span>enterprise@rapidtriage.me</span>
+                    <button class="copy-btn" onclick="copyText('enterprise@rapidtriage.me')">Copy</button>
+                </div>
+                <div class="password">
+                    <span>EnterpriseUser123!</span>
+                    <button class="copy-btn" onclick="copyText('EnterpriseUser123!')">Copy</button>
+                </div>
+                <div class="features">
+                    <h4>Features:</h4>
+                    <ul class="feature-list">
+                        <li>Unlimited projects</li>
+                        <li>Unlimited API keys</li>
+                        <li>SSO configuration</li>
+                        <li>Custom integrations</li>
+                        <li>Priority support</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Organization Owner -->
+            <div class="user-card org">
+                <h3>👑 Organization Owner</h3>
+                <div class="email">
+                    <span>owner@rapidtriage.me</span>
+                    <button class="copy-btn" onclick="copyText('owner@rapidtriage.me')">Copy</button>
+                </div>
+                <div class="password">
+                    <span>OrgOwner123!</span>
+                    <button class="copy-btn" onclick="copyText('OrgOwner123!')">Copy</button>
+                </div>
+                <div class="features">
+                    <h4>Permissions:</h4>
+                    <ul class="feature-list">
+                        <li>Full organization access</li>
+                        <li>Billing management</li>
+                        <li>User impersonation</li>
+                        <li>Delete organization</li>
+                        <li>Transfer ownership</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Developer -->
+            <div class="user-card org">
+                <h3>💻 Developer</h3>
+                <div class="email">
+                    <span>developer@rapidtriage.me</span>
+                    <button class="copy-btn" onclick="copyText('developer@rapidtriage.me')">Copy</button>
+                </div>
+                <div class="password">
+                    <span>OrgDev123!</span>
+                    <button class="copy-btn" onclick="copyText('OrgDev123!')">Copy</button>
+                </div>
+                <div class="features">
+                    <h4>Permissions:</h4>
+                    <ul class="feature-list">
+                        <li>Project management</li>
+                        <li>Debug tools access</li>
+                        <li>API key management</li>
+                        <li>Full CRUD on projects</li>
+                        <li>No billing access</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Test Authentication</h2>
+            <div style="text-align: center;">
+                <button class="test-btn" onclick="testLogin('free@rapidtriage.me', 'FreeUser123!')">Test Free User</button>
+                <button class="test-btn" onclick="testLogin('pro@rapidtriage.me', 'ProUser123!')">Test Pro User</button>
+                <button class="test-btn" onclick="testLogin('owner@rapidtriage.me', 'OrgOwner123!')">Test Owner</button>
+                <button class="test-btn" onclick="testAllUsers()">Test All Users</button>
+                <button class="test-btn" style="background: #48bb78;" onclick="window.open('https://rapidtriage.me/login', '_blank')">Go to Login Page</button>
+            </div>
+            <div id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show a temporary success message
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#48bb78';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 1000);
+            });
+        }
+
+        async function testLogin(email, password) {
+            const output = document.getElementById('output');
+            output.className = 'show';
+            output.textContent = `Testing login for ${email}...\n`;
+
+            try {
+                const response = await fetch('https://rapidtriage.me/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    output.textContent += `\n✅ Login successful!\n`;
+                    output.textContent += `📝 Token: ${data.token.substring(0, 50)}...\n`;
+                    output.textContent += `👤 User ID: ${data.user.id}\n`;
+                    output.textContent += `🎭 Role: ${data.user.role}\n`;
+                    output.textContent += `💎 Plan: ${data.user.subscription.plan}\n`;
+                    output.textContent += `🔑 Permissions: ${data.user.permissions?.length || 0} permissions\n`;
+
+                    // Test API access
+                    output.textContent += `\n📡 Testing API access...\n`;
+                    const apiResponse = await fetch('https://rapidtriage.me/api/projects', {
+                        headers: {
+                            'Authorization': `Bearer ${data.token}`
+                        }
+                    });
+                    output.textContent += `   Projects API: ${apiResponse.status} ${apiResponse.ok ? '✅' : '❌'}\n`;
+                } else {
+                    output.textContent += `\n❌ Login failed: ${data.error || 'Unknown error'}\n`;
+                }
+            } catch (error) {
+                output.textContent += `\n❌ Error: ${error.message}\n`;
+            }
+        }
+
+        async function testAllUsers() {
+            const users = [
+                { email: 'free@rapidtriage.me', password: 'FreeUser123!', name: 'Free User' },
+                { email: 'starter@rapidtriage.me', password: 'StarterUser123!', name: 'Starter User' },
+                { email: 'pro@rapidtriage.me', password: 'ProUser123!', name: 'Pro User' },
+                { email: 'enterprise@rapidtriage.me', password: 'EnterpriseUser123!', name: 'Enterprise User' },
+                { email: 'owner@rapidtriage.me', password: 'OrgOwner123!', name: 'Organization Owner' },
+                { email: 'developer@rapidtriage.me', password: 'OrgDev123!', name: 'Developer' }
+            ];
+
+            const output = document.getElementById('output');
+            output.className = 'show';
+            output.textContent = '🧪 Testing all users...\n\n';
+
+            for (const user of users) {
+                output.textContent += `Testing ${user.name}... `;
+                try {
+                    const response = await fetch('https://rapidtriage.me/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: user.email, password: user.password })
+                    });
+
+                    if (response.ok) {
+                        output.textContent += '✅ PASS\n';
+                    } else {
+                        output.textContent += '❌ FAIL\n';
+                    }
+                } catch (error) {
+                    output.textContent += '❌ ERROR\n';
+                }
+            }
+
+            output.textContent += '\n✨ All tests completed!\n';
+        }
+    </script>
+</body>
+</html>

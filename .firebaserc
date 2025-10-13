@@ -1,0 +1,30 @@
+{
+  "projects": {
+    "default": "rapidtriage-prod",
+    "staging": "rapidtriage-staging",
+    "development": "rapidtriage-dev"
+  },
+  "targets": {
+    "rapidtriage-prod": {
+      "hosting": {
+        "production": [
+          "rapidtriage-prod"
+        ]
+      }
+    },
+    "rapidtriage-staging": {
+      "hosting": {
+        "staging": [
+          "rapidtriage-staging"
+        ]
+      }
+    },
+    "rapidtriage-dev": {
+      "hosting": {
+        "development": [
+          "rapidtriage-dev"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,251 @@
+{
+  "users": {
+    "free_user": {
+      "email": "free@rapidtriage.me",
+      "password": "FreeUser123!",
+      "name": "Free User",
+      "role": "user",
+      "subscription": {
+        "plan": "free",
+        "limits": {
+          "projects": 1,
+          "sessions": 100,
+          "apiKeys": 3,
+          "requestsPerMinute": 100
+        }
+      },
+      "permissions": [
+        "profile:read",
+        "profile:update",
+        "project:read",
+        "project:create:limited",
+        "apikey:create:limited"
+      ]
+    },
+    "starter_user": {
+      "email": "starter@rapidtriage.me",
+      "password": "StarterUser123!",
+      "name": "Starter User",
+      "role": "user",
+      "subscription": {
+        "plan": "starter",
+        "limits": {
+          "projects": 5,
+          "sessions": 1000,
+          "apiKeys": 5,
+          "requestsPerMinute": 500
+        }
+      },
+      "permissions": [
+        "profile:read",
+        "profile:update",
+        "project:read",
+        "project:create",
+        "project:update",
+        "project:delete:own",
+        "apikey:create",
+        "apikey:revoke:own",
+        "workspace:create",
+        "workspace:read"
+      ]
+    },
+    "pro_user": {
+      "email": "pro@rapidtriage.me",
+      "password": "ProUser123!",
+      "name": "Pro User",
+      "role": "user",
+      "subscription": {
+        "plan": "pro",
+        "limits": {
+          "projects": 25,
+          "sessions": 10000,
+          "apiKeys": 10,
+          "requestsPerMinute": 1000
+        }
+      },
+      "permissions": [
+        "profile:read",
+        "profile:update",
+        "project:read",
+        "project:create",
+        "project:update",
+        "project:delete",
+        "apikey:create",
+        "apikey:revoke",
+        "workspace:create",
+        "workspace:read",
+        "workspace:update",
+        "workspace:invite",
+        "analytics:read",
+        "audit:read:own",
+        "billing:read"
+      ]
+    },
+    "enterprise_user": {
+      "email": "enterprise@rapidtriage.me",
+      "password": "EnterpriseUser123!",
+      "name": "Enterprise User",
+      "role": "user",
+      "subscription": {
+        "plan": "enterprise",
+        "limits": {
+          "projects": -1,
+          "sessions": -1,
+          "apiKeys": -1,
+          "requestsPerMinute": -1
+        }
+      },
+      "permissions": [
+        "profile:read",
+        "profile:update",
+        "project:read",
+        "project:create",
+        "project:update",
+        "project:delete",
+        "apikey:create",
+        "apikey:revoke",
+        "workspace:*",
+        "analytics:*",
+        "audit:read",
+        "billing:*",
+        "team:manage",
+        "sso:configure"
+      ]
+    },
+    "organization_owner": {
+      "email": "owner@rapidtriage.me",
+      "password": "OwnerUser123!",
+      "name": "Organization Owner",
+      "role": "owner",
+      "organizationRole": "owner",
+      "subscription": {
+        "plan": "enterprise"
+      },
+      "permissions": ["*"]
+    },
+    "organization_admin": {
+      "email": "admin@rapidtriage.me",
+      "password": "AdminUser123!",
+      "name": "Organization Admin",
+      "role": "admin",
+      "organizationRole": "admin",
+      "subscription": {
+        "plan": "enterprise"
+      },
+      "permissions": [
+        "organization:read",
+        "organization:update",
+        "team:*",
+        "member:*",
+        "project:*",
+        "workspace:*",
+        "billing:read",
+        "audit:*",
+        "settings:*"
+      ]
+    },
+    "organization_developer": {
+      "email": "developer@rapidtriage.me",
+      "password": "DevUser123!",
+      "name": "Organization Developer",
+      "role": "developer",
+      "organizationRole": "developer",
+      "subscription": {
+        "plan": "enterprise"
+      },
+      "permissions": [
+        "organization:read",
+        "project:*",
+        "workspace:read",
+        "workspace:update",
+        "apikey:*",
+        "debug:*",
+        "analytics:read"
+      ]
+    },
+    "organization_analyst": {
+      "email": "analyst@rapidtriage.me",
+      "password": "AnalystUser123!",
+      "name": "Organization Analyst",
+      "role": "analyst",
+      "organizationRole": "analyst",
+      "subscription": {
+        "plan": "enterprise"
+      },
+      "permissions": [
+        "organization:read",
+        "project:read",
+        "workspace:read",
+        "analytics:*",
+        "report:*",
+        "dashboard:*",
+        "metrics:read"
+      ]
+    },
+    "organization_viewer": {
+      "email": "viewer@rapidtriage.me",
+      "password": "ViewerUser123!",
+      "name": "Organization Viewer",
+      "role": "viewer",
+      "organizationRole": "viewer",
+      "subscription": {
+        "plan": "enterprise"
+      },
+      "permissions": [
+        "organization:read",
+        "project:read",
+        "workspace:read",
+        "analytics:read",
+        "report:read",
+        "dashboard:read"
+      ]
+    },
+    "organization_billing": {
+      "email": "billing@rapidtriage.me",
+      "password": "BillingUser123!",
+      "name": "Organization Billing",
+      "role": "billing",
+      "organizationRole": "billing",
+      "subscription": {
+        "plan": "enterprise"
+      },
+      "permissions": [
+        "organization:read",
+        "billing:*",
+        "invoice:*",
+        "subscription:*",
+        "payment:*",
+        "usage:read"
+      ]
+    },
+    "guest_user": {
+      "email": "guest@rapidtriage.me",
+      "password": "GuestUser123!",
+      "name": "Guest User",
+      "role": "guest",
+      "subscription": {
+        "plan": "free"
+      },
+      "permissions": [
+        "profile:read:limited",
+        "project:read:public",
+        "documentation:read"
+      ]
+    },
+    "api_service_account": {
+      "email": "api@rapidtriage.me",
+      "apiKey": "rtm_service_key_abc123xyz789",
+      "name": "API Service Account",
+      "role": "service",
+      "subscription": {
+        "plan": "enterprise"
+      },
+      "permissions": [
+        "api:*",
+        "debug:execute",
+        "metrics:write",
+        "logs:write"
+      ]
+    }
+  }
+}

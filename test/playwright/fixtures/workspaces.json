@@ -1,0 +1,139 @@
+{
+  "workspaces": [
+    {
+      "id": "ws_dev_team",
+      "name": "Development Team Workspace",
+      "description": "Main development workspace for engineering team",
+      "owner": "organization_owner",
+      "members": [
+        {
+          "userId": "organization_admin",
+          "role": "admin"
+        },
+        {
+          "userId": "organization_developer",
+          "role": "member"
+        },
+        {
+          "userId": "organization_analyst",
+          "role": "viewer"
+        }
+      ],
+      "projects": ["proj_api", "proj_frontend"],
+      "settings": {
+        "visibility": "private",
+        "allowGuestAccess": false,
+        "enforce2FA": true,
+        "apiKeysEnabled": true
+      },
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-12-20T15:30:00Z"
+    },
+    {
+      "id": "ws_analytics",
+      "name": "Analytics Workspace",
+      "description": "Data analytics and reporting workspace",
+      "owner": "organization_analyst",
+      "members": [
+        {
+          "userId": "organization_viewer",
+          "role": "viewer"
+        },
+        {
+          "userId": "pro_user",
+          "role": "member"
+        }
+      ],
+      "projects": ["proj_reports", "proj_dashboards"],
+      "settings": {
+        "visibility": "organization",
+        "allowGuestAccess": true,
+        "enforce2FA": false,
+        "apiKeysEnabled": false
+      },
+      "createdAt": "2024-03-10T09:00:00Z",
+      "updatedAt": "2024-12-18T14:20:00Z"
+    },
+    {
+      "id": "ws_testing",
+      "name": "QA Testing Workspace",
+      "description": "Quality assurance and testing workspace",
+      "owner": "enterprise_user",
+      "members": [
+        {
+          "userId": "organization_developer",
+          "role": "admin"
+        },
+        {
+          "userId": "starter_user",
+          "role": "member"
+        }
+      ],
+      "projects": ["proj_e2e", "proj_integration"],
+      "settings": {
+        "visibility": "private",
+        "allowGuestAccess": false,
+        "enforce2FA": true,
+        "apiKeysEnabled": true
+      },
+      "createdAt": "2024-02-20T11:00:00Z",
+      "updatedAt": "2024-12-15T16:45:00Z"
+    },
+    {
+      "id": "ws_public",
+      "name": "Public Demo Workspace",
+      "description": "Public workspace for demos and documentation",
+      "owner": "pro_user",
+      "members": [
+        {
+          "userId": "free_user",
+          "role": "viewer"
+        },
+        {
+          "userId": "guest_user",
+          "role": "viewer"
+        }
+      ],
+      "projects": ["proj_demo"],
+      "settings": {
+        "visibility": "public",
+        "allowGuestAccess": true,
+        "enforce2FA": false,
+        "apiKeysEnabled": false
+      },
+      "createdAt": "2024-04-01T08:00:00Z",
+      "updatedAt": "2024-12-10T12:00:00Z"
+    },
+    {
+      "id": "ws_enterprise",
+      "name": "Enterprise Operations",
+      "description": "Enterprise-wide operations and monitoring",
+      "owner": "enterprise_user",
+      "members": [
+        {
+          "userId": "organization_owner",
+          "role": "admin"
+        },
+        {
+          "userId": "organization_admin",
+          "role": "admin"
+        },
+        {
+          "userId": "organization_billing",
+          "role": "viewer"
+        }
+      ],
+      "projects": ["proj_monitoring", "proj_infrastructure"],
+      "settings": {
+        "visibility": "organization",
+        "allowGuestAccess": false,
+        "enforce2FA": true,
+        "apiKeysEnabled": true,
+        "ssoRequired": true,
+        "auditLogsEnabled": true
+      },
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-12-22T18:00:00Z"
+    }
+  ]
+}

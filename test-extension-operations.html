@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidTriage Extension Operations Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+        }
+
+        .test-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .operation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .operation-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .operation-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .operation-btn:active {
+            transform: translateY(0);
+        }
+
+        .operation-btn.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .operation-btn.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .status-bar {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status-bar h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-value {
+            font-weight: 600;
+        }
+
+        .status-value.connected {
+            color: #10b981;
+        }
+
+        .status-value.disconnected {
+            color: #ef4444;
+        }
+
+        .logs-container {
+            background: #1f2937;
+            color: #d1d5db;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #374151;
+        }
+
+        .log-entry.success {
+            color: #10b981;
+        }
+
+        .log-entry.error {
+            color: #ef4444;
+        }
+
+        .log-entry.info {
+            color: #60a5fa;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .result-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .result-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .search-section {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .search-btn {
+            background: white;
+            color: #f59e0b;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .search-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .instructions {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .instructions h3 {
+            color: #3b82f6;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #1e40af;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <span>🚀</span>
+            RapidTriage Extension Operations Test
+        </h1>
+        <p class="subtitle">Test all debugging operations for fixing issues</p>
+
+        <div class="instructions">
+            <h3>📋 Setup Instructions</h3>
+            <ol>
+                <li>Install RapidTriage Chrome Extension from /rapidtriage-extension</li>
+                <li>Ensure browser connector is running (port 3025)</li>
+                <li>Open this page in Chrome with the extension installed</li>
+                <li>Click operations below to test functionality</li>
+            </ol>
+        </div>
+
+        <div class="status-bar">
+            <h3>Connection Status</h3>
+            <div class="status-item">
+                <span>Extension:</span>
+                <span id="extension-status" class="status-value disconnected">Not Detected</span>
+            </div>
+            <div class="status-item">
+                <span>Local Connector:</span>
+                <span id="local-status" class="status-value disconnected">Disconnected</span>
+            </div>
+            <div class="status-item">
+                <span>Remote Server:</span>
+                <span id="remote-status" class="status-value disconnected">Disconnected</span>
+            </div>
+            <div class="status-item">
+                <span>Active Connection:</span>
+                <span id="active-connection" class="status-value">None</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔍 Google Search Test - Crypto Market 2025</h2>
+            <div class="search-section">
+                <input type="text" id="search-query" class="search-input" value="crypto market in 2025" placeholder="Enter search query">
+                <button class="search-btn" onclick="performGoogleSearch()">🔍 Search on Google</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📸 Data Capture Operations</h2>
+            <div class="operation-grid">
+                <button class="operation-btn" onclick="testOperation('screenshot')">📸 Take Screenshot</button>
+                <button class="operation-btn" onclick="testOperation('consoleLogs')">📋 Get Console Logs</button>
+                <button class="operation-btn" onclick="testOperation('consoleErrors')">🔴 Get Console Errors</button>
+                <button class="operation-btn" onclick="testOperation('networkLogs')">🌐 Get Network Logs</button>
+                <button class="operation-btn" onclick="testOperation('networkErrors')">⚠️ Get Network Errors</button>
+                <button class="operation-btn" onclick="testOperation('pageInfo')">📄 Get Page Info</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Lighthouse Audits</h2>
+            <div class="operation-grid">
+                <button class="operation-btn" onclick="testLighthouse('performance')">⚡ Performance Audit</button>
+                <button class="operation-btn" onclick="testLighthouse('accessibility')">♿ Accessibility Audit</button>
+                <button class="operation-btn" onclick="testLighthouse('seo')">🔍 SEO Audit</button>
+                <button class="operation-btn" onclick="testLighthouse('best-practices')">📚 Best Practices Audit</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🛠️ Control Operations</h2>
+            <div class="operation-grid">
+                <button class="operation-btn" onclick="testOperation('navigate')">🌐 Navigate to URL</button>
+                <button class="operation-btn" onclick="testOperation('executeJS')">💻 Execute JavaScript</button>
+                <button class="operation-btn" onclick="testOperation('inspectElement')">🔍 Inspect Element</button>
+                <button class="operation-btn" onclick="testOperation('triageReport')">📄 Generate Report</button>
+                <button class="operation-btn" onclick="testOperation('clear')">🧹 Clear Data</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Test Results</h2>
+            <div class="results-grid" id="results-grid">
+                <div class="result-card">
+                    <h4>Console Logs</h4>
+                    <div class="value" id="console-count">0</div>
+                </div>
+                <div class="result-card">
+                    <h4>Console Errors</h4>
+                    <div class="value" id="error-count">0</div>
+                </div>
+                <div class="result-card">
+                    <h4>Network Requests</h4>
+                    <div class="value" id="network-count">0</div>
+                </div>
+                <div class="result-card">
+                    <h4>Network Errors</h4>
+                    <div class="value" id="network-error-count">0</div>
+                </div>
+                <div class="result-card">
+                    <h4>Performance Score</h4>
+                    <div class="value" id="performance-score">-</div>
+                </div>
+                <div class="result-card">
+                    <h4>Accessibility Score</h4>
+                    <div class="value" id="accessibility-score">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Operation Logs</h2>
+            <div class="logs-container" id="logs-container">
+                <div class="log-entry info">Waiting for operations...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load extension scripts with proper paths -->
+    <script>
+        // Create fallback config if not loaded from extension
+        if (typeof RAPIDTRIAGE_CONFIG === 'undefined') {
+            window.RAPIDTRIAGE_CONFIG = {
+                LOCAL_API: 'http://localhost:3025',
+                REMOTE_API: 'https://rapidtriage.me',
+                DEFAULT_TOKEN: 'KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8',
+                CONNECTION_TIMEOUT: 3000,
+                REQUEST_TIMEOUT: 30000
+            };
+        }
+    </script>
+    <script src="rapidtriage-extension/operations.js"></script>
+    <script>
+        let operations = null;
+        let logContainer = document.getElementById('logs-container');
+
+        // Initialize on page load
+        window.addEventListener('load', async () => {
+            addLog('Initializing RapidTriage Operations...', 'info');
+
+            // Create operations instance
+            operations = new RapidTriageOperations();
+
+            // Check extension
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+                document.getElementById('extension-status').textContent = 'Installed';
+                document.getElementById('extension-status').className = 'status-value connected';
+                addLog('✅ Chrome extension detected', 'success');
+            } else {
+                addLog('❌ Chrome extension not detected', 'error');
+            }
+
+            // Initialize and test connections
+            const result = await operations.initialize();
+
+            if (result.success) {
+                if (result.type === 'local') {
+                    document.getElementById('local-status').textContent = 'Connected';
+                    document.getElementById('local-status').className = 'status-value connected';
+                    document.getElementById('active-connection').textContent = 'Local (Port 3025)';
+                } else {
+                    document.getElementById('remote-status').textContent = 'Connected';
+                    document.getElementById('remote-status').className = 'status-value connected';
+                    document.getElementById('active-connection').textContent = 'Remote (rapidtriage.me)';
+                }
+                document.getElementById('active-connection').className = 'status-value connected';
+                addLog(`✅ Connected to ${result.type} server`, 'success');
+            } else {
+                addLog(`❌ Connection failed: ${result.error}`, 'error');
+            }
+        });
+
+        // Add log entry
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Test operation
+        async function testOperation(operation) {
+            if (!operations) {
+                addLog('❌ Operations not initialized', 'error');
+                return;
+            }
+
+            try {
+                addLog(`Testing ${operation}...`, 'info');
+
+                switch(operation) {
+                    case 'screenshot':
+                        const screenshot = await operations.captureScreenshot();
+                        addLog('✅ Screenshot captured', 'success');
+                        break;
+
+                    case 'consoleLogs':
+                        const logs = await operations.getConsoleLogs();
+                        document.getElementById('console-count').textContent = logs.length;
+                        addLog(`✅ Retrieved ${logs.length} console logs`, 'success');
+                        break;
+
+                    case 'consoleErrors':
+                        const errors = await operations.getConsoleErrors();
+                        document.getElementById('error-count').textContent = errors.length;
+                        addLog(`✅ Retrieved ${errors.length} console errors`, 'success');
+                        break;
+
+                    case 'networkLogs':
+                        const networkLogs = await operations.getNetworkLogs();
+                        document.getElementById('network-count').textContent = networkLogs.length;
+                        addLog(`✅ Retrieved ${networkLogs.length} network requests`, 'success');
+                        break;
+
+                    case 'networkErrors':
+                        const networkErrors = await operations.getNetworkErrors();
+                        document.getElementById('network-error-count').textContent = networkErrors.length;
+                        addLog(`✅ Retrieved ${networkErrors.length} network errors`, 'success');
+                        break;
+
+                    case 'pageInfo':
+                        const info = await operations.makeRequest(
+                            operations.connectionType === 'local'
+                                ? 'http://localhost:3025/page-info'
+                                : 'https://rapidtriage.me/api/page-info',
+                            { method: 'GET' }
+                        );
+                        addLog(`✅ Page: ${info.title || 'Unknown'}`, 'success');
+                        break;
+
+                    case 'navigate':
+                        const url = prompt('Enter URL to navigate to:', 'https://www.google.com');
+                        if (url) {
+                            await operations.navigate(url);
+                            addLog(`✅ Navigated to ${url}`, 'success');
+                        }
+                        break;
+
+                    case 'executeJS':
+                        const script = prompt('Enter JavaScript to execute:', 'document.title');
+                        if (script) {
+                            const result = await operations.executeJS(script);
+                            addLog(`✅ JavaScript executed: ${JSON.stringify(result)}`, 'success');
+                        }
+                        break;
+
+                    case 'inspectElement':
+                        const selector = prompt('Enter CSS selector:', 'body');
+                        if (selector) {
+                            const element = await operations.inspectElement(selector);
+                            addLog(`✅ Element inspected: ${selector}`, 'success');
+                        }
+                        break;
+
+                    case 'triageReport':
+                        const report = await operations.generateTriageReport();
+                        addLog(`✅ Report generated with ${Object.keys(report).length} sections`, 'success');
+                        console.log('Triage Report:', report);
+                        break;
+
+                    case 'clear':
+                        await operations.clearData();
+                        addLog('✅ Data cleared', 'success');
+                        // Reset counters
+                        document.getElementById('console-count').textContent = '0';
+                        document.getElementById('error-count').textContent = '0';
+                        document.getElementById('network-count').textContent = '0';
+                        document.getElementById('network-error-count').textContent = '0';
+                        break;
+                }
+            } catch (error) {
+                addLog(`❌ ${operation} failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Test Lighthouse audit
+        async function testLighthouse(type) {
+            if (!operations) {
+                addLog('❌ Operations not initialized', 'error');
+                return;
+            }
+
+            try {
+                addLog(`Running ${type} audit...`, 'info');
+                const result = await operations.runLighthouseAudit(type);
+
+                if (result.score !== undefined) {
+                    const score = Math.round(result.score * 100);
+                    addLog(`✅ ${type} audit score: ${score}/100`, 'success');
+
+                    // Update display
+                    if (type === 'performance') {
+                        document.getElementById('performance-score').textContent = score;
+                    } else if (type === 'accessibility') {
+                        document.getElementById('accessibility-score').textContent = score;
+                    }
+                }
+            } catch (error) {
+                addLog(`❌ ${type} audit failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Perform Google search
+        async function performGoogleSearch() {
+            if (!operations) {
+                addLog('❌ Operations not initialized', 'error');
+                return;
+            }
+
+            const query = document.getElementById('search-query').value;
+            if (!query) {
+                addLog('❌ Please enter a search query', 'error');
+                return;
+            }
+
+            try {
+                addLog(`🔍 Searching Google for "${query}"...`, 'info');
+
+                // Navigate to Google
+                await operations.navigate('https://www.google.com');
+                addLog('✅ Navigated to Google', 'success');
+
+                // Wait for page load
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Execute search
+                const searchScript = `
+                    const searchBox = document.querySelector('input[name="q"], textarea[name="q"]');
+                    if (searchBox) {
+                        searchBox.value = "${query}";
+                        searchBox.dispatchEvent(new Event('input', { bubbles: true }));
+                        const form = searchBox.closest('form');
+                        if (form) {
+                            form.submit();
+                            return 'Search submitted';
+                        }
+                        return 'Search box filled';
+                    }
+                    return 'Search box not found';
+                `;
+
+                const result = await operations.executeJS(searchScript);
+                addLog(`✅ Search executed: ${result}`, 'success');
+
+                // Wait for results
+                await new Promise(resolve => setTimeout(resolve, 3000));
+
+                // Capture data
+                addLog('📸 Capturing search results data...', 'info');
+
+                const [screenshot, logs, errors, network] = await Promise.all([
+                    operations.captureScreenshot(),
+                    operations.getConsoleLogs(),
+                    operations.getConsoleErrors(),
+                    operations.getNetworkLogs()
+                ]);
+
+                // Update counters
+                document.getElementById('console-count').textContent = logs.length;
+                document.getElementById('error-count').textContent = errors.length;
+                document.getElementById('network-count').textContent = network.length;
+
+                addLog(`✅ Search complete! Captured ${logs.length} logs, ${errors.length} errors, ${network.length} requests`, 'success');
+
+            } catch (error) {
+                addLog(`❌ Search failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Generate test console logs
+        console.log('RapidTriage test page loaded');
+        console.info('This is an info message');
+        console.warn('This is a warning message');
+        console.error('This is an error message for testing');
+    </script>
+</body>
+</html>

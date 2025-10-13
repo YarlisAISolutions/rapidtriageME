@@ -46,14 +46,17 @@ export class HealthCheck {
       if (!this.env.SESSIONS) {
         return 'not_configured';
       }
-      
-      // Test KV storage availability
-      const testKey = 'health_check_test';
-      await this.env.SESSIONS.put(testKey, 'ok', { expirationTtl: 60 });
+
+      // Only perform a read operation to check KV availability
+      // This avoids exhausting the daily write limit
+      const testKey = 'health_check_status';
       const value = await this.env.SESSIONS.get(testKey);
-      await this.env.SESSIONS.delete(testKey);
-      return value === 'ok' ? 'ok' : 'error';
+
+      // KV is available if we can perform a read without errors
+      // The actual value doesn't matter for health check
+      return 'ok';
     } catch (error) {
+      // If read fails, KV might be unavailable
       return 'error';
     }
   }

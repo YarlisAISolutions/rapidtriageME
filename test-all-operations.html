@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidTriage - Automated Test Runner</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-runner {
+            margin: 30px 0;
+        }
+
+        .run-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .run-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .run-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+        }
+
+        .test-progress {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .test-log {
+            background: #1f2937;
+            color: #d1d5db;
+            padding: 20px;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #374151;
+        }
+
+        .log-success { color: #10b981; }
+        .log-error { color: #ef4444; }
+        .log-warning { color: #f59e0b; }
+        .log-info { color: #60a5fa; }
+
+        .results {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-card h3 {
+            color: #667eea;
+            margin: 0 0 10px 0;
+        }
+
+        .result-value {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .result-value.success { color: #10b981; }
+        .result-value.error { color: #ef4444; }
+
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <span>🤖</span>
+            RapidTriage Automated Test Runner
+        </h1>
+        <p>This page will automatically test all RapidTriage extension operations</p>
+
+        <div class="test-runner">
+            <button class="run-btn" onclick="runAllTests()" id="runBtn">
+                🚀 Run All Tests
+            </button>
+        </div>
+
+        <div class="status" id="status">
+            <strong>Status:</strong> <span id="statusText">Ready to test</span>
+        </div>
+
+        <div class="test-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+            </div>
+        </div>
+
+        <div class="test-log" id="testLog">
+            <div class="log-entry log-info">Test runner ready. Click "Run All Tests" to begin.</div>
+        </div>
+
+        <div class="results" id="results" style="display: none;">
+            <div class="result-card">
+                <h3>Tests Passed</h3>
+                <div class="result-value success" id="passedCount">0</div>
+            </div>
+            <div class="result-card">
+                <h3>Tests Failed</h3>
+                <div class="result-value error" id="failedCount">0</div>
+            </div>
+            <div class="result-card">
+                <h3>Success Rate</h3>
+                <div class="result-value" id="successRate">0%</div>
+            </div>
+            <div class="result-card">
+                <h3>Total Tests</h3>
+                <div class="result-value" id="totalTests">0</div>
+            </div>
+        </div>
+
+        <iframe id="testFrame" src="test-extension-operations.html" style="display: none;"></iframe>
+    </div>
+
+    <script>
+        const testLog = document.getElementById('testLog');
+        const statusText = document.getElementById('statusText');
+        const progressBar = document.getElementById('progressBar');
+        const runBtn = document.getElementById('runBtn');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            testLog.appendChild(entry);
+            testLog.scrollTop = testLog.scrollHeight;
+        }
+
+        async function runAllTests() {
+            log('Starting automated tests...', 'info');
+            runBtn.disabled = true;
+            statusText.textContent = 'Running tests...';
+
+            const testFrame = document.getElementById('testFrame');
+            testFrame.style.display = 'block';
+
+            // Wait for iframe to load
+            await new Promise(resolve => {
+                if (testFrame.contentWindow.document.readyState === 'complete') {
+                    resolve();
+                } else {
+                    testFrame.onload = resolve;
+                }
+            });
+
+            const testWindow = testFrame.contentWindow;
+            const testDoc = testWindow.document;
+
+            // Total tests to run
+            const tests = [
+                // Data Capture Operations
+                { name: 'Take Screenshot', selector: 'button', text: 'Take Screenshot' },
+                { name: 'Get Console Logs', selector: 'button', text: 'Get Console Logs' },
+                { name: 'Get Console Errors', selector: 'button', text: 'Get Console Errors' },
+                { name: 'Get Network Logs', selector: 'button', text: 'Get Network Logs' },
+                { name: 'Get Network Errors', selector: 'button', text: 'Get Network Errors' },
+                { name: 'Get Page Info', selector: 'button', text: 'Get Page Info' },
+
+                // Lighthouse Audits
+                { name: 'Performance Audit', selector: 'button', text: 'Performance Audit' },
+                { name: 'Accessibility Audit', selector: 'button', text: 'Accessibility Audit' },
+                { name: 'SEO Audit', selector: 'button', text: 'SEO Audit' },
+                { name: 'Best Practices Audit', selector: 'button', text: 'Best Practices Audit' },
+
+                // Control Operations
+                { name: 'Generate Report', selector: 'button', text: 'Generate Report' },
+                { name: 'Clear Data', selector: 'button', text: 'Clear Data' }
+            ];
+
+            // Special test for Google Search
+            const googleSearchTest = {
+                name: 'Google Search - Crypto Market 2025',
+                action: async () => {
+                    const searchInput = testDoc.getElementById('search-query');
+                    const searchBtn = testDoc.querySelector('.search-btn');
+
+                    if (searchInput && searchBtn) {
+                        searchInput.value = 'crypto market in 2025';
+                        searchBtn.click();
+                        await wait(5000);
+                        return true;
+                    }
+                    return false;
+                }
+            };
+
+            let passed = 0;
+            let failed = 0;
+            const totalTests = tests.length + 1; // +1 for Google search
+
+            // Helper function to wait
+            const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+            // Run Google search test first
+            log(`Testing: ${googleSearchTest.name}`, 'info');
+            try {
+                const result = await googleSearchTest.action();
+                if (result) {
+                    log(`✅ ${googleSearchTest.name} - PASSED`, 'success');
+                    passed++;
+                } else {
+                    log(`❌ ${googleSearchTest.name} - FAILED`, 'error');
+                    failed++;
+                }
+            } catch (error) {
+                log(`❌ ${googleSearchTest.name} - ERROR: ${error.message}`, 'error');
+                failed++;
+            }
+
+            // Update progress
+            let completed = 1;
+            progressBar.style.width = `${(completed / totalTests) * 100}%`;
+            progressBar.textContent = `${Math.round((completed / totalTests) * 100)}%`;
+
+            // Run each test
+            for (const test of tests) {
+                log(`Testing: ${test.name}`, 'info');
+
+                try {
+                    // Find button by text
+                    const buttons = Array.from(testDoc.querySelectorAll(test.selector));
+                    const button = buttons.find(btn => btn.textContent.includes(test.text));
+
+                    if (button) {
+                        // Special handling for prompt-based operations
+                        if (test.text === 'Navigate to URL') {
+                            testWindow.prompt = () => 'https://www.example.com';
+                        } else if (test.text === 'Execute JavaScript') {
+                            testWindow.prompt = () => 'document.title';
+                        } else if (test.text === 'Inspect Element') {
+                            testWindow.prompt = () => 'body';
+                        }
+
+                        // Click the button
+                        button.click();
+
+                        // Wait for operation to complete
+                        await wait(2000);
+
+                        // Check the logs for success
+                        const logsContainer = testDoc.getElementById('logs-container');
+                        const logs = logsContainer ? logsContainer.textContent : '';
+
+                        if (logs.includes('✅')) {
+                            log(`✅ ${test.name} - PASSED`, 'success');
+                            passed++;
+                        } else if (logs.includes('❌')) {
+                            log(`❌ ${test.name} - FAILED`, 'error');
+                            failed++;
+                        } else {
+                            log(`⚠️ ${test.name} - UNCERTAIN`, 'warning');
+                            passed++;
+                        }
+                    } else {
+                        log(`❌ ${test.name} - Button not found`, 'error');
+                        failed++;
+                    }
+                } catch (error) {
+                    log(`❌ ${test.name} - ERROR: ${error.message}`, 'error');
+                    failed++;
+                }
+
+                // Update progress
+                completed++;
+                progressBar.style.width = `${(completed / totalTests) * 100}%`;
+                progressBar.textContent = `${Math.round((completed / totalTests) * 100)}%`;
+            }
+
+            // Show results
+            document.getElementById('results').style.display = 'grid';
+            document.getElementById('passedCount').textContent = passed;
+            document.getElementById('failedCount').textContent = failed;
+            document.getElementById('successRate').textContent = `${Math.round((passed / totalTests) * 100)}%`;
+            document.getElementById('totalTests').textContent = totalTests;
+
+            const successRate = Math.round((passed / totalTests) * 100);
+            document.getElementById('successRate').className = successRate >= 70 ? 'result-value success' : 'result-value error';
+
+            statusText.textContent = `Tests complete: ${passed} passed, ${failed} failed`;
+            log(`\n📊 Test Summary: ${passed} passed, ${failed} failed (${successRate}% success rate)`, 'info');
+
+            runBtn.disabled = false;
+            runBtn.textContent = '🔄 Run Tests Again';
+        }
+
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            log('Test runner loaded. Ready to run tests.', 'info');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidTriage Direct Connection Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { color: #333; }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .connected { background: #d1fae5; color: #065f46; }
+        .disconnected { background: #fee2e2; color: #991b1b; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        button:hover { background: #764ba2; }
+        .log {
+            background: #1f2937;
+            color: #d1d5db;
+            padding: 10px;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 20px 0;
+        }
+        .log-entry { padding: 2px 0; }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .info { color: #60a5fa; }
+    </style>
+</head>
+<body>
+    <h1>🔧 RapidTriage Direct Connection Test</h1>
+
+    <div id="status" class="status disconnected">
+        Status: Checking connections...
+    </div>
+
+    <div>
+        <button onclick="testLocalConnection()">Test Local Connection</button>
+        <button onclick="testRemoteConnection()">Test Remote Connection</button>
+        <button onclick="testGoogleSearch()">Test Google Search</button>
+        <button onclick="captureScreenshot()">Capture Screenshot</button>
+        <button onclick="getConsoleLogs()">Get Console Logs</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div class="log" id="log"></div>
+
+    <script>
+        const log = document.getElementById('log');
+        const status = document.getElementById('status');
+        let currentConnection = null;
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function testLocalConnection() {
+            addLog('Testing local connection to localhost:3025...', 'info');
+            try {
+                const response = await fetch('http://localhost:3025/health');
+                const data = await response.json();
+
+                if (data.status === 'healthy') {
+                    addLog('✅ Local connection successful!', 'success');
+                    addLog(`Service: ${data.service}`, 'info');
+                    addLog(`Version: ${data.version}`, 'info');
+                    addLog(`Browser: ${data.browser}`, 'info');
+
+                    status.className = 'status connected';
+                    status.textContent = 'Status: Connected to Local Server';
+                    currentConnection = 'local';
+                    return true;
+                }
+            } catch (error) {
+                addLog(`❌ Local connection failed: ${error.message}`, 'error');
+                status.className = 'status disconnected';
+                status.textContent = 'Status: Local connection failed';
+                return false;
+            }
+        }
+
+        async function testRemoteConnection() {
+            addLog('Testing remote connection to rapidtriage.me...', 'info');
+            try {
+                const response = await fetch('https://rapidtriage.me/health');
+                const data = await response.json();
+
+                if (data.status === 'healthy') {
+                    addLog('✅ Remote connection successful!', 'success');
+                    addLog(`Service: ${data.service}`, 'info');
+                    addLog(`Version: ${data.version}`, 'info');
+
+                    status.className = 'status connected';
+                    status.textContent = 'Status: Connected to Remote Server';
+                    currentConnection = 'remote';
+                    return true;
+                }
+            } catch (error) {
+                addLog(`❌ Remote connection failed: ${error.message}`, 'error');
+                status.className = 'status disconnected';
+                status.textContent = 'Status: Remote connection failed';
+                return false;
+            }
+        }
+
+        async function testGoogleSearch() {
+            addLog('Starting Google search test for "crypto market in 2025"...', 'info');
+
+            if (!currentConnection) {
+                // Try to establish connection first
+                const localOk = await testLocalConnection();
+                if (!localOk) {
+                    await testRemoteConnection();
+                }
+            }
+
+            if (!currentConnection) {
+                addLog('❌ No connection available', 'error');
+                return;
+            }
+
+            const baseUrl = currentConnection === 'local'
+                ? 'http://localhost:3025'
+                : 'https://rapidtriage.me';
+
+            try {
+                // Navigate to Google
+                addLog('Navigating to Google...', 'info');
+                const navResponse = await fetch(`${baseUrl}/navigate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: 'https://www.google.com' })
+                });
+
+                if (!navResponse.ok) {
+                    throw new Error(`Navigation failed: ${navResponse.status}`);
+                }
+
+                addLog('✅ Navigated to Google', 'success');
+
+                // Wait for page load
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Execute search
+                addLog('Executing search for "crypto market in 2025"...', 'info');
+                const searchScript = `
+                    const searchBox = document.querySelector('input[name="q"], textarea[name="q"]');
+                    if (searchBox) {
+                        searchBox.value = "crypto market in 2025";
+                        searchBox.dispatchEvent(new Event('input', { bubbles: true }));
+                        const form = searchBox.closest('form');
+                        if (form) {
+                            form.submit();
+                            return 'Search submitted';
+                        }
+                        return 'Search box filled';
+                    }
+                    return 'Search box not found';
+                `;
+
+                const execResponse = await fetch(`${baseUrl}/execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ script: searchScript })
+                });
+
+                const execResult = await execResponse.json();
+                addLog(`✅ Search executed: ${JSON.stringify(execResult)}`, 'success');
+
+            } catch (error) {
+                addLog(`❌ Google search test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function captureScreenshot() {
+            addLog('Capturing screenshot...', 'info');
+
+            if (!currentConnection) {
+                addLog('❌ No connection available', 'error');
+                return;
+            }
+
+            const baseUrl = currentConnection === 'local'
+                ? 'http://localhost:3025'
+                : 'https://rapidtriage.me';
+
+            try {
+                const response = await fetch(`${baseUrl}/screenshot`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullPage: false })
+                });
+
+                const result = await response.json();
+
+                if (result.screenshot || result.path) {
+                    addLog('✅ Screenshot captured successfully', 'success');
+                    if (result.path) {
+                        addLog(`Path: ${result.path}`, 'info');
+                    }
+                } else {
+                    addLog('❌ Screenshot failed', 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Screenshot error: ${error.message}`, 'error');
+            }
+        }
+
+        async function getConsoleLogs() {
+            addLog('Getting console logs...', 'info');
+
+            if (!currentConnection) {
+                addLog('❌ No connection available', 'error');
+                return;
+            }
+
+            const baseUrl = currentConnection === 'local'
+                ? 'http://localhost:3025'
+                : 'https://rapidtriage.me';
+
+            try {
+                const response = await fetch(`${baseUrl}/console`);
+                const result = await response.json();
+
+                if (result.logs) {
+                    addLog(`✅ Retrieved ${result.logs.length} console logs`, 'success');
+                    result.logs.slice(-5).forEach(logEntry => {
+                        addLog(`  [${logEntry.type}] ${logEntry.text}`, 'info');
+                    });
+                } else {
+                    addLog('❌ No logs retrieved', 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Console logs error: ${error.message}`, 'error');
+            }
+        }
+
+        function clearLog() {
+            log.innerHTML = '';
+            addLog('Log cleared', 'info');
+        }
+
+        // Test connections on load
+        window.addEventListener('load', async () => {
+            addLog('Page loaded. Testing connections...', 'info');
+
+            // Generate some test console logs
+            console.log('Test log message');
+            console.error('Test error message');
+            console.warn('Test warning message');
+
+            // Test local first
+            const localOk = await testLocalConnection();
+
+            // If local fails, try remote
+            if (!localOk) {
+                await testRemoteConnection();
+            }
+        });
+    </script>
+</body>
+</html>

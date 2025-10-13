@@ -1,0 +1,211 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        request.auth.token.role == 'admin' ||
+        request.auth.token.role == 'owner';
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && request.auth.token.role == role;
+    }
+
+    function belongsToOrganization(orgId) {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == orgId;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
+
+      // User subcollections
+      match /apiKeys/{keyId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /sessions/{sessionId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /metrics/{metricId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if false; // System only
+      }
+
+      match /security/{document} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Organizations collection
+    match /organizations/{orgId} {
+      allow read: if belongsToOrganization(orgId) || isAdmin();
+      allow create: if hasRole('owner') || isAdmin();
+      allow update: if belongsToOrganization(orgId) &&
+        (hasRole('owner') || hasRole('admin'));
+      allow delete: if hasRole('owner');
+
+      // Organization subcollections
+      match /members/{memberId} {
+        allow read: if belongsToOrganization(orgId);
+        allow write: if belongsToOrganization(orgId) &&
+          (hasRole('owner') || hasRole('admin'));
+      }
+
+      match /workspaces/{workspaceId} {
+        allow read: if belongsToOrganization(orgId);
+        allow create: if belongsToOrganization(orgId) &&
+          (hasRole('owner') || hasRole('admin') || hasRole('developer'));
+        allow update: if belongsToOrganization(orgId) &&
+          (hasRole('owner') || hasRole('admin'));
+        allow delete: if belongsToOrganization(orgId) &&
+          (hasRole('owner') || hasRole('admin'));
+      }
+
+      match /billing/{document} {
+        allow read: if belongsToOrganization(orgId) &&
+          (hasRole('owner') || hasRole('billing'));
+        allow write: if hasRole('owner') || hasRole('billing');
+      }
+    }
+
+    // Projects collection
+    match /projects/{projectId} {
+      allow read: if isAuthenticated() && (
+        resource.data.owner == request.auth.uid ||
+        request.auth.uid in resource.data.members ||
+        belongsToOrganization(resource.data.organizationId)
+      );
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        resource.data.owner == request.auth.uid ||
+        hasRole('admin')
+      );
+      allow delete: if isAuthenticated() &&
+        resource.data.owner == request.auth.uid;
+
+      // Project subcollections
+      match /sessions/{sessionId} {
+        allow read, write: if isAuthenticated() && (
+          get(/databases/$(database)/documents/projects/$(projectId)).data.owner == request.auth.uid ||
+          request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.members
+        );
+      }
+
+      match /screenshots/{screenshotId} {
+        allow read: if isAuthenticated() && (
+          get(/databases/$(database)/documents/projects/$(projectId)).data.owner == request.auth.uid ||
+          request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.members
+        );
+        allow create: if isAuthenticated();
+        allow delete: if isAuthenticated() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.owner == request.auth.uid;
+      }
+
+      match /reports/{reportId} {
+        allow read: if isAuthenticated() && (
+          get(/databases/$(database)/documents/projects/$(projectId)).data.owner == request.auth.uid ||
+          request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.members
+        );
+        allow create: if isAuthenticated();
+        allow update: if false; // Reports are immutable
+        allow delete: if isAuthenticated() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.owner == request.auth.uid;
+      }
+    }
+
+    // Real-time sessions collection
+    match /sessions/{sessionId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        request.auth.uid in resource.data.viewers
+      );
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+
+      // Session subcollections
+      match /browserData/{document} {
+        allow read, write: if isAuthenticated() && (
+          get(/databases/$(database)/documents/sessions/$(sessionId)).data.userId == request.auth.uid
+        );
+      }
+
+      match /consoleLogs/{logId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() &&
+          get(/databases/$(database)/documents/sessions/$(sessionId)).data.userId == request.auth.uid;
+      }
+
+      match /networkLogs/{logId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() &&
+          get(/databases/$(database)/documents/sessions/$(sessionId)).data.userId == request.auth.uid;
+      }
+
+      match /events/{eventId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() &&
+          get(/databases/$(database)/documents/sessions/$(sessionId)).data.userId == request.auth.uid;
+      }
+    }
+
+    // API Keys collection (global)
+    match /apiKeys/{keyId} {
+      allow read: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+
+      // API Key usage tracking
+      match /usage/{usageId} {
+        allow read: if isAuthenticated() &&
+          get(/databases/$(database)/documents/apiKeys/$(keyId)).data.userId == request.auth.uid;
+        allow write: if false; // System only
+      }
+    }
+
+    // Analytics collection (read-only for users)
+    match /analytics/{document} {
+      allow read: if isAdmin();
+      allow write: if false; // System only
+    }
+
+    // System configuration (admin only)
+    match /config/{document} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Feature flags
+    match /featureFlags/{flag} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Audit logs (read-only)
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // System only
+    }
+  }
+}

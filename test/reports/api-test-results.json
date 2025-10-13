@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-08-15T02:29:44.112Z",
+  "timestamp": "2025-10-10T12:27:37.432Z",
   "environment": "development",
   "summary": {
     "total": 13,
-    "passed": 13,
-    "failed": 0,
-    "successRate": "100.0"
+    "passed": 4,
+    "failed": 9,
+    "successRate": "30.8"
   },
   "results": [
     {
@@ -18,39 +18,48 @@
     },
     {
       "name": "Console Logs Endpoint",
-      "status": "passed"
+      "status": "failed",
+      "error": "Console logs failed: 401"
     },
     {
       "name": "Console Errors Endpoint",
-      "status": "passed"
+      "status": "failed",
+      "error": "Console errors failed: 401"
     },
     {
       "name": "Network Logs Endpoint",
-      "status": "passed"
+      "status": "failed",
+      "error": "Network logs failed: 401"
     },
     {
       "name": "Network Errors Endpoint",
-      "status": "passed"
+      "status": "failed",
+      "error": "Network errors failed: 401"
     },
     {
       "name": "Lighthouse Audit",
-      "status": "passed"
+      "status": "failed",
+      "error": "Lighthouse audit failed: 401"
     },
     {
       "name": "Lighthouse accessibility Audit",
-      "status": "passed"
+      "status": "failed",
+      "error": "accessibility audit failed: 401"
     },
     {
       "name": "Lighthouse performance Audit",
-      "status": "passed"
+      "status": "failed",
+      "error": "performance audit failed: 401"
     },
     {
       "name": "Lighthouse seo Audit",
-      "status": "passed"
+      "status": "failed",
+      "error": "seo audit failed: 401"
     },
     {
       "name": "Lighthouse best-practices Audit",
-      "status": "passed"
+      "status": "failed",
+      "error": "best-practices audit failed: 401"
     },
     {
       "name": "Authentication (Invalid Token)",

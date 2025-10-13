@@ -1,0 +1,318 @@
+{
+  "projects": [
+    {
+      "id": "proj_api",
+      "name": "API Gateway",
+      "description": "Main API gateway service",
+      "workspaceId": "ws_dev_team",
+      "owner": "organization_developer",
+      "type": "backend",
+      "status": "active",
+      "settings": {
+        "debugMode": true,
+        "loggingLevel": "debug",
+        "rateLimit": 1000,
+        "customDomain": "api.rapidtriage.me"
+      },
+      "integrations": {
+        "github": {
+          "enabled": true,
+          "repository": "YarlisAISolutions/rapidtriage-api"
+        },
+        "slack": {
+          "enabled": true,
+          "channel": "#api-alerts"
+        }
+      },
+      "metrics": {
+        "apiCalls": 145230,
+        "errorRate": 0.02,
+        "avgResponseTime": 45
+      },
+      "createdAt": "2024-02-01T10:00:00Z",
+      "updatedAt": "2024-12-20T15:30:00Z"
+    },
+    {
+      "id": "proj_frontend",
+      "name": "Web Dashboard",
+      "description": "Customer-facing web dashboard",
+      "workspaceId": "ws_dev_team",
+      "owner": "organization_developer",
+      "type": "frontend",
+      "status": "active",
+      "settings": {
+        "debugMode": false,
+        "loggingLevel": "info",
+        "cdnEnabled": true,
+        "customDomain": "app.rapidtriage.me"
+      },
+      "integrations": {
+        "github": {
+          "enabled": true,
+          "repository": "YarlisAISolutions/rapidtriage-frontend"
+        },
+        "vercel": {
+          "enabled": true,
+          "projectId": "prj_rapidtriage_frontend"
+        }
+      },
+      "metrics": {
+        "pageViews": 523100,
+        "errorRate": 0.01,
+        "avgLoadTime": 1200
+      },
+      "createdAt": "2024-02-05T11:00:00Z",
+      "updatedAt": "2024-12-19T14:20:00Z"
+    },
+    {
+      "id": "proj_reports",
+      "name": "Analytics Reports",
+      "description": "Automated reporting system",
+      "workspaceId": "ws_analytics",
+      "owner": "organization_analyst",
+      "type": "analytics",
+      "status": "active",
+      "settings": {
+        "scheduleEnabled": true,
+        "reportFrequency": "daily",
+        "exportFormats": ["pdf", "csv", "xlsx"],
+        "emailNotifications": true
+      },
+      "integrations": {
+        "bigquery": {
+          "enabled": true,
+          "dataset": "rapidtriage_analytics"
+        },
+        "tableau": {
+          "enabled": true,
+          "workbookId": "wb_rapidtriage"
+        }
+      },
+      "metrics": {
+        "reportsGenerated": 8932,
+        "avgGenerationTime": 5.2,
+        "dataProcessed": "1.2TB"
+      },
+      "createdAt": "2024-03-15T09:00:00Z",
+      "updatedAt": "2024-12-18T16:00:00Z"
+    },
+    {
+      "id": "proj_dashboards",
+      "name": "Real-time Dashboards",
+      "description": "Live monitoring dashboards",
+      "workspaceId": "ws_analytics",
+      "owner": "organization_analyst",
+      "type": "monitoring",
+      "status": "active",
+      "settings": {
+        "refreshInterval": 5000,
+        "dataRetention": "30d",
+        "alertsEnabled": true,
+        "publicAccess": false
+      },
+      "integrations": {
+        "prometheus": {
+          "enabled": true,
+          "endpoint": "https://metrics.rapidtriage.me"
+        },
+        "grafana": {
+          "enabled": true,
+          "dashboardId": "dash_rapidtriage"
+        }
+      },
+      "metrics": {
+        "activeUsers": 234,
+        "dataPoints": 45000000,
+        "alertsFired": 127
+      },
+      "createdAt": "2024-03-20T10:00:00Z",
+      "updatedAt": "2024-12-21T17:30:00Z"
+    },
+    {
+      "id": "proj_e2e",
+      "name": "E2E Test Suite",
+      "description": "End-to-end testing framework",
+      "workspaceId": "ws_testing",
+      "owner": "organization_developer",
+      "type": "testing",
+      "status": "active",
+      "settings": {
+        "autoRun": true,
+        "schedule": "*/30 * * * *",
+        "browsers": ["chrome", "firefox", "safari"],
+        "parallelization": 4
+      },
+      "integrations": {
+        "github": {
+          "enabled": true,
+          "repository": "YarlisAISolutions/rapidtriage-tests",
+          "runOnPR": true
+        },
+        "browserstack": {
+          "enabled": true,
+          "accountId": "rapidtriage"
+        }
+      },
+      "metrics": {
+        "testsRun": 34521,
+        "passRate": 0.97,
+        "avgDuration": 180
+      },
+      "createdAt": "2024-02-25T11:00:00Z",
+      "updatedAt": "2024-12-20T09:00:00Z"
+    },
+    {
+      "id": "proj_integration",
+      "name": "Integration Tests",
+      "description": "API and service integration testing",
+      "workspaceId": "ws_testing",
+      "owner": "starter_user",
+      "type": "testing",
+      "status": "active",
+      "settings": {
+        "coverage": true,
+        "minCoverage": 80,
+        "mockServices": true,
+        "testDatabase": "test_db"
+      },
+      "integrations": {
+        "jest": {
+          "enabled": true,
+          "configFile": "jest.config.js"
+        },
+        "codecov": {
+          "enabled": true,
+          "token": "cov_rapidtriage"
+        }
+      },
+      "metrics": {
+        "coverage": 86.4,
+        "testsCount": 892,
+        "executionTime": 45
+      },
+      "createdAt": "2024-03-01T12:00:00Z",
+      "updatedAt": "2024-12-19T11:30:00Z"
+    },
+    {
+      "id": "proj_demo",
+      "name": "Public Demo",
+      "description": "Public demonstration project",
+      "workspaceId": "ws_public",
+      "owner": "pro_user",
+      "type": "demo",
+      "status": "active",
+      "settings": {
+        "readOnly": true,
+        "resetDaily": true,
+        "limitedFeatures": true,
+        "maxApiCalls": 100
+      },
+      "integrations": {},
+      "metrics": {
+        "visitors": 12340,
+        "avgSessionTime": 420,
+        "conversionRate": 0.15
+      },
+      "createdAt": "2024-04-05T08:00:00Z",
+      "updatedAt": "2024-12-15T10:00:00Z"
+    },
+    {
+      "id": "proj_monitoring",
+      "name": "Infrastructure Monitoring",
+      "description": "Enterprise infrastructure monitoring",
+      "workspaceId": "ws_enterprise",
+      "owner": "enterprise_user",
+      "type": "monitoring",
+      "status": "active",
+      "settings": {
+        "24x7Monitoring": true,
+        "slaTracking": true,
+        "incidentManagement": true,
+        "customAlerts": true,
+        "dataRetention": "365d"
+      },
+      "integrations": {
+        "pagerduty": {
+          "enabled": true,
+          "serviceKey": "pd_rapidtriage"
+        },
+        "datadog": {
+          "enabled": true,
+          "apiKey": "dd_rapidtriage"
+        },
+        "aws": {
+          "enabled": true,
+          "region": "us-east-1",
+          "cloudwatch": true
+        }
+      },
+      "metrics": {
+        "uptime": 99.99,
+        "incidentsResolved": 43,
+        "avgResolutionTime": 12.5,
+        "servicesMonitored": 28
+      },
+      "createdAt": "2024-01-10T00:00:00Z",
+      "updatedAt": "2024-12-22T20:00:00Z"
+    },
+    {
+      "id": "proj_infrastructure",
+      "name": "Cloud Infrastructure",
+      "description": "Enterprise cloud infrastructure management",
+      "workspaceId": "ws_enterprise",
+      "owner": "organization_owner",
+      "type": "infrastructure",
+      "status": "active",
+      "settings": {
+        "autoScaling": true,
+        "costOptimization": true,
+        "securityScanning": true,
+        "complianceChecks": true,
+        "multiRegion": true
+      },
+      "integrations": {
+        "terraform": {
+          "enabled": true,
+          "workspaces": ["prod", "staging", "dev"]
+        },
+        "kubernetes": {
+          "enabled": true,
+          "clusters": ["prod-cluster", "staging-cluster"]
+        },
+        "vault": {
+          "enabled": true,
+          "endpoint": "https://vault.rapidtriage.me"
+        }
+      },
+      "metrics": {
+        "resources": 156,
+        "monthlyCost": 8420.50,
+        "costSavings": 2130.00,
+        "complianceScore": 98
+      },
+      "createdAt": "2024-01-05T00:00:00Z",
+      "updatedAt": "2024-12-21T19:00:00Z"
+    },
+    {
+      "id": "proj_free_limited",
+      "name": "Free User Project",
+      "description": "Limited project for free tier",
+      "workspaceId": null,
+      "owner": "free_user",
+      "type": "basic",
+      "status": "active",
+      "settings": {
+        "apiCallLimit": 1000,
+        "storageLimit": "100MB",
+        "featuresLimited": true
+      },
+      "integrations": {},
+      "metrics": {
+        "apiCallsUsed": 823,
+        "storageUsed": "67MB"
+      },
+      "createdAt": "2024-11-01T10:00:00Z",
+      "updatedAt": "2024-12-20T14:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "realm": "rapidtriage-production",
+  "authServerUrl": "https://auth.yarlis.ai/",
+  "ssl-required": "external",
+  "resource": "rapidtriage-webapp",
+  "public-client": true,
+  "confidential-port": 0
+}

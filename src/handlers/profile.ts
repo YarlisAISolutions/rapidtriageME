@@ -177,6 +177,101 @@ export class ProfileHandler {
       background: linear-gradient(135deg, #f6ad55, #ed8936);
       color: white;
     }
+
+    /* Loading Spinner Styles */
+    .spinner-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+      padding: 40px;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      position: relative;
+      animation: spinnerRotate 2s linear infinite;
+    }
+
+    .spinner-ring {
+      box-sizing: border-box;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 4px solid transparent;
+      border-radius: 50%;
+    }
+
+    .spinner-ring.outer {
+      border-top-color: #667eea;
+      border-right-color: #667eea;
+      animation: spinnerPulse 1.5s ease-in-out infinite;
+    }
+
+    .spinner-ring.inner {
+      width: 75%;
+      height: 75%;
+      top: 12.5%;
+      left: 12.5%;
+      border-bottom-color: #764ba2;
+      border-left-color: #764ba2;
+      animation: spinnerPulse 1.5s ease-in-out infinite reverse;
+    }
+
+    .spinner-ring.center {
+      width: 40%;
+      height: 40%;
+      top: 30%;
+      left: 30%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      animation: spinnerCenter 1.5s ease-in-out infinite;
+    }
+
+    @keyframes spinnerRotate {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes spinnerPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    @keyframes spinnerCenter {
+      0%, 100% { transform: scale(0.8); opacity: 0.6; }
+      50% { transform: scale(1); opacity: 1; }
+    }
+
+    .loading-text {
+      margin-top: 20px;
+      color: #718096;
+      font-size: 14px;
+      font-weight: 500;
+      animation: fadeInOut 1.5s ease-in-out infinite;
+    }
+
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .profile-loading {
+      display: none;
+    }
+
+    .profile-loading.active {
+      display: flex;
+    }
+
+    .profile-content {
+      display: block;
+    }
+
+    .profile-content.hidden {
+      display: none;
+    }
     
     .tabs {
       display: flex;
@@ -568,7 +663,7 @@ export class ProfileHandler {
       <div class="user-menu">
         <button class="user-button" onclick="toggleUserMenu()">
           <div class="user-avatar" id="userAvatar">U</div>
-          <span id="userNameHeader">Loading...</span>
+          <span id="userNameHeader" style="min-width: 60px; display: inline-block;">User</span>
           <span>▼</span>
         </button>
       </div>
@@ -577,16 +672,30 @@ export class ProfileHandler {
 
   <!-- Main Content -->
   <div class="container">
-    <!-- Profile Header -->
-    <div class="profile-header">
-      <div class="profile-avatar" id="profileAvatar">U</div>
-      <div class="profile-info">
-        <h1 id="profileName">Loading...</h1>
-        <p id="profileEmail">Loading...</p>
-        <p id="profileCompany">Loading...</p>
-        <span class="profile-badge badge-free" id="profileBadge">LOADING...</span>
+    <!-- Loading Spinner -->
+    <div class="profile-loading active" id="profileLoading">
+      <div class="spinner-container">
+        <div class="spinner">
+          <div class="spinner-ring outer"></div>
+          <div class="spinner-ring inner"></div>
+          <div class="spinner-ring center"></div>
+        </div>
+        <div class="loading-text">Loading profile...</div>
       </div>
     </div>
+
+    <!-- Profile Content (initially hidden) -->
+    <div class="profile-content hidden" id="profileContent">
+      <!-- Profile Header -->
+      <div class="profile-header">
+        <div class="profile-avatar" id="profileAvatar">U</div>
+        <div class="profile-info">
+          <h1 id="profileName">User</h1>
+          <p id="profileEmail">email@example.com</p>
+          <p id="profileCompany">Company</p>
+          <span class="profile-badge badge-free" id="profileBadge">FREE TIER</span>
+        </div>
+      </div>
 
     <!-- Alert Container -->
     <div id="alertContainer"></div>
@@ -840,18 +949,35 @@ export class ProfileHandler {
         <button class="btn btn-primary" onclick="addPaymentMethod()">Add Payment Method</button>
       </div>
     </div>
-  </div>
+    </div> <!-- End of profile-content -->
+  </div> <!-- End of container -->
 
   <script>
     // State management
     let authToken = null;
     let userProfile = null;
 
+    // Show/hide loading spinner
+    function showLoading(show = true) {
+      const loadingEl = document.getElementById('profileLoading');
+      const contentEl = document.getElementById('profileContent');
+
+      if (show) {
+        loadingEl?.classList.add('active');
+        contentEl?.classList.add('hidden');
+      } else {
+        loadingEl?.classList.remove('active');
+        contentEl?.classList.remove('hidden');
+      }
+    }
+
     // Initialize profile
     async function init() {
-      authToken = localStorage.getItem('rapidtriage_auth_token') || 
+      showLoading(true); // Show spinner when starting
+
+      authToken = localStorage.getItem('rapidtriage_auth_token') ||
                   sessionStorage.getItem('rapidtriage_auth_token');
-      
+
       // Try to load from localStorage first as a fallback
       const storedUser = localStorage.getItem('rapidtriage_user');
       if (storedUser) {
@@ -870,10 +996,13 @@ export class ProfileHandler {
           console.error('Failed to parse stored user data:', e);
         }
       }
-      
+
       // Always try to load fresh data from API
       await loadProfile();
       loadUsageStats();
+
+      // Hide spinner after loading
+      setTimeout(() => showLoading(false), 500); // Small delay for smooth transition
     }
 
     // Load user profile
@@ -982,16 +1111,16 @@ export class ProfileHandler {
       }
       
       // Update form fields
-      const inputName = document.getElementById('inputName') as HTMLInputElement;
-      const inputEmail = document.getElementById('inputEmail') as HTMLInputElement;
-      const inputCompany = document.getElementById('inputCompany') as HTMLInputElement;
+      const inputName = document.getElementById('inputName');
+      const inputEmail = document.getElementById('inputEmail');
+      const inputCompany = document.getElementById('inputCompany');
       
       if (inputName) inputName.value = displayName;
       if (inputEmail) inputEmail.value = userProfile.email || '';
       if (inputCompany) inputCompany.value = userProfile.company || userProfile.organization || '';
       
       // Update security settings
-      const twoFactorToggle = document.getElementById('twoFactorToggle') as HTMLInputElement;
+      const twoFactorToggle = document.getElementById('twoFactorToggle');
       if (twoFactorToggle) twoFactorToggle.checked = userProfile.twoFactorEnabled || false;
       
       // Update subscription info
@@ -1113,10 +1242,12 @@ export class ProfileHandler {
     // Save profile form
     document.getElementById('profileForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      
+
       const name = document.getElementById('inputName').value;
       const company = document.getElementById('inputCompany').value;
-      
+
+      showLoading(true); // Show spinner during save
+
       try {
         const response = await fetch('/auth/profile', {
           method: 'PUT',
@@ -1129,17 +1260,19 @@ export class ProfileHandler {
             company
           })
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to update profile');
         }
-        
+
         showAlert('Profile updated successfully', 'success');
         await loadProfile();
-        
+
       } catch (error) {
         console.error('Error updating profile:', error);
         showAlert('Failed to update profile', 'error');
+      } finally {
+        showLoading(false); // Hide spinner after save
       }
     });
 
@@ -1257,8 +1390,188 @@ export class ProfileHandler {
     }
 
     function toggleUserMenu() {
-      // User menu dropdown would go here
-      showAlert('User menu coming soon', 'info');
+      const userButton = document.querySelector('.user-button');
+      const existingMenu = document.getElementById('userDropdownMenu');
+
+      if (existingMenu) {
+        existingMenu.remove();
+        return;
+      }
+
+      const menu = document.createElement('div');
+      menu.id = 'userDropdownMenu';
+      menu.className = 'user-dropdown-menu';
+      menu.innerHTML = \`
+        <div class="dropdown-arrow"></div>
+        <div class="user-info">
+          <div class="user-avatar-large">\${userProfile?.name?.charAt(0) || 'U'}</div>
+          <div class="user-details">
+            <div class="user-name">\${userProfile?.name || 'User'}</div>
+            <div class="user-email">\${userProfile?.email || ''}</div>
+            <div class="user-plan">\${userProfile?.subscription?.plan || 'Free'} Plan</div>
+          </div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <a href="/profile" class="dropdown-item">
+          <span class="dropdown-icon">👤</span> Profile
+        </a>
+        <a href="/settings" class="dropdown-item">
+          <span class="dropdown-icon">⚙️</span> Settings
+        </a>
+        <a href="/billing" class="dropdown-item">
+          <span class="dropdown-icon">💳</span> Billing & Subscription
+        </a>
+        <a href="/api-keys" class="dropdown-item">
+          <span class="dropdown-icon">🔑</span> API Keys
+        </a>
+        <div class="dropdown-divider"></div>
+        <a href="/docs" class="dropdown-item">
+          <span class="dropdown-icon">📚</span> Documentation
+        </a>
+        <a href="/support" class="dropdown-item">
+          <span class="dropdown-icon">💬</span> Support
+        </a>
+        <div class="dropdown-divider"></div>
+        <a href="/admin" class="dropdown-item" \${userProfile?.role !== 'admin' ? 'style="display:none"' : ''}>
+          <span class="dropdown-icon">🛡️</span> Admin Dashboard
+        </a>
+        <div class="dropdown-divider" \${userProfile?.role !== 'admin' ? 'style="display:none"' : ''}></div>
+        <a href="#" class="dropdown-item" onclick="signOut(); return false;">
+          <span class="dropdown-icon">🚪</span> Sign Out
+        </a>
+      \`;
+
+      // Style the menu
+      const style = document.createElement('style');
+      style.textContent = \`
+        .user-dropdown-menu {
+          position: absolute;
+          top: 60px;
+          right: 20px;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+          min-width: 280px;
+          z-index: 1000;
+          animation: dropdownFadeIn 0.3s ease;
+        }
+
+        .dropdown-arrow {
+          position: absolute;
+          top: -8px;
+          right: 20px;
+          width: 16px;
+          height: 16px;
+          background: white;
+          transform: rotate(45deg);
+          box-shadow: -3px -3px 5px rgba(0,0,0,0.05);
+        }
+
+        .user-info {
+          padding: 20px;
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+
+        .user-avatar-large {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          font-weight: bold;
+        }
+
+        .user-details {
+          flex: 1;
+        }
+
+        .user-name {
+          font-weight: 600;
+          color: #1a202c;
+          margin-bottom: 4px;
+        }
+
+        .user-email {
+          font-size: 13px;
+          color: #718096;
+          margin-bottom: 4px;
+        }
+
+        .user-plan {
+          font-size: 12px;
+          color: #667eea;
+          font-weight: 500;
+          text-transform: uppercase;
+        }
+
+        .dropdown-divider {
+          height: 1px;
+          background: #e2e8f0;
+          margin: 0;
+        }
+
+        .dropdown-item {
+          display: flex;
+          align-items: center;
+          padding: 12px 20px;
+          text-decoration: none;
+          color: #4a5568;
+          transition: all 0.2s;
+          font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+          background: #f7fafc;
+          color: #667eea;
+        }
+
+        .dropdown-icon {
+          width: 24px;
+          margin-right: 12px;
+          font-size: 16px;
+        }
+
+        @keyframes dropdownFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      \`;
+
+      if (!document.getElementById('dropdownStyles')) {
+        style.id = 'dropdownStyles';
+        document.head.appendChild(style);
+      }
+
+      document.body.appendChild(menu);
+
+      // Close menu when clicking outside
+      setTimeout(() => {
+        document.addEventListener('click', function closeMenu(e) {
+          if (!menu.contains(e.target) && !userButton.contains(e.target)) {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+          }
+        });
+      }, 100);
+    }
+
+    function signOut() {
+      localStorage.removeItem('rapidtriage_auth_token');
+      localStorage.removeItem('rapidtriage_user');
+      sessionStorage.removeItem('rapidtriage_auth_token');
+      window.location.href = '/login';
     }
 
     // Initialize on load

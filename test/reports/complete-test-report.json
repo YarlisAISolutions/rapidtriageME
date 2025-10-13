@@ -1,10 +1,11 @@
 {
-  "timestamp": "2025-08-15T02:29:37.770Z",
+  "timestamp": "2025-10-10T12:27:29.935Z",
   "environment": "test",
   "suites": [
     {
       "name": "API Tests",
-      "status": "passed"
+      "status": "failed",
+      "exitCode": 1
     },
     {
       "name": "Extension Tests",
@@ -18,8 +19,8 @@
   ],
   "summary": {
     "total": 3,
-    "passed": 2,
-    "failed": 0,
+    "passed": 1,
+    "failed": 1,
     "skipped": 1
   }
 }

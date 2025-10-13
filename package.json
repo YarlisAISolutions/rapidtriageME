@@ -19,6 +19,12 @@
     "test:browser": "node test/03-browser/browser-test-suite.js",
     "test:organize": "bash test/organize-tests.sh",
     "test:clean": "rm -rf test/reports/*",
+    "test:chrome-mvp": "playwright test test/playwright/tests/chrome-mvp --config=test/playwright/config/chrome-mvp.config.ts",
+    "test:chrome-mvp:pricing": "playwright test test/playwright/tests/chrome-mvp/01-pricing-page.spec.ts --config=test/playwright/config/chrome-mvp.config.ts",
+    "test:chrome-mvp:roles": "playwright test test/playwright/tests/chrome-mvp/02-role-based-crud.spec.ts --config=test/playwright/config/chrome-mvp.config.ts",
+    "test:chrome-mvp:headed": "playwright test test/playwright/tests/chrome-mvp --config=test/playwright/config/chrome-mvp.config.ts --headed",
+    "test:chrome-mvp:debug": "playwright test test/playwright/tests/chrome-mvp --config=test/playwright/config/chrome-mvp.config.ts --debug",
+    "test:chrome-mvp:report": "playwright show-report test/playwright/reports/chrome-mvp-html",
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -34,11 +40,16 @@
   "dependencies": {
     "@cloudflare/workers-types": "^4.20240117.0",
     "@modelcontextprotocol/sdk": "^0.5.0",
-    "axios": "^1.6.0",
+    "@tsndr/cloudflare-worker-jwt": "^3.2.0",
+    "axios": "^1.12.2",
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "firebase": "^10.7.2",
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^4.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.11",

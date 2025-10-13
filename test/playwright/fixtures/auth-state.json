@@ -1,0 +1,15 @@
+{
+  "cookies": [
+    {
+      "name": "auth_token",
+      "value": "KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8",
+      "domain": "rapidtriage.me",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

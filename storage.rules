@@ -1,0 +1,111 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasValidImageType() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function hasValidFileSize() {
+      return request.resource.size < 10 * 1024 * 1024; // 10MB limit
+    }
+
+    // Screenshots storage
+    match /screenshots/{tenantId}/{projectId}/{allPaths=**} {
+      allow read: if isAuthenticated() && (
+        isOwner(tenantId) ||
+        firestore.get(/databases/(default)/documents/projects/$(projectId)).data.members.hasAny([request.auth.uid])
+      );
+
+      allow write: if isAuthenticated() &&
+        hasValidImageType() &&
+        hasValidFileSize() && (
+          isOwner(tenantId) ||
+          firestore.get(/databases/(default)/documents/projects/$(projectId)).data.members.hasAny([request.auth.uid])
+        );
+
+      allow delete: if isAuthenticated() && (
+        isOwner(tenantId) ||
+        firestore.get(/databases/(default)/documents/projects/$(projectId)).data.owner == request.auth.uid
+      );
+    }
+
+    // Reports storage
+    match /reports/{userId}/{reportId}/{allPaths=**} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && request.resource.size < 50 * 1024 * 1024; // 50MB limit
+      allow delete: if isOwner(userId);
+    }
+
+    // Exports storage
+    match /exports/{exportId}/{allPaths=**} {
+      allow read: if isAuthenticated() &&
+        firestore.get(/databases/(default)/documents/exports/$(exportId)).data.userId == request.auth.uid;
+
+      allow write: if false; // System only
+      allow delete: if false; // System only with lifecycle rules
+    }
+
+    // Temporary storage (auto-deleted after 24 hours)
+    match /temp/{sessionId}/{allPaths=**} {
+      allow read: if isAuthenticated() &&
+        firestore.get(/databases/(default)/documents/sessions/$(sessionId)).data.userId == request.auth.uid;
+
+      allow write: if isAuthenticated() &&
+        firestore.get(/databases/(default)/documents/sessions/$(sessionId)).data.userId == request.auth.uid &&
+        request.resource.size < 5 * 1024 * 1024; // 5MB limit
+
+      allow delete: if isAuthenticated() &&
+        firestore.get(/databases/(default)/documents/sessions/$(sessionId)).data.userId == request.auth.uid;
+    }
+
+    // User profile pictures
+    match /users/{userId}/profile/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) &&
+        hasValidImageType() &&
+        request.resource.size < 5 * 1024 * 1024; // 5MB limit
+      allow delete: if isOwner(userId);
+    }
+
+    // Organization assets
+    match /organizations/{orgId}/assets/{allPaths=**} {
+      allow read: if isAuthenticated() &&
+        firestore.get(/databases/(default)/documents/organizations/$(orgId)/members/$(request.auth.uid)).data != null;
+
+      allow write: if isAuthenticated() &&
+        firestore.get(/databases/(default)/documents/organizations/$(orgId)/members/$(request.auth.uid)).data.role in ['owner', 'admin'] &&
+        request.resource.size < 10 * 1024 * 1024; // 10MB limit
+
+      allow delete: if isAuthenticated() &&
+        firestore.get(/databases/(default)/documents/organizations/$(orgId)/members/$(request.auth.uid)).data.role in ['owner', 'admin'];
+    }
+
+    // Public assets (logos, etc.)
+    match /public/{allPaths=**} {
+      allow read: if true; // Public access
+      allow write: if false; // Admin only through Firebase Console
+      allow delete: if false; // Admin only
+    }
+
+    // Backup storage (system only)
+    match /backups/{allPaths=**} {
+      allow read: if false; // System only
+      allow write: if false; // System only
+      allow delete: if false; // System only
+    }
+
+    // Default deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
