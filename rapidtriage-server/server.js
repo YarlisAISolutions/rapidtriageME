@@ -8,12 +8,16 @@
 const express = require('express');
 const cors = require('cors');
 const puppeteer = require('puppeteer');
+const config = require('./config');
 
 const app = express();
-const PORT = process.env.PORT || 3025;
+const PORT = config.server.port;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: config.cors.origins,
+    credentials: true
+}));
 app.use(express.json({ limit: '50mb' }));
 
 // Store for logs, current URL, and audit results
@@ -31,12 +35,9 @@ let browser = null;
  */
 async function initBrowser() {
     if (!browser) {
-        // Use environment variable for Chromium path if available (Cloud Run)
-        const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
-        
         browser = await puppeteer.launch({
-            headless: 'new',
-            executablePath,
+            headless: config.browser.headless ? 'new' : false,
+            executablePath: config.browser.executablePath,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -61,10 +62,11 @@ async function initBrowser() {
 // Identity endpoint for Chrome extension validation
 app.get('/.identity', (req, res) => {
     res.json({
-        signature: 'mcp-browser-connector-24x7',
-        name: 'RapidTriageME Browser Tools Server',
-        version: '2.0.0',
-        port: PORT
+        signature: config.server.signature,
+        name: config.server.name,
+        version: config.server.version,
+        port: PORT,
+        environment: config.environment
     });
 });
 
@@ -301,8 +303,8 @@ app.post('/screenshot', (req, res) => {
         });
     }
     
-    // Create screenshots directory in user's home folder
-    const screenshotsDir = path.join(os.homedir(), 'RapidTriage_Screenshots');
+    // Use configured screenshots directory
+    const screenshotsDir = config.screenshots.directory.replace('~', os.homedir());
     if (!fs.existsSync(screenshotsDir)) {
         fs.mkdirSync(screenshotsDir, { recursive: true });
     }
@@ -797,11 +799,17 @@ process.on('SIGINT', async () => {
 });
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`🚀 RapidTriageME Browser Backend Server`);
-    console.log(`📍 Running on http://localhost:${PORT}`);
-    console.log(`🔧 Health check: http://localhost:${PORT}/health`);
+app.listen(PORT, config.server.host === 'localhost' ? 'localhost' : undefined, () => {
+    console.log('\n' + '='.repeat(60));
+    console.log(`🚀 ${config.server.name}`);
+    console.log(`📍 Running on http://${config.server.host}:${PORT}`);
+    console.log(`🔧 Health check: http://${config.server.host}:${PORT}/health`);
+    console.log(`📷 Screenshots: ${config.screenshots.directory}`);
+    console.log(`🌍 Environment: ${config.environment}`);
+    console.log(`📦 Version: ${config.server.version}`);
+    console.log('='.repeat(60) + '\n');
 });
 
-// Initialize browser on startup
-initBrowser().catch(console.error);
+// Initialize browser on startup (lazy initialization - only when needed)
+// initBrowser().catch(console.error);
+console.log('💡 Browser will be initialized on first use (lazy loading)');

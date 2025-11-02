@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "RapidTriage DevTools",
-    "version": "3.1.0",
+    "version": "3.2.1",
     "description": "YarlisAISolutions RapidTriage - Complete browser debugging and monitoring toolkit with AI-powered analysis",
     "devtools_page": "devtools.html",
     "permissions": [
@@ -18,6 +18,12 @@
     "background": {
         "service_worker": "background.js"
     },
+    "web_accessible_resources": [
+        {
+            "resources": ["config.js"],
+            "matches": ["<all_urls>"]
+        }
+    ],
     "action": {
         "default_popup": "popup.html",
         "default_title": "RapidTriage Controls",

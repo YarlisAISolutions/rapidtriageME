@@ -410,7 +410,7 @@ class RapidTriageOperations {
     async getAuthToken() {
         return new Promise((resolve) => {
             chrome.storage.sync.get(['apiToken'], (items) => {
-                resolve(items.apiToken || 'KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8');
+                resolve(items.apiToken || null);
             });
         });
     }

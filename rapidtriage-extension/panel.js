@@ -32,25 +32,66 @@ let performanceMetrics = {
 // Track network insights
 let networkInsights = [];
 
-// Load saved settings on startup
-chrome.storage.local.get(["browserConnectorSettings"], (result) => {
-  if (result.browserConnectorSettings) {
-    settings = { ...settings, ...result.browserConnectorSettings };
-    updateUIFromSettings();
-  }
+// Wait for DOM to be fully ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializePanel);
+} else {
+  initializePanel();
+}
 
-  // Create connection status banner at the top
-  createConnectionBanner();
+function initializePanel() {
+  console.log('[RapidTriage] Panel initialization starting...');
+  
+  // Load saved settings
+  chrome.storage.local.get(["browserConnectorSettings"], (result) => {
+    if (result.browserConnectorSettings) {
+      settings = { ...settings, ...result.browserConnectorSettings };
+    }
+    
+    // Update UI from settings
+    try {
+      updateUIFromSettings();
+    } catch (e) {
+      console.warn('[RapidTriage] Could not update UI from settings:', e);
+    }
 
-  // Initialize tab functionality
-  initializeTabs();
+    // Create connection status banner at the top
+    try {
+      createConnectionBanner();
+    } catch (e) {
+      console.error('[RapidTriage] Could not create connection banner:', e);
+    }
 
-  // Initialize Chrome 135 features
-  initializeChrome135Features();
+    // Initialize tab functionality
+    try {
+      initializeTabs();
+    } catch (e) {
+      console.warn('[RapidTriage] Could not initialize tabs:', e);
+    }
 
-  // Automatically discover server on panel load with quiet mode enabled
-  discoverServer(true);
-});
+    // Initialize Chrome 135 features
+    try {
+      initializeChrome135Features();
+    } catch (e) {
+      console.warn('[RapidTriage] Could not initialize Chrome 135 features:', e);
+    }
+
+    // Setup event listeners
+    try {
+      setupEventListeners();
+    } catch (e) {
+      console.error('[RapidTriage] Could not setup event listeners:', e);
+    }
+
+    // Start server discovery with a delay
+    setTimeout(() => {
+      console.log('[RapidTriage] Starting server discovery...');
+      discoverServer(true).catch(err => {
+        console.error('[RapidTriage] Discovery error:', err);
+      });
+    }, 300);
+  });
+}
 
 // Add listener for connection status updates from background script (page refresh events)
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -321,28 +362,49 @@ function updateConnectionBanner(connected, serverInfo) {
   }
 }
 
-// Initialize UI elements
-const logLimitInput = document.getElementById("log-limit");
-const queryLimitInput = document.getElementById("query-limit");
-const stringSizeLimitInput = document.getElementById("string-size-limit");
-const showRequestHeadersCheckbox = document.getElementById(
-  "show-request-headers"
-);
-const showResponseHeadersCheckbox = document.getElementById(
-  "show-response-headers"
-);
-const maxLogSizeInput = document.getElementById("max-log-size");
-const screenshotPathInput = document.getElementById("screenshot-path");
-const captureScreenshotButton = document.getElementById("capture-screenshot");
+// UI elements (will be initialized after DOM loads)
+let logLimitInput;
+let queryLimitInput;
+let stringSizeLimitInput;
+let showRequestHeadersCheckbox;
+let showResponseHeadersCheckbox;
+let maxLogSizeInput;
+let screenshotPathInput;
+let captureScreenshotButton;
 
-// Server connection UI elements
-const serverHostInput = document.getElementById("server-host");
-const serverPortInput = document.getElementById("server-port");
-const discoverServerButton = document.getElementById("discover-server");
-const testConnectionButton = document.getElementById("test-connection");
-const connectionStatusDiv = document.getElementById("connection-status");
-const statusIcon = document.getElementById("status-icon");
-const statusText = document.getElementById("status-text");
+// Initialize all UI element references
+function initializeAllUIElements() {
+  logLimitInput = document.getElementById("log-limit");
+  queryLimitInput = document.getElementById("query-limit");
+  stringSizeLimitInput = document.getElementById("string-size-limit");
+  showRequestHeadersCheckbox = document.getElementById("show-request-headers");
+  showResponseHeadersCheckbox = document.getElementById("show-response-headers");
+  maxLogSizeInput = document.getElementById("max-log-size");
+  screenshotPathInput = document.getElementById("screenshot-path");
+  captureScreenshotButton = document.getElementById("capture-screenshot");
+  
+  initializeUIElements();
+}
+
+// Server connection UI elements (will be initialized after DOM loads)
+let serverHostInput;
+let serverPortInput;
+let discoverServerButton;
+let testConnectionButton;
+let connectionStatusDiv;
+let statusIcon;
+let statusText;
+
+// Initialize UI element references after DOM is ready
+function initializeUIElements() {
+  serverHostInput = document.getElementById("server-host");
+  serverPortInput = document.getElementById("server-port");
+  discoverServerButton = document.getElementById("discover-server");
+  testConnectionButton = document.getElementById("test-connection");
+  connectionStatusDiv = document.getElementById("connection-status");
+  statusIcon = document.getElementById("status-icon");
+  statusText = document.getElementById("status-text");
+}
 
 // Initialize collapsible advanced settings
 const advancedSettingsHeader = document.getElementById(
@@ -363,16 +425,20 @@ const allowAutoPasteCheckbox = document.getElementById("allow-auto-paste");
 
 // Update UI from settings
 function updateUIFromSettings() {
-  logLimitInput.value = settings.logLimit;
-  queryLimitInput.value = settings.queryLimit;
-  stringSizeLimitInput.value = settings.stringSizeLimit;
-  showRequestHeadersCheckbox.checked = settings.showRequestHeaders;
-  showResponseHeadersCheckbox.checked = settings.showResponseHeaders;
-  maxLogSizeInput.value = settings.maxLogSize;
-  screenshotPathInput.value = settings.screenshotPath;
-  serverHostInput.value = settings.serverHost;
-  serverPortInput.value = settings.serverPort;
-  allowAutoPasteCheckbox.checked = settings.allowAutoPaste;
+  initializeAllUIElements();
+  
+  if (logLimitInput) logLimitInput.value = settings.logLimit;
+  if (queryLimitInput) queryLimitInput.value = settings.queryLimit;
+  if (stringSizeLimitInput) stringSizeLimitInput.value = settings.stringSizeLimit;
+  if (showRequestHeadersCheckbox) showRequestHeadersCheckbox.checked = settings.showRequestHeaders;
+  if (showResponseHeadersCheckbox) showResponseHeadersCheckbox.checked = settings.showResponseHeaders;
+  if (maxLogSizeInput) maxLogSizeInput.value = settings.maxLogSize;
+  if (screenshotPathInput) screenshotPathInput.value = settings.screenshotPath;
+  if (serverHostInput) serverHostInput.value = settings.serverHost;
+  if (serverPortInput) serverPortInput.value = settings.serverPort;
+  
+  const allowAutoPasteCheckbox = document.getElementById("allow-auto-paste");
+  if (allowAutoPasteCheckbox) allowAutoPasteCheckbox.checked = settings.allowAutoPaste;
 }
 
 // Save settings
@@ -385,62 +451,110 @@ function saveSettings() {
   });
 }
 
-// Add event listeners for all inputs
-logLimitInput.addEventListener("change", (e) => {
-  settings.logLimit = parseInt(e.target.value, 10);
-  saveSettings();
-});
+// Setup event listeners after DOM is ready
+function setupEventListeners() {
+  // Add event listeners for all inputs
+  if (logLimitInput) {
+    logLimitInput.addEventListener("change", (e) => {
+      settings.logLimit = parseInt(e.target.value, 10);
+      saveSettings();
+    });
+  }
 
-queryLimitInput.addEventListener("change", (e) => {
-  settings.queryLimit = parseInt(e.target.value, 10);
-  saveSettings();
-});
+  if (queryLimitInput) {
+    queryLimitInput.addEventListener("change", (e) => {
+      settings.queryLimit = parseInt(e.target.value, 10);
+      saveSettings();
+    });
+  }
 
-stringSizeLimitInput.addEventListener("change", (e) => {
-  settings.stringSizeLimit = parseInt(e.target.value, 10);
-  saveSettings();
-});
+  if (stringSizeLimitInput) {
+    stringSizeLimitInput.addEventListener("change", (e) => {
+      settings.stringSizeLimit = parseInt(e.target.value, 10);
+      saveSettings();
+    });
+  }
 
-showRequestHeadersCheckbox.addEventListener("change", (e) => {
-  settings.showRequestHeaders = e.target.checked;
-  saveSettings();
-});
+  if (showRequestHeadersCheckbox) {
+    showRequestHeadersCheckbox.addEventListener("change", (e) => {
+      settings.showRequestHeaders = e.target.checked;
+      saveSettings();
+    });
+  }
 
-showResponseHeadersCheckbox.addEventListener("change", (e) => {
-  settings.showResponseHeaders = e.target.checked;
-  saveSettings();
-});
+  if (showResponseHeadersCheckbox) {
+    showResponseHeadersCheckbox.addEventListener("change", (e) => {
+      settings.showResponseHeaders = e.target.checked;
+      saveSettings();
+    });
+  }
 
-maxLogSizeInput.addEventListener("change", (e) => {
-  settings.maxLogSize = parseInt(e.target.value, 10);
-  saveSettings();
-});
+  if (maxLogSizeInput) {
+    maxLogSizeInput.addEventListener("change", (e) => {
+      settings.maxLogSize = parseInt(e.target.value, 10);
+      saveSettings();
+    });
+  }
 
-screenshotPathInput.addEventListener("change", (e) => {
-  settings.screenshotPath = e.target.value;
-  saveSettings();
-});
+  if (screenshotPathInput) {
+    screenshotPathInput.addEventListener("change", (e) => {
+      settings.screenshotPath = e.target.value;
+      saveSettings();
+    });
+  }
 
-// Add event listeners for server settings
-serverHostInput.addEventListener("change", (e) => {
-  settings.serverHost = e.target.value;
-  saveSettings();
-  // Automatically test connection when host is changed
-  testConnection(settings.serverHost, settings.serverPort);
-});
+  // Add event listeners for server settings
+  if (serverHostInput) {
+    serverHostInput.addEventListener("change", (e) => {
+      settings.serverHost = e.target.value;
+      saveSettings();
+      // Automatically test connection when host is changed
+      testConnection(settings.serverHost, settings.serverPort);
+    });
+  }
 
-serverPortInput.addEventListener("change", (e) => {
-  settings.serverPort = parseInt(e.target.value, 10);
-  saveSettings();
-  // Automatically test connection when port is changed
-  testConnection(settings.serverHost, settings.serverPort);
-});
+  if (serverPortInput) {
+    serverPortInput.addEventListener("change", (e) => {
+      settings.serverPort = parseInt(e.target.value, 10);
+      saveSettings();
+      // Automatically test connection when port is changed
+      testConnection(settings.serverHost, settings.serverPort);
+    });
+  }
 
-// Add event listener for auto-paste checkbox
-allowAutoPasteCheckbox.addEventListener("change", (e) => {
-  settings.allowAutoPaste = e.target.checked;
-  saveSettings();
-});
+  // Add event listener for auto-paste checkbox
+  const allowAutoPasteCheckbox = document.getElementById("allow-auto-paste");
+  if (allowAutoPasteCheckbox) {
+    allowAutoPasteCheckbox.addEventListener("change", (e) => {
+      settings.allowAutoPaste = e.target.checked;
+      saveSettings();
+    });
+  }
+  
+  // Test connection button
+  if (testConnectionButton) {
+    testConnectionButton.addEventListener("click", async () => {
+      cancelOngoingDiscovery();
+      await testConnection(settings.serverHost, settings.serverPort);
+    });
+  }
+  
+  // Discover server button
+  if (discoverServerButton) {
+    discoverServerButton.addEventListener("click", () => discoverServer(false));
+  }
+  
+  // Screenshot button
+  if (captureScreenshotButton) {
+    captureScreenshotButton.addEventListener("click", handleScreenshotCapture);
+  }
+  
+  // Wipe logs button
+  const wipeLogsButton = document.getElementById("wipe-logs");
+  if (wipeLogsButton) {
+    wipeLogsButton.addEventListener("click", handleWipeLogs);
+  }
+}
 
 // Function to cancel any ongoing discovery operations
 function cancelOngoingDiscovery() {
@@ -477,12 +591,7 @@ function cancelOngoingDiscovery() {
   }
 }
 
-// Test server connection
-testConnectionButton.addEventListener("click", async () => {
-  // Cancel any ongoing discovery operations before testing
-  cancelOngoingDiscovery();
-  await testConnection(settings.serverHost, settings.serverPort);
-});
+// Test server connection (moved to setupEventListeners)
 
 // Function to test server connection
 async function testConnection(host, port) {
@@ -493,14 +602,19 @@ async function testConnection(host, port) {
   statusIcon.className = "status-indicator";
   statusText.textContent = "Testing connection...";
 
+  console.log(`[RapidTriage] Testing connection to ${host}:${port}`);
+
   try {
     // Use the identity endpoint instead of .port for more reliable validation
     const response = await fetch(`http://${host}:${port}/.identity`, {
       signal: AbortSignal.timeout(5000), // 5 second timeout
     });
 
+    console.log(`[RapidTriage] Response status: ${response.status}`);
+
     if (response.ok) {
       const identity = await response.json();
+      console.log(`[RapidTriage] Server identity:`, identity);
 
       // Verify this is actually our server by checking the signature
       const validSignatures = [
@@ -688,6 +802,8 @@ async function discoverServer(quietMode = false) {
   discoveryController = new AbortController();
   isDiscoveryInProgress = true;
 
+  console.log(`[RapidTriage] Starting server discovery (quiet mode: ${quietMode})`);
+
   // In quiet mode, we don't show the connection status until we either succeed or fail completely
   if (!quietMode) {
     connectionStatusDiv.style.display = "block";
@@ -699,7 +815,7 @@ async function discoverServer(quietMode = false) {
   updateConnectionBanner(false, null);
 
   try {
-    console.log("Starting server discovery process");
+    console.log("[RapidTriage] Starting server discovery process");
 
     // Add an early cancellation listener that will respond to page navigation/refresh
     discoveryController.signal.addEventListener("abort", () => {
@@ -947,11 +1063,12 @@ async function discoverServer(quietMode = false) {
   }
 }
 
-// Bind discover server button to the extracted function
-discoverServerButton.addEventListener("click", () => discoverServer(false));
+// Discover server button (moved to setupEventListeners)
 
-// Screenshot capture functionality
-captureScreenshotButton.addEventListener("click", () => {
+// Screenshot capture functionality (moved to setupEventListeners)
+function handleScreenshotCapture() {
+  if (!captureScreenshotButton) return;
+  
   captureScreenshotButton.textContent = "Capturing...";
 
   // Send message to background script to capture screenshot
@@ -978,11 +1095,13 @@ captureScreenshotButton.addEventListener("click", () => {
       }, 2000);
     }
   );
-});
+}
 
-// Add wipe logs functionality
-const wipeLogsButton = document.getElementById("wipe-logs");
-wipeLogsButton.addEventListener("click", () => {
+// Wipe logs functionality (moved to setupEventListeners)
+function handleWipeLogs() {
+  const wipeLogsButton = document.getElementById("wipe-logs");
+  if (!wipeLogsButton) return;
+  
   const serverUrl = `http://${settings.serverHost}:${settings.serverPort}/wipelogs`;
   console.log(`Sending wipe request to ${serverUrl}`);
 
@@ -1005,7 +1124,7 @@ wipeLogsButton.addEventListener("click", () => {
         wipeLogsButton.textContent = "Wipe All Logs";
       }, 2000);
     });
-});
+}
 
 // Initialize tab functionality
 function initializeTabs() {

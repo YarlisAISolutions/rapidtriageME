@@ -1,0 +1,11 @@
+import * as functions from 'firebase-functions';
+export declare const api: functions.HttpsFunction;
+export declare const onUserCreate: functions.CloudFunction<import("firebase-admin/auth").UserRecord>;
+export declare const onUserDelete: functions.CloudFunction<import("firebase-admin/auth").UserRecord>;
+export declare const onProjectCreate: functions.CloudFunction<functions.firestore.QueryDocumentSnapshot>;
+export declare const onScreenshotUpload: functions.CloudFunction<functions.storage.ObjectMetadata>;
+export declare const dailyCleanup: functions.CloudFunction<unknown>;
+export declare const aggregateAnalytics: functions.CloudFunction<unknown>;
+export declare const verifyToken: functions.HttpsFunction & functions.Runnable<any>;
+export declare const createCustomToken: functions.HttpsFunction & functions.Runnable<any>;
+export declare const processJob: functions.HttpsFunction & functions.Runnable<any>;

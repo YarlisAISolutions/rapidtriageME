@@ -1,0 +1,39 @@
+{
+  "server": {
+    "host": "localhost",
+    "port": 3025,
+    "name": "RapidTriageME Browser Tools Server",
+    "version": "2.0.0"
+  },
+  "browser": {
+    "headless": true,
+    "executablePath": ""
+  },
+  "extension": {
+    "logLimit": 50,
+    "queryLimit": 30000,
+    "stringSizeLimit": 500,
+    "maxLogSize": 20000
+  },
+  "screenshots": {
+    "directory": "~/RapidTriage_Screenshots"
+  },
+  "cors": {
+    "origins": [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:5000",
+      "https://yarlis.com",
+      "https://www.yarlis.com",
+      "https://studio.yarlis.com"
+    ]
+  },
+  "firebase": {
+    "projectId": "yarlis-rapidtriage",
+    "authDomain": "yarlis-rapidtriage.firebaseapp.com",
+    "storageBucket": "yarlis-rapidtriage.appspot.com"
+  },
+  "environment": "development",
+  "logLevel": "info"
+}
+

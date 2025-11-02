@@ -1,110 +1,110 @@
-// RapidTriage Extension Configuration
+// RapidTriageME Extension Configuration
+// This file contains configuration that can be updated without rebuilding the extension
+// Values can be overridden via Chrome storage or environment variables
+
 const RAPIDTRIAGE_CONFIG = {
-    // API Endpoints
-    LOCAL_API: 'http://localhost:3025',
-    REMOTE_API: 'https://rapidtriage.me',
-
-    // Default API Token
-    DEFAULT_TOKEN: 'KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8',
-
-    // Server Signatures
-    LOCAL_SIGNATURE: 'mcp-browser-connector-24x7',
-    REMOTE_SIGNATURE: 'rapidtriage-remote',
-
-    // Timeouts
-    CONNECTION_TIMEOUT: 3000,
-    REQUEST_TIMEOUT: 30000,
-    RETRY_DELAY: 500,
-    MAX_RETRIES: 3,
-
-    // Operations
-    OPERATIONS: {
-        // Navigation & Control
-        NAVIGATE: '/navigate',
-        EXECUTE_JS: '/execute',
-        CLEAR: '/clear',
-
-        // Data Capture
-        SCREENSHOT: '/screenshot',
-        CONSOLE_LOGS: '/console',
-        CONSOLE_ERRORS: '/console/errors',
-        NETWORK_LOGS: '/network',
-        NETWORK_ERRORS: '/network/errors',
-        PAGE_INFO: '/page-info',
-
-        // Lighthouse Audits
-        LIGHTHOUSE_PERFORMANCE: '/lighthouse/performance',
-        LIGHTHOUSE_ACCESSIBILITY: '/lighthouse/accessibility',
-        LIGHTHOUSE_SEO: '/lighthouse/seo',
-        LIGHTHOUSE_BEST_PRACTICES: '/lighthouse/best-practices',
-
-        // Element Inspection
-        INSPECT_ELEMENT: '/inspect-element',
-        GET_SELECTED_ELEMENT: '/selected-element',
-
-        // Health & Identity
-        HEALTH: '/health',
-        IDENTITY: '/.identity'
-    },
-
-    // Remote API Operations (require auth)
-    REMOTE_OPERATIONS: {
-        SCREENSHOT: '/api/screenshot',
-        CONSOLE_LOGS: '/api/console-logs',
-        CONSOLE_ERRORS: '/api/console-errors',
-        NETWORK_LOGS: '/api/network-logs',
-        NETWORK_ERRORS: '/api/network-errors',
-        LIGHTHOUSE: '/api/lighthouse',
-        LIGHTHOUSE_ACCESSIBILITY: '/api/lighthouse/accessibility',
-        LIGHTHOUSE_PERFORMANCE: '/api/lighthouse/performance',
-        LIGHTHOUSE_SEO: '/api/lighthouse/seo',
-        LIGHTHOUSE_BEST_PRACTICES: '/api/lighthouse/best-practices',
-        NAVIGATE: '/api/navigate',
-        EXECUTE_JS: '/api/execute-js',
-        INSPECT_ELEMENT: '/api/inspect-element',
-        TRIAGE_REPORT: '/api/triage-report',
-        CLEAR_BROWSER_DATA: '/api/clear-browser-data'
-    },
-
-    // Debug Mode
-    DEBUG_ENABLED: false,
-
-    // Auto-discovery settings
-    AUTO_DISCOVERY: {
-        ENABLED: true,
-        INTERVAL: 5000,
-        MAX_ATTEMPTS: 10
+  // API Configuration - DO NOT hardcode sensitive tokens
+  api: {
+    // Default fallback token (should be overridden via Chrome storage)
+    defaultToken: null,  // Set via chrome.storage.sync.get(['apiToken'])
+    tokenStorageKey: 'apiToken'
+  },
+  
+  // Server connection defaults
+  server: {
+    defaultHost: 'localhost',
+    defaultPort: 3025,
+    remoteHost: 'rapidtriage.me',
+    remotePort: 443,
+    remoteProtocol: 'https',
+    fallbackHosts: ['127.0.0.1', 'localhost'],
+    fallbackPorts: [3025, 3026, 3027, 3028, 3029, 3030],
+    timeout: 5000,
+    reconnectDelay: 30000,
+    identityEndpoint: '/.identity',
+    healthEndpoint: '/health'
+  },
+  
+  // Extension defaults
+  extension: {
+    logLimit: 50,
+    queryLimit: 30000,
+    stringSizeLimit: 500,
+    maxLogSize: 20000,
+    allowAutoPaste: false,
+    showRequestHeaders: false,
+    showResponseHeaders: false
+  },
+  
+  // Identity signatures for server validation
+  serverSignatures: [
+    'mcp-browser-connector-24x7',  // Local browser tools server
+    'rapidtriage-remote'            // Remote RapidTriage server
+  ],
+  
+  // Remote server options (if using cloud deployment)
+  remote: {
+    enabled: false,
+    host: 'rapidtriage.me',
+    port: 443,
+    protocol: 'https'
+  },
+  
+  // Feature flags
+  features: {
+    autoDiscovery: true,
+    remoteScreenshot: true,
+    performanceMetrics: true,
+    networkAnalysis: true
+  },
+  
+  // Chrome version compatibility
+  compatibility: {
+    minChromeVersion: 135,
+    useDelayedInit: true,
+    initDelay: 200
+  },
+  
+  // API Endpoints
+  endpoints: {
+    screenshot: '/screenshot',
+    screenshotRemote: '/api/screenshot',
+    lighthouse: '/api/lighthouse',
+    consoleLogs: '/api/console-logs',
+    consoleErrors: '/api/console-errors',
+    networkLogs: '/api/network-logs',
+    networkErrors: '/api/network-errors',
+    openFolder: '/open-folder'
+  },
+  
+  // Helper functions
+  getLocalServerUrl: function() {
+    return `http://${this.server.defaultHost}:${this.server.defaultPort}`;
+  },
+  
+  getRemoteServerUrl: function() {
+    return `${this.remote.protocol}://${this.remote.host}`;
+  },
+  
+  getApiToken: function(callback) {
+    // Try to get token from Chrome storage first
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      chrome.storage.sync.get([this.api.tokenStorageKey], function(items) {
+        const token = items[RAPIDTRIAGE_CONFIG.api.tokenStorageKey] || null;
+        callback(token);
+      });
+    } else {
+      callback(this.api.defaultToken);
     }
+  }
 };
 
-// Helper function to get the appropriate API endpoint
-function getApiEndpoint(operation, isRemote = false) {
-    if (isRemote) {
-        return RAPIDTRIAGE_CONFIG.REMOTE_API + (RAPIDTRIAGE_CONFIG.REMOTE_OPERATIONS[operation] || '');
-    }
-    return RAPIDTRIAGE_CONFIG.LOCAL_API + (RAPIDTRIAGE_CONFIG.OPERATIONS[operation] || '');
-}
-
-// Helper function to determine if we should use remote API
-function shouldUseRemoteApi(currentUrl) {
-    // Use local API for local development
-    if (!currentUrl ||
-        currentUrl.startsWith('http://localhost') ||
-        currentUrl.startsWith('http://127.0.0.1') ||
-        currentUrl.startsWith('file://') ||
-        currentUrl.startsWith('chrome://') ||
-        currentUrl.startsWith('chrome-extension://')) {
-        return false;
-    }
-    // Use remote API for production sites
-    return true;
+// Make globally accessible
+if (typeof window !== 'undefined') {
+  window.RAPIDTRIAGE_CONFIG = RAPIDTRIAGE_CONFIG;
 }
 
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        RAPIDTRIAGE_CONFIG,
-        getApiEndpoint,
-        shouldUseRemoteApi
-    };
+  module.exports = RAPIDTRIAGE_CONFIG;
 }

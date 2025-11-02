@@ -52,6 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Get configuration from loaded config.js
+const CONFIG = window.RAPIDTRIAGE_CONFIG || {};
+
 // Function to determine the correct API base URL
 function getApiBaseUrl(url) {
     // Check if URL is local development
@@ -62,18 +65,23 @@ function getApiBaseUrl(url) {
         url.startsWith('chrome://') ||
         url.startsWith('chrome-extension://')) {
         // Use local server for local development
-        return 'http://localhost:3025';
+        return CONFIG.getLocalServerUrl ? CONFIG.getLocalServerUrl() : 'http://localhost:3025';
     }
     // Use remote server for all other URLs
-    return 'https://rapidtriage.me';
+    return CONFIG.getRemoteServerUrl ? CONFIG.getRemoteServerUrl() : 'https://rapidtriage.me';
 }
 
 // Function to get API token from storage
 function getApiToken(callback) {
-    chrome.storage.sync.get(['apiToken'], function(items) {
-        const apiToken = items.apiToken || 'KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8'; // Fallback for backward compatibility
-        callback(apiToken);
-    });
+    if (CONFIG.getApiToken) {
+        CONFIG.getApiToken(callback);
+    } else {
+        // Fallback if config not loaded
+        chrome.storage.sync.get(['apiToken'], function(items) {
+            const apiToken = items.apiToken || null;
+            callback(apiToken);
+        });
+    }
 }
 
 // Function to make authenticated API request
@@ -301,9 +309,9 @@ async function testServer(button) {
         const tabs = await chrome.tabs.query({active: true, currentWindow: true});
         const currentUrl = tabs[0]?.url || '';
         const primaryUrl = getApiBaseUrl(currentUrl);
-        const fallbackUrl = primaryUrl === 'http://localhost:3025' 
-            ? 'https://rapidtriage.me' 
-            : 'http://localhost:3025';
+        const localUrl = CONFIG.getLocalServerUrl ? CONFIG.getLocalServerUrl() : 'http://localhost:3025';
+        const remoteUrl = CONFIG.getRemoteServerUrl ? CONFIG.getRemoteServerUrl() : 'https://rapidtriage.me';
+        const fallbackUrl = primaryUrl.includes('localhost') ? remoteUrl : localUrl;
         
         // Show immediate preview
         showPreview('🔍 Server Connection Test', `Testing connection to ${primaryUrl}...<br>Please wait...`, 'info');
@@ -407,26 +415,24 @@ function takeScreenshot(button) {
                     
                     // Use different endpoint based on server type
                     const screenshotEndpoint = apiBaseUrl.includes('localhost') 
-                        ? `${apiBaseUrl}/screenshot`  // Local server uses /screenshot
-                        : `${apiBaseUrl}/api/screenshot`;  // Remote server uses /api/screenshot
+                        ? `${apiBaseUrl}${CONFIG.endpoints?.screenshot || '/screenshot'}`
+                        : `${apiBaseUrl}${CONFIG.endpoints?.screenshotRemote || '/api/screenshot'}`;
                     
                     // Get API token from storage
-                    chrome.storage.sync.get(['apiToken'], function(items) {
-                        const apiToken = items.apiToken || 'KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8'; // Fallback for backward compatibility
-                        
+                    getApiToken(function(apiToken) {
                         fetch(screenshotEndpoint, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${apiToken}`
+                                'Authorization': apiToken ? `Bearer ${apiToken}` : ''
                             },
-                        body: JSON.stringify({
-                            data: dataUrl,
-                            timestamp: new Date().toISOString(),
-                            url: currentUrl,
-                            title: tabs[0]?.title || 'Screenshot'
+                            body: JSON.stringify({
+                                data: dataUrl,
+                                timestamp: new Date().toISOString(),
+                                url: currentUrl,
+                                title: tabs[0]?.title || 'Screenshot'
+                            })
                         })
-                    })
                     .then(response => {
                         if (!response.ok) {
                             throw new Error(`Server error: ${response.status}`);
@@ -519,8 +525,10 @@ function takeScreenshot(button) {
                             // Open folder button
                             document.querySelector('.open-folder-btn')?.addEventListener('click', function() {
                                 const dir = this.getAttribute('data-dir');
+                                const localUrl = CONFIG.getLocalServerUrl ? CONFIG.getLocalServerUrl() : 'http://localhost:3025';
+                                const endpoint = CONFIG.endpoints?.openFolder || '/open-folder';
                                 // Send message to open folder (requires native messaging or server endpoint)
-                                fetch('http://localhost:3025/open-folder', {
+                                fetch(`${localUrl}${endpoint}`, {
                                     method: 'POST',
                                     headers: {'Content-Type': 'application/json'},
                                     body: JSON.stringify({path: dir})
@@ -561,6 +569,7 @@ function takeScreenshot(button) {
                     })
                     .finally(() => {
                         if (button) setButtonLoading(button, false);
+                    });
                     });
                 }
             });
@@ -763,9 +772,7 @@ function runLighthouseAudit(button) {
             addLog(`🔗 Using API: ${apiBaseUrl}`);
             
             // Get API token from storage
-            chrome.storage.sync.get(['apiToken'], async function(items) {
-                const apiToken = items.apiToken || 'KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8'; // Fallback for backward compatibility
-                
+            getApiToken(async function(apiToken) {
                 fetchWithFallback(
                     `${apiBaseUrl}/api/lighthouse`,
                     `${fallbackUrl}/api/lighthouse`,
@@ -773,13 +780,13 @@ function runLighthouseAudit(button) {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiToken}`
+                            'Authorization': apiToken ? `Bearer ${apiToken}` : ''
                         },
-                    body: JSON.stringify({
-                        url: currentUrl,
-                        categories: ['performance', 'accessibility', 'seo', 'best-practices']
-                    })
-                }
+                        body: JSON.stringify({
+                            url: currentUrl,
+                            categories: ['performance', 'accessibility', 'seo', 'best-practices']
+                        })
+                    }
             )
             .then(({response, usedUrl}) => {
                 addLog(`✅ Connected to: ${usedUrl}`);
@@ -857,6 +864,7 @@ function runLighthouseAudit(button) {
             .finally(() => {
                 if (button) setButtonLoading(button, false);
             });
+            });
         });
     } catch (error) {
         addLog(`❌ Audit error: ${error.message}`);
@@ -909,28 +917,28 @@ function getConsoleLogs(button) {
             
             // Determine API endpoint based on URL
             const apiBaseUrl = getApiBaseUrl(currentUrl);
-            const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
-                ? 'https://rapidtriage.me' 
-                : 'http://localhost:3025';
+            const localUrl = CONFIG.getLocalServerUrl ? CONFIG.getLocalServerUrl() : 'http://localhost:3025';
+            const remoteUrl = CONFIG.getRemoteServerUrl ? CONFIG.getRemoteServerUrl() : 'https://rapidtriage.me';
+            const fallbackUrl = apiBaseUrl.includes('localhost') ? remoteUrl : localUrl;
             
             addLog(`🔗 Using API: ${apiBaseUrl}`);
             
             // Get API token from storage
-            chrome.storage.sync.get(['apiToken'], async function(items) {
-                const apiToken = items.apiToken || 'KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8'; // Fallback for backward compatibility
+            getApiToken(async function(apiToken) {
+                const endpoint = CONFIG.endpoints?.consoleLogs || '/api/console-logs';
                 
                 fetchWithFallback(
-                    `${apiBaseUrl}/api/console-logs`,
-                    `${fallbackUrl}/api/console-logs`,
+                    `${apiBaseUrl}${endpoint}`,
+                    `${fallbackUrl}${endpoint}`,
                     {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiToken}`
+                            'Authorization': apiToken ? `Bearer ${apiToken}` : ''
                         },
-                    body: JSON.stringify({url: currentUrl})
-                }
-            )
+                        body: JSON.stringify({url: currentUrl})
+                    }
+                )
             .then(({response, usedUrl}) => {
                 addLog(`✅ Connected to: ${usedUrl}`);
                 if (!response.ok) {
@@ -1053,6 +1061,7 @@ function getConsoleLogs(button) {
             })
             .finally(() => {
                 if (button) setButtonLoading(button, false);
+            });
             });
         });
     } catch (error) {
@@ -1177,24 +1186,25 @@ function runAccessibilityAudit(button) {
         
         const currentUrl = tabs[0].url;
         const apiBaseUrl = getApiBaseUrl(currentUrl);
-        const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
-            ? 'https://rapidtriage.me' 
-            : 'http://localhost:3025';
+        const localUrl = CONFIG.getLocalServerUrl ? CONFIG.getLocalServerUrl() : 'http://localhost:3025';
+        const remoteUrl = CONFIG.getRemoteServerUrl ? CONFIG.getRemoteServerUrl() : 'https://rapidtriage.me';
+        const fallbackUrl = apiBaseUrl.includes('localhost') ? remoteUrl : localUrl;
         
         addLog(`🔗 Using API: ${apiBaseUrl}`);
         
-        fetchWithFallback(
-            `${apiBaseUrl}/api/lighthouse/accessibility`,
-            `${fallbackUrl}/api/lighthouse/accessibility`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8'
-                },
-                body: JSON.stringify({url: currentUrl})
-            }
-        )
+        getApiToken(function(apiToken) {
+            fetchWithFallback(
+                `${apiBaseUrl}/api/lighthouse/accessibility`,
+                `${fallbackUrl}/api/lighthouse/accessibility`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': apiToken ? `Bearer ${apiToken}` : ''
+                    },
+                    body: JSON.stringify({url: currentUrl})
+                }
+            )
         .then(({response, usedUrl}) => {
             addLog(`✅ Connected to: ${usedUrl}`);
             if (!response.ok) {
@@ -1235,6 +1245,7 @@ function runAccessibilityAudit(button) {
         .finally(() => {
             if (button) setButtonLoading(button, false);
         });
+        });
     });
 }
 
@@ -1254,24 +1265,25 @@ function runPerformanceAudit(button) {
         
         const currentUrl = tabs[0].url;
         const apiBaseUrl = getApiBaseUrl(currentUrl);
-        const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
-            ? 'https://rapidtriage.me' 
-            : 'http://localhost:3025';
+        const localUrl = CONFIG.getLocalServerUrl ? CONFIG.getLocalServerUrl() : 'http://localhost:3025';
+        const remoteUrl = CONFIG.getRemoteServerUrl ? CONFIG.getRemoteServerUrl() : 'https://rapidtriage.me';
+        const fallbackUrl = apiBaseUrl.includes('localhost') ? remoteUrl : localUrl;
         
         addLog(`🔗 Using API: ${apiBaseUrl}`);
         
-        fetchWithFallback(
-            `${apiBaseUrl}/api/lighthouse/performance`,
-            `${fallbackUrl}/api/lighthouse/performance`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8'
-                },
-                body: JSON.stringify({url: currentUrl})
-            }
-        )
+        getApiToken(function(apiToken) {
+            fetchWithFallback(
+                `${apiBaseUrl}/api/lighthouse/performance`,
+                `${fallbackUrl}/api/lighthouse/performance`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': apiToken ? `Bearer ${apiToken}` : ''
+                    },
+                    body: JSON.stringify({url: currentUrl})
+                }
+            )
         .then(({response, usedUrl}) => {
             addLog(`✅ Connected to: ${usedUrl}`);
             if (!response.ok) {
@@ -1315,6 +1327,7 @@ function runPerformanceAudit(button) {
         .finally(() => {
             if (button) setButtonLoading(button, false);
         });
+        });
     });
 }
 
@@ -1334,24 +1347,25 @@ function runSEOAudit(button) {
         
         const currentUrl = tabs[0].url;
         const apiBaseUrl = getApiBaseUrl(currentUrl);
-        const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
-            ? 'https://rapidtriage.me' 
-            : 'http://localhost:3025';
+        const localUrl = CONFIG.getLocalServerUrl ? CONFIG.getLocalServerUrl() : 'http://localhost:3025';
+        const remoteUrl = CONFIG.getRemoteServerUrl ? CONFIG.getRemoteServerUrl() : 'https://rapidtriage.me';
+        const fallbackUrl = apiBaseUrl.includes('localhost') ? remoteUrl : localUrl;
         
         addLog(`🔗 Using API: ${apiBaseUrl}`);
         
-        fetchWithFallback(
-            `${apiBaseUrl}/api/lighthouse/seo`,
-            `${fallbackUrl}/api/lighthouse/seo`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8'
-                },
-                body: JSON.stringify({url: currentUrl})
-            }
-        )
+        getApiToken(function(apiToken) {
+            fetchWithFallback(
+                `${apiBaseUrl}/api/lighthouse/seo`,
+                `${fallbackUrl}/api/lighthouse/seo`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': apiToken ? `Bearer ${apiToken}` : ''
+                    },
+                    body: JSON.stringify({url: currentUrl})
+                }
+            )
         .then(({response, usedUrl}) => {
             addLog(`✅ Connected to: ${usedUrl}`);
             if (!response.ok) {
@@ -1385,6 +1399,7 @@ function runSEOAudit(button) {
         .finally(() => {
             if (button) setButtonLoading(button, false);
         });
+        });
     });
 }
 
@@ -1404,24 +1419,25 @@ function runBestPracticesAudit(button) {
         
         const currentUrl = tabs[0].url;
         const apiBaseUrl = getApiBaseUrl(currentUrl);
-        const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
-            ? 'https://rapidtriage.me' 
-            : 'http://localhost:3025';
+        const localUrl = CONFIG.getLocalServerUrl ? CONFIG.getLocalServerUrl() : 'http://localhost:3025';
+        const remoteUrl = CONFIG.getRemoteServerUrl ? CONFIG.getRemoteServerUrl() : 'https://rapidtriage.me';
+        const fallbackUrl = apiBaseUrl.includes('localhost') ? remoteUrl : localUrl;
         
         addLog(`🔗 Using API: ${apiBaseUrl}`);
         
-        fetchWithFallback(
-            `${apiBaseUrl}/api/lighthouse/best-practices`,
-            `${fallbackUrl}/api/lighthouse/best-practices`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8'
-                },
-                body: JSON.stringify({url: currentUrl})
-            }
-        )
+        getApiToken(function(apiToken) {
+            fetchWithFallback(
+                `${apiBaseUrl}/api/lighthouse/best-practices`,
+                `${fallbackUrl}/api/lighthouse/best-practices`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': apiToken ? `Bearer ${apiToken}` : ''
+                    },
+                    body: JSON.stringify({url: currentUrl})
+                }
+            )
         .then(({response, usedUrl}) => {
             addLog(`✅ Connected to: ${usedUrl}`);
             if (!response.ok) {
@@ -1462,6 +1478,7 @@ function runBestPracticesAudit(button) {
         .finally(() => {
             if (button) setButtonLoading(button, false);
         });
+        });
     });
 }
 
@@ -1483,15 +1500,14 @@ function getConsoleErrors(button) {
         
         const currentUrl = tabs[0].url;
         const apiBaseUrl = getApiBaseUrl(currentUrl);
-        const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
-            ? 'https://rapidtriage.me' 
-            : 'http://localhost:3025';
+        const localUrl = CONFIG.getLocalServerUrl ? CONFIG.getLocalServerUrl() : 'http://localhost:3025';
+        const remoteUrl = CONFIG.getRemoteServerUrl ? CONFIG.getRemoteServerUrl() : 'https://rapidtriage.me';
+        const fallbackUrl = apiBaseUrl.includes('localhost') ? remoteUrl : localUrl;
         
         addLog(`🔗 Using API: ${apiBaseUrl}`);
         
         // Get API token from storage
-        chrome.storage.sync.get(['apiToken'], async function(items) {
-            const apiToken = items.apiToken || 'KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8';
+        getApiToken(async function(apiToken) {
             
             fetchWithFallback(
                 `${apiBaseUrl}/api/console-errors`,
@@ -1500,7 +1516,7 @@ function getConsoleErrors(button) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiToken}`
+                        'Authorization': apiToken ? `Bearer ${apiToken}` : ''
                     },
                     body: JSON.stringify({url: currentUrl})
                 }
@@ -1564,15 +1580,14 @@ function getNetworkLogs(button) {
         
         const currentUrl = tabs[0].url;
         const apiBaseUrl = getApiBaseUrl(currentUrl);
-        const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
-            ? 'https://rapidtriage.me' 
-            : 'http://localhost:3025';
+        const localUrl = CONFIG.getLocalServerUrl ? CONFIG.getLocalServerUrl() : 'http://localhost:3025';
+        const remoteUrl = CONFIG.getRemoteServerUrl ? CONFIG.getRemoteServerUrl() : 'https://rapidtriage.me';
+        const fallbackUrl = apiBaseUrl.includes('localhost') ? remoteUrl : localUrl;
         
         addLog(`🔗 Using API: ${apiBaseUrl}`);
         
         // Get API token from storage
-        chrome.storage.sync.get(['apiToken'], async function(items) {
-            const apiToken = items.apiToken || 'KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8';
+        getApiToken(async function(apiToken) {
             
             fetchWithFallback(
                 `${apiBaseUrl}/api/network-logs`,
@@ -1581,7 +1596,7 @@ function getNetworkLogs(button) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiToken}`
+                        'Authorization': apiToken ? `Bearer ${apiToken}` : ''
                     },
                     body: JSON.stringify({url: currentUrl})
                 }
@@ -1646,15 +1661,14 @@ function getNetworkErrors(button) {
         
         const currentUrl = tabs[0].url;
         const apiBaseUrl = getApiBaseUrl(currentUrl);
-        const fallbackUrl = apiBaseUrl === 'http://localhost:3025' 
-            ? 'https://rapidtriage.me' 
-            : 'http://localhost:3025';
+        const localUrl = CONFIG.getLocalServerUrl ? CONFIG.getLocalServerUrl() : 'http://localhost:3025';
+        const remoteUrl = CONFIG.getRemoteServerUrl ? CONFIG.getRemoteServerUrl() : 'https://rapidtriage.me';
+        const fallbackUrl = apiBaseUrl.includes('localhost') ? remoteUrl : localUrl;
         
         addLog(`🔗 Using API: ${apiBaseUrl}`);
         
         // Get API token from storage
-        chrome.storage.sync.get(['apiToken'], async function(items) {
-            const apiToken = items.apiToken || 'KskHe6x5tkS4CgLrwfeZvbXsSDmZUjR8';
+        getApiToken(async function(apiToken) {
             
             fetchWithFallback(
                 `${apiBaseUrl}/api/network-errors`,
@@ -1663,7 +1677,7 @@ function getNetworkErrors(button) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiToken}`
+                        'Authorization': apiToken ? `Bearer ${apiToken}` : ''
                     },
                     body: JSON.stringify({url: currentUrl})
                 }

@@ -1,5 +1,5 @@
 {
-  "name": "@yarlis/rapidtriage-mcp",
+  "name": "rapidtriage-mcp",
   "version": "1.0.0",
   "description": "YarlisAISolutions RapidTriage MCP - AI-powered browser debugging and triage platform using Model Context Protocol",
   "main": "dist/mcp-server.js",
@@ -16,7 +16,7 @@
   },
   "scripts": {
     "inspect": "tsc && npx @modelcontextprotocol/inspector node -- dist/mcp-server.js",
-    "inspect-live": "npx @modelcontextprotocol/inspector npx -- @yarlis/rapidtriage-mcp",
+    "inspect-live": "npx @modelcontextprotocol/inspector npx -- rapidtriage-mcp",
     "build": "tsc",
     "start": "tsc && node dist/mcp-server.js",
     "test": "echo \"No tests yet\"",
