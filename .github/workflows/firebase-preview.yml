@@ -1,0 +1,183 @@
+name: Firebase Preview Deployment
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs-site/**'
+      - 'mkdocs.yml'
+      - '*.md'
+      - '.github/workflows/docs.yml'
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  preview:
+    name: Build and Deploy Preview
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install functions dependencies
+        run: npm ci
+        working-directory: functions
+
+      - name: Create functions environment file
+        run: |
+          cat > functions/.env << EOF
+          AUTH_TOKEN=${{ secrets.AUTH_TOKEN }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          RAPIDTRIAGE_API_TOKEN=${{ secrets.RAPIDTRIAGE_API_TOKEN }}
+          FIREBASE_PROJECT_ID=rapidtriage-me
+          GCLOUD_PROJECT=rapidtriage-me
+          ENVIRONMENT=staging
+          NODE_ENV=production
+          API_BASE_URL=https://rapidtriage-me.web.app
+          EOF
+
+      - name: Build functions
+        run: npm run build
+        working-directory: functions
+
+      - name: Run linting
+        run: npm run lint || true
+        working-directory: functions
+
+      - name: Create hosting public directory
+        run: mkdir -p dist/public
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_RAPIDTRIAGE_ME }}
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy Preview to Firebase Hosting
+        id: firebase-preview
+        run: |
+          CHANNEL_ID="pr-${{ github.event.pull_request.number }}"
+          OUTPUT=$(firebase hosting:channel:deploy $CHANNEL_ID --project rapidtriage-me --expires 7d --json 2>&1) || true
+
+          # Extract the preview URL from the output
+          PREVIEW_URL=$(echo "$OUTPUT" | grep -o '"url": "[^"]*"' | head -1 | cut -d'"' -f4)
+
+          if [ -z "$PREVIEW_URL" ]; then
+            # Fallback URL construction
+            PREVIEW_URL="https://rapidtriage-me--${CHANNEL_ID}.web.app"
+          fi
+
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "channel_id=$CHANNEL_ID" >> $GITHUB_OUTPUT
+          echo "Preview URL: $PREVIEW_URL"
+
+      - name: Comment Preview URL on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const previewUrl = '${{ steps.firebase-preview.outputs.preview_url }}';
+            const channelId = '${{ steps.firebase-preview.outputs.channel_id }}';
+
+            const body = `## Firebase Preview Deployment
+
+            Your preview is ready!
+
+            | Resource | URL |
+            |----------|-----|
+            | Preview | ${previewUrl} |
+            | Channel | \`${channelId}\` |
+            | Expires | 7 days |
+
+            ---
+
+            **Notes:**
+            - This preview includes Firebase Hosting only
+            - Functions are not deployed to preview channels
+            - The preview will expire in 7 days
+
+            > Deployed by GitHub Actions`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Firebase Preview Deployment')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+      - name: Build Summary
+        run: |
+          echo "## Preview Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Preview URL**: ${{ steps.firebase-preview.outputs.preview_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Channel**: ${{ steps.firebase-preview.outputs.channel_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR**: #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Expires**: 7 days" >> $GITHUB_STEP_SUMMARY
+
+  cleanup:
+    name: Cleanup Old Preview Channels
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_RAPIDTRIAGE_ME }}
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Delete Preview Channel
+        run: |
+          CHANNEL_ID="pr-${{ github.event.pull_request.number }}"
+          firebase hosting:channel:delete $CHANNEL_ID --project rapidtriage-me --force || true
+          echo "Deleted preview channel: $CHANNEL_ID"

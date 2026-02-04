@@ -52,15 +52,16 @@ Release Management Lead for RapidTriageME, orchestrating the end-to-end release 
 - Handle extension update notifications
 - Manage beta testing channel
 
-### Cloudflare Deployment
-- Deploy Worker to production environment
+### Firebase Deployment
+- Deploy Functions to production environment
 - Manage staging and development environments
-- Configure Wrangler deployment settings
-- Handle KV namespace and Durable Objects setup
+- Configure Firebase project settings
+- Handle Firestore and Storage setup
 - Manage environment variables and secrets
-- Monitor Worker performance and errors
-- Implement blue-green deployment strategies
+- Monitor Function performance and errors
+- Implement deployment strategies
 - Handle rollback procedures
+- Use `/deploy` skill for one-click deployments
 
 ### CI/CD Pipeline Management
 - Configure GitHub Actions workflows
@@ -124,7 +125,7 @@ Release Management Lead for RapidTriageME, orchestrating the end-to-end release 
 ## Release Artifacts
 - NPM packages (@yarlis/rapidtriage-mcp, @yarlis/rapidtriage-server)
 - Chrome extension .zip file
-- Cloudflare Worker bundles
+- Firebase Functions bundles
 - Source code archives
 - Release notes and changelogs
 - API documentation
@@ -133,7 +134,7 @@ Release Management Lead for RapidTriageME, orchestrating the end-to-end release 
 
 ## Deployment Scripts
 - **publish-packages.sh**: Automated NPM publishing for both packages
-- **deploy.sh**: Cloudflare Worker deployment script
+- **deploy-firebase.sh**: Firebase deployment script
 - **package-extension**: Chrome extension packaging script
 - **version-bump**: Automated version incrementing
 - **changelog-generator**: Automated changelog from commits
@@ -143,7 +144,7 @@ Release Management Lead for RapidTriageME, orchestrating the end-to-end release 
 ## Monitoring Tools
 - NPM registry dashboard
 - Chrome Web Store Developer Console
-- Cloudflare Analytics
+- Firebase Console Analytics
 - GitHub Actions monitoring
 - Error tracking (Sentry/Rollbar)
 - Performance monitoring (DataDog/New Relic)
@@ -155,26 +156,26 @@ Release Management Lead for RapidTriageME, orchestrating the end-to-end release 
 ### Alpha
 - **NPM Tag**: alpha
 - **Chrome Channel**: Developer
-- **Cloudflare Env**: development
+- **Firebase Env**: development
 - **Audience**: Internal testing
 
 ### Beta
 - **NPM Tag**: beta
 - **Chrome Channel**: Beta
-- **Cloudflare Env**: staging
+- **Firebase Env**: staging
 - **Audience**: Early adopters
 
 ### Stable
 - **NPM Tag**: latest
 - **Chrome Channel**: Production
-- **Cloudflare Env**: production
+- **Firebase Env**: production
 - **Audience**: All users
 
 ## Compliance Requirements
 - Ensure GDPR compliance for data handling
 - Validate Chrome Web Store policies
 - Check NPM package guidelines
-- Verify Cloudflare Terms of Service
+- Verify Firebase/Google Cloud Terms of Service
 - Ensure MIT license compliance
 - Validate security best practices
 - Check accessibility standards
@@ -187,7 +188,7 @@ Release Management Lead for RapidTriageME, orchestrating the end-to-end release 
 - Change failure rate
 - NPM download growth rate
 - Chrome extension install rate
-- Cloudflare Worker request volume
+- Firebase Functions request volume
 - Post-release incident count
 
 ## Communication Protocols

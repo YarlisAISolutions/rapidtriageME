@@ -1,0 +1,185 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function isWorkspaceOwner(workspaceId) {
+      return get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.ownerId == request.auth.uid;
+    }
+
+    function isWorkspaceMember(workspaceId) {
+      return exists(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid));
+    }
+
+    function hasWorkspacePermission(workspaceId, permission) {
+      let member = get(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid));
+      return member.data.customPermissions[permission] == true || member.data.role == 'owner';
+    }
+
+    // ============================================
+    // USERS COLLECTION
+    // ============================================
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if true; // Allow registration
+      allow update: if isOwner(userId);
+      allow delete: if isAdmin();
+
+      // API Keys subcollection
+      match /apiKeys/{keyId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Daily usage subcollection
+      match /dailyUsage/{date} {
+        allow read: if isOwner(userId);
+        allow write: if true; // Server-side updates via Admin SDK
+      }
+    }
+
+    // ============================================
+    // API KEY LOOKUP (Server-side only)
+    // ============================================
+    match /apiKeyLookup/{keyHash} {
+      allow read: if false; // Server-side only via Admin SDK
+      allow write: if false;
+    }
+
+    // ============================================
+    // REFRESH TOKENS (Server-side only)
+    // ============================================
+    match /refreshTokens/{tokenHash} {
+      allow read, write: if false; // Server-side only via Admin SDK
+    }
+
+    // ============================================
+    // RATE LIMITS (Server-side only)
+    // ============================================
+    match /rateLimits/{clientId} {
+      allow read, write: if false; // Server-side only via Admin SDK
+    }
+
+    // ============================================
+    // BROWSER SESSIONS
+    // ============================================
+    match /browserSessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow create: if true; // Allow anonymous session creation
+      allow update, delete: if isAuthenticated();
+
+      match /consoleLogs/{logId} {
+        allow read: if isAuthenticated();
+        allow create: if true;
+        allow update, delete: if isAuthenticated();
+      }
+
+      match /networkLogs/{logId} {
+        allow read: if isAuthenticated();
+        allow create: if true;
+        allow update, delete: if isAuthenticated();
+      }
+    }
+
+    // ============================================
+    // SCREENSHOTS
+    // ============================================
+    match /screenshots/{screenshotId} {
+      allow read: if resource.data.permissions.public == true ||
+                    (isAuthenticated() && resource.data.tenant.identifier == request.auth.uid);
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && resource.data.tenant.identifier == request.auth.uid;
+    }
+
+    // ============================================
+    // WORKSPACES
+    // ============================================
+    match /workspaces/{workspaceId} {
+      allow read: if resource.data.visibility == 'public' ||
+                    isWorkspaceMember(workspaceId);
+      allow create: if isAuthenticated();
+      allow update: if hasWorkspacePermission(workspaceId, 'manageSettings');
+      allow delete: if isWorkspaceOwner(workspaceId);
+
+      match /members/{memberId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow write: if hasWorkspacePermission(workspaceId, 'manageMembers');
+      }
+
+      match /projects/{projectId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow create: if hasWorkspacePermission(workspaceId, 'createProject');
+        allow delete: if hasWorkspacePermission(workspaceId, 'deleteProject');
+      }
+
+      match /activities/{activityId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow write: if false; // Server-side only
+      }
+    }
+
+    // ============================================
+    // WORKSPACE SLUG INDEX
+    // ============================================
+    match /workspaceSlugIndex/{slug} {
+      allow read: if true;
+      allow write: if false; // Server-side only
+    }
+
+    // ============================================
+    // TEMPLATES
+    // ============================================
+    match /templates/{templateId} {
+      allow read: if resource.data.isPublic == true ||
+                    resource.data.createdBy == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow update, delete: if resource.data.createdBy == request.auth.uid;
+    }
+
+    // ============================================
+    // METRICS (Admin only)
+    // ============================================
+    match /metrics/{document=**} {
+      allow read: if isAdmin();
+      allow write: if false; // Server-side only
+    }
+
+    // ============================================
+    // SERVICE HEALTH (Public read)
+    // ============================================
+    match /serviceHealth/{document=**} {
+      allow read: if true;
+      allow write: if false; // Server-side only
+    }
+
+    // ============================================
+    // REPORTS
+    // ============================================
+    match /reports/{reportId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow update, delete: if resource.data.userId == request.auth.uid;
+    }
+
+    // ============================================
+    // AUDIT LOGS (Admin only)
+    // ============================================
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+  }
+}

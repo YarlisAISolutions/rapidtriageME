@@ -46,10 +46,11 @@ This directory contains specialized AI agent definitions for the RapidTriageME b
 **Key Responsibilities:**
 - Manage NPM package publishing (@yarlis scope)
 - Coordinate Chrome Web Store releases
-- Deploy to Cloudflare Workers platform
+- Deploy to Firebase platform (Functions, Hosting, Firestore, Storage)
 - Maintain CI/CD pipelines with GitHub Actions
 - Handle version management and changelogs
 - Implement rollback procedures and disaster recovery
+- Use `/deploy` skill for one-click production deployments
 
 ## How to Use These Agents
 
@@ -95,15 +96,30 @@ These agents are specifically designed for the RapidTriageME platform, which inc
 - **rapidtriage-mcp**: MCP protocol server for IDE integration
 - **rapidtriage-server**: Browser middleware for Chrome extension
 - **rapidtriage-extension**: Chrome DevTools panel
-- **Cloudflare Worker**: Remote deployment with SSE transport
+- **Firebase Functions**: Serverless backend with SSE transport
+- **Firebase Hosting**: Static hosting and CDN
 
 ### Key Technologies
 - TypeScript for type-safe development
 - Model Context Protocol (MCP) for AI integration
 - Chrome Extension Manifest V3
-- Cloudflare Workers for edge deployment
+- Firebase (Functions, Firestore, Storage, Hosting)
 - Lighthouse for performance auditing
 - WebSocket/SSE for real-time communication
+
+## Skills
+
+### `/deploy` - One-Click Deployment
+Deploy RapidTriageME to Firebase with a single command:
+
+```bash
+/deploy                      # Deploy all to production (default)
+/deploy production           # Deploy all to production
+/deploy production functions # Deploy only functions
+/deploy production hosting   # Deploy only hosting
+```
+
+See `.claude/skills/deploy.md` for full documentation.
 
 ## Best Practices
 

@@ -1,0 +1,97 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isValidSize(maxMB) {
+      return request.resource.size < maxMB * 1024 * 1024;
+    }
+
+    // ============================================
+    // PUBLIC ASSETS (Anyone can read)
+    // ============================================
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // ============================================
+    // SCREENSHOTS - By Tenant Type
+    // ============================================
+
+    // Public/Anonymous Screenshots
+    match /screenshots/public/{allPaths=**} {
+      allow read: if true;
+      allow write: if isValidImage() && isValidSize(5);
+    }
+
+    // User Screenshots (authenticated users)
+    match /screenshots/user/{userId}/{allPaths=**} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidImage() && isValidSize(10);
+    }
+
+    // Team Screenshots (team members)
+    match /screenshots/team/{teamId}/{allPaths=**} {
+      allow read: if isAuthenticated() && request.auth.token.teamId == teamId;
+      allow write: if isAuthenticated()
+                   && request.auth.token.teamId == teamId
+                   && isValidImage()
+                   && isValidSize(20);
+    }
+
+    // Enterprise Screenshots (organization members)
+    match /screenshots/enterprise/{orgId}/{allPaths=**} {
+      allow read: if isAuthenticated() && request.auth.token.orgId == orgId;
+      allow write: if isAuthenticated()
+                   && request.auth.token.orgId == orgId
+                   && isValidImage();
+    }
+
+    // ============================================
+    // USER UPLOADS (General purpose)
+    // ============================================
+    match /uploads/{userId}/{allPaths=**} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidSize(50);
+    }
+
+    // ============================================
+    // REPORTS
+    // ============================================
+    match /reports/{userId}/{reportId}/{allPaths=**} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidSize(100);
+    }
+
+    // ============================================
+    // WORKSPACE ASSETS
+    // ============================================
+    match /workspaces/{workspaceId}/{allPaths=**} {
+      // Note: Fine-grained workspace permissions should be handled
+      // via Cloud Functions that validate membership
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidSize(50);
+    }
+
+    // ============================================
+    // TEST ENVIRONMENT (Development only)
+    // ============================================
+    match /test/{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}

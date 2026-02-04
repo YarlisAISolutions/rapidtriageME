@@ -3,9 +3,9 @@
   "project": {
     "name": "RapidTriageME",
     "description": "Remote Browser Tools MCP Platform for AI-powered browser triage and debugging",
-    "type": "cloudflare-worker",
-    "provider": "CLOUDFLARE",
-    "domain": "rapidtriage.me"
+    "type": "firebase-functions",
+    "provider": "FIREBASE",
+    "domain": "rapidtriage-me.web.app"
   },
   "commands": {
     "build": "npm run build",
@@ -14,8 +14,9 @@
     "typecheck": "npm run typecheck",
     "dev": "npm run dev",
     "deploy": {
-      "staging": "npm run deploy:staging",
-      "production": "npm run deploy:production"
+      "functions": "npm run deploy:functions",
+      "hosting": "npm run deploy:hosting",
+      "all": "npm run deploy"
     }
   },
   "conventions": {
@@ -43,10 +44,10 @@
     }
   },
   "environment": {
-    "runtime": "cloudflare-workers",
+    "runtime": "firebase-functions",
     "nodeVersion": ">=18.0.0",
     "packageManager": "npm",
-    "framework": "MCP SDK with Cloudflare Workers"
+    "framework": "MCP SDK with Firebase Functions"
   },
   "testing": {
     "framework": "jest",
@@ -64,10 +65,27 @@
       "preCommit": ["lint", "typecheck"]
     }
   },
-  "cloudflare": {
-    "workers": true,
-    "kvNamespaces": ["SESSIONS"],
-    "environments": ["staging", "production"]
+  "firebase": {
+    "projectId": "rapidtriage-me",
+    "functions": true,
+    "firestore": true,
+    "storage": true,
+    "hosting": true,
+    "emulators": {
+      "ui": 4000,
+      "functions": 5001,
+      "firestore": 8080,
+      "hosting": 5050,
+      "storage": 9199,
+      "auth": 9099
+    }
+  },
+  "skills": {
+    "deploy": {
+      "description": "One-click Firebase deployment",
+      "defaultEnvironment": "production",
+      "defaultTarget": "all"
+    }
   },
   "dependencies": {
     "manager": "npm",

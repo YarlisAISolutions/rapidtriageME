@@ -4,6 +4,8 @@ node_modules/
 
 # Build outputs
 dist/
+!dist/public/
+!dist/public/**
 */dist/
 build/
 */build/
@@ -48,10 +50,11 @@ temp/
 *.tmp
 *.temp
 
-# Cloudflare Workers
+# Legacy Cloudflare (backed up to .cloudflare-backup/)
 .mf/
 .wrangler/
 wrangler.toml.backup
+wrangler*.toml
 
 # Chrome extension temporary files
 *.pem
@@ -104,3 +107,16 @@ test-local.sh
 test-configs/
 test-page.html
 .env.backup.*
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
+pubsub-debug.log
+emulator-data/
+functions/lib/
+functions/.env
+functions/.secret.local
+*.firebaserc.backup

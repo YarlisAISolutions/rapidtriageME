@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "rapidtriage-me",
+    "production": "rapidtriage-me"
+  },
+  "targets": {
+    "rapidtriage-me": {
+      "hosting": {
+        "app": ["rapidtriage-me"]
+      }
+    }
+  },
+  "etags": {}
+}
