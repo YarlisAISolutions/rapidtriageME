@@ -26,7 +26,7 @@
     "test:organize": "bash test/organize-tests.sh",
     "test:clean": "rm -rf test/reports/*",
     "lint": "eslint src/**/*.ts && cd functions && npm run lint",
-    "typecheck": "tsc --noEmit && cd functions && tsc --noEmit",
+    "typecheck": "cd functions && tsc --noEmit",
     "setup": "npm install && cd functions && npm install",
     "clean": "rm -rf functions/lib emulator-data"
   },

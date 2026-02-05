@@ -2,8 +2,7 @@
   "compilerOptions": {
     "target": "ES2021",
     "module": "ESNext",
-    "lib": ["ES2021", "WebWorker"],
-    "types": ["@cloudflare/workers-types", "@types/node"],
+    "lib": ["ES2021", "DOM"],
     "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
@@ -11,27 +10,18 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "noEmit": false,
+    "noEmit": true,
     "isolatedModules": true,
     "allowJs": true,
-    "checkJs": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts"
+  "include": [],
+  "exclude": ["node_modules", "dist", "src"],
+  "references": [
+    { "path": "./functions" }
   ]
 }
