@@ -1,0 +1,38 @@
+{
+  "name": "@rapidtriage/e2e-tests",
+  "version": "1.0.0",
+  "description": "E2E automation tests for RapidTriageME using Playwright",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report ../reports/playwright-report",
+    "test:books": "playwright test tests/books-toscrape/",
+    "test:quotes": "playwright test tests/quotes-toscrape/",
+    "test:internet": "playwright test tests/the-internet/",
+    "test:httpbin": "playwright test tests/httpbin/",
+    "test:example": "playwright test tests/example-com/",
+    "test:rapidtriage": "playwright test tests/rapidtriage-api/",
+    "test:extension": "playwright test tests/rapidtriage-api/ --grep 'Extension'",
+    "install:browsers": "playwright install chromium"
+  },
+  "keywords": [
+    "playwright",
+    "e2e",
+    "automation",
+    "testing",
+    "rapidtriage"
+  ],
+  "author": "YarlisAISolutions",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.50.1",
+    "@types/node": "^22.13.0",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
