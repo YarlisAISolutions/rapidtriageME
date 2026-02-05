@@ -1,0 +1,26 @@
+{
+  "name": "rapidtriage-e2e-tests",
+  "version": "1.0.0",
+  "description": "End-to-end tests for RapidTriageME platform",
+  "main": "test-runner.ts",
+  "scripts": {
+    "test": "npx tsx test-runner.ts",
+    "test:auth": "npx tsx test-runner.ts --category authentication",
+    "test:api": "npx tsx test-runner.ts --category api_management",
+    "test:screenshot": "npx tsx test-runner.ts --category screenshot",
+    "test:lighthouse": "npx tsx test-runner.ts --category lighthouse",
+    "test:subscription": "npx tsx test-runner.ts --category subscription",
+    "test:dashboard": "npx tsx test-runner.ts --category dashboard",
+    "test:session": "npx tsx test-runner.ts --category session",
+    "test:errors": "npx tsx test-runner.ts --category error_handling",
+    "seed-users": "npx tsx seed-test-users.ts",
+    "report": "open ../reports/e2e/latest-report.html"
+  },
+  "dependencies": {
+    "tsx": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "rapidtriage-playwright-tests",
+  "version": "1.0.0",
+  "description": "Playwright test suite for RapidTriageME Chrome extension",
+  "main": "extension-player.js",
+  "scripts": {
+    "test": "node extension-player.js",
+    "test:headless": "HEADLESS=true node extension-player.js",
+    "install-browsers": "npx playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

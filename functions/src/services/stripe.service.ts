@@ -1,22 +1,21 @@
 /**
  * Stripe Service for RapidTriageME
- * 
+ *
  * Handles all Stripe API interactions for subscription management,
  * payment processing, and customer management.
+ *
+ * Uses the centralized Stripe gateway for client initialization
+ * and standardized error handling.
  */
 
 import Stripe from 'stripe';
 import * as admin from 'firebase-admin';
 import { logger } from 'firebase-functions';
-
-// Initialize Stripe with secret key from environment
-const getStripe = (): Stripe => {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) {
-    throw new Error('STRIPE_SECRET_KEY environment variable not set');
-  }
-  return new Stripe(secretKey);
-};
+import {
+  getStripeClient,
+  verifyWebhookSignature as gatewayVerifyWebhook,
+  executeStripeOperation,
+} from './stripe/index.js';
 
 /**
  * Subscription tier definitions matching mobile app
@@ -167,7 +166,7 @@ class StripeService {
    * Get or create a Stripe customer for a user
    */
   async getOrCreateCustomer(userId: string, email: string, name?: string): Promise<string> {
-    const stripe = getStripe();
+    const stripe = getStripeClient();
     
     // Check if user already has a Stripe customer ID
     const userDoc = await this.db.collection('users').doc(userId).get();
@@ -206,7 +205,7 @@ class StripeService {
     successUrl: string,
     cancelUrl: string
   ): Promise<{ sessionId: string; url: string }> {
-    const stripe = getStripe();
+    const stripe = getStripeClient();
     
     // Get or create customer
     const customerId = await this.getOrCreateCustomer(userId, email);
@@ -249,7 +248,7 @@ class StripeService {
     userId: string,
     returnUrl: string
   ): Promise<{ url: string }> {
-    const stripe = getStripe();
+    const stripe = getStripeClient();
     
     // Get user's Stripe customer ID
     const userDoc = await this.db.collection('users').doc(userId).get();
@@ -375,7 +374,7 @@ class StripeService {
    * Cancel subscription at period end
    */
   async cancelSubscription(userId: string): Promise<void> {
-    const stripe = getStripe();
+    const stripe = getStripeClient();
     
     const subscription = await this.getUserSubscription(userId);
     if (!subscription?.stripeSubscriptionId) {
@@ -401,7 +400,7 @@ class StripeService {
    * Reactivate a subscription that's set to cancel
    */
   async reactivateSubscription(userId: string): Promise<void> {
-    const stripe = getStripe();
+    const stripe = getStripeClient();
     
     const subscription = await this.getUserSubscription(userId);
     if (!subscription?.stripeSubscriptionId) {
@@ -442,16 +441,10 @@ class StripeService {
 
   /**
    * Verify Stripe webhook signature
+   * Delegates to the centralized gateway for consistent signature verification
    */
   verifyWebhookSignature(payload: string | Buffer, signature: string): Stripe.Event {
-    const stripe = getStripe();
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-    if (!webhookSecret) {
-      throw new Error('STRIPE_WEBHOOK_SECRET environment variable not set');
-    }
-
-    return stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+    return gatewayVerifyWebhook(payload, signature);
   }
 
   /**
@@ -472,7 +465,7 @@ class StripeService {
       pdfUrl: string | null;
     }>;
   }> {
-    const stripe = getStripe();
+    const stripe = getStripeClient();
 
     // Get user's Stripe customer ID
     const userDoc = await this.db.collection('users').doc(userId).get();
@@ -519,7 +512,7 @@ class StripeService {
     periodEnd: string;
     lines: Array<{ description: string | null; amount: number }>;
   } | null> {
-    const stripe = getStripe();
+    const stripe = getStripeClient();
 
     const userDoc = await this.db.collection('users').doc(userId).get();
     const userData = userDoc.data();

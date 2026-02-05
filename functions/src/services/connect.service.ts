@@ -13,30 +13,22 @@
  * - Account creation: Embedded onboarding components
  * - Account management: Redirect to Stripe Dashboard
  * - Risk: Stripe manages risk and liability
+ *
+ * Uses the centralized Stripe gateway for client initialization
+ * and standardized error handling.
  */
 
 import Stripe from 'stripe';
 import * as admin from 'firebase-admin';
 import { logger } from 'firebase-functions';
+import {
+  getStripeClient,
+  verifyConnectWebhookSignature,
+  fetchV2Event,
+  connectedAccountOptions,
+} from './stripe/index.js';
 
 const db = admin.firestore();
-
-/**
- * Get Stripe client instance
- * Uses the STRIPE_SECRET_KEY environment variable
- */
-const getStripeClient = (): Stripe => {
-  // PLACEHOLDER: Ensure STRIPE_SECRET_KEY is set in Firebase secrets
-  // Run: firebase functions:secrets:set STRIPE_SECRET_KEY
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) {
-    throw new Error(
-      'STRIPE_SECRET_KEY environment variable not set. ' +
-      'Run: firebase functions:secrets:set STRIPE_SECRET_KEY'
-    );
-  }
-  return new Stripe(secretKey);
-};
 
 /**
  * Connected account status
@@ -503,20 +495,19 @@ class ConnectService {
    * Handle V2 account webhook events (thin events)
    *
    * Processes account requirement updates and capability status changes.
+   * Uses the centralized gateway for signature verification and event fetching.
    */
   async handleAccountWebhook(
     payload: string | Buffer,
     signature: string,
     webhookSecret: string
   ): Promise<{ handled: boolean; eventType: string }> {
-    const stripeClient = getStripeClient();
-
     try {
-      // Parse thin event
-      const thinEvent = (stripeClient as any).parseThinEvent(payload, signature, webhookSecret);
+      // Parse thin event using gateway
+      const thinEvent = verifyConnectWebhookSignature(payload, signature, webhookSecret);
 
-      // Fetch the full event data
-      const event = await (stripeClient as any).v2.core.events.retrieve(thinEvent.id);
+      // Fetch the full event data using gateway
+      const event = await fetchV2Event(thinEvent.id);
 
       logger.info('Received V2 account event', {
         eventId: event.id,

@@ -47,6 +47,12 @@ export const onUserCreated = beforeUserCreated(
     const user = event.data;
     const db = getFirestore();
 
+    // Guard against undefined user data
+    if (!user) {
+      console.error('No user data in event');
+      return;
+    }
+
     console.log(`Processing new user: ${user.uid}`);
 
     try {

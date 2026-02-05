@@ -14,9 +14,10 @@
 
 ### Technology Stack
 - **Runtime**: Firebase Functions (Node.js 20), Node.js 18+
-- **Languages**: TypeScript 5.3+
+- **Languages**: TypeScript 5.9+
 - **Protocols**: Model Context Protocol (MCP), Server-Sent Events (SSE)
 - **Cloud**: Firebase (Functions, Firestore, Storage, Hosting, Authentication)
+- **Payments**: Stripe, Stripe Connect V2
 - **Mobile**: React Native, Expo
 - **Testing**: Jest, Puppeteer, Playwright
 - **Build**: Firebase CLI, TypeScript Compiler
@@ -67,6 +68,11 @@ STORAGE_EMULATOR_PORT=9199
 FUNCTIONS_EMULATOR_PORT=5001
 HOSTING_EMULATOR_PORT=5050
 UI_EMULATOR_PORT=4000
+
+# Stripe Configuration (set via Firebase Secrets)
+STRIPE_SECRET_KEY=sk_live_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+STRIPE_CONNECT_WEBHOOK_SECRET=whsec_xxx
 ```
 
 ## Project Structure
@@ -108,10 +114,17 @@ UI_EMULATOR_PORT=4000
 │   │   ├── background/          # Background triggers
 │   │   ├── middleware/          # Auth, rate limiting
 │   │   ├── services/            # Business logic
+│   │   │   ├── stripe/          # Stripe gateway module
+│   │   │   ├── stripe.service.ts    # Subscription management
+│   │   │   └── connect.service.ts   # Stripe Connect V2
 │   │   ├── types/               # TypeScript types
 │   │   ├── utils/               # Utilities
 │   │   └── config/              # Configuration
+│   ├── test/                    # Test infrastructure
+│   │   ├── __mocks__/           # Firebase mocks
+│   │   └── unit/                # Unit tests by category
 │   ├── package.json             # Functions dependencies
+│   ├── .eslintrc.js             # ESLint configuration
 │   └── tsconfig.json            # TypeScript config
 │
 ├── /RapidTriageMobile           # React Native App
@@ -121,7 +134,12 @@ UI_EMULATOR_PORT=4000
 │
 ├── /docs                        # Project documentation
 ├── /test-suite                  # Testing infrastructure
-├── /scripts                     # Deployment scripts
+│   └── /playwright              # Playwright E2E tests
+├── /scripts                     # Deployment & utility scripts
+│   ├── deploy-firebase.sh       # Firebase deployment script
+│   └── security-check.sh        # Pre-deployment security audit
+├── /.claude/skills              # Claude Code skills
+│   └── release.md               # Release automation skill
 ├── /.cloudflare-backup          # Legacy Cloudflare config backup
 │
 ├── firebase.json                # Firebase configuration
@@ -315,6 +333,63 @@ GET  /openapi.json         - OpenAPI specification
 POST /auth/*               - Authentication endpoints
 ```
 
+### Stripe Billing Endpoints
+```
+POST /api/billing/checkout          - Create checkout session
+POST /api/billing/portal            - Customer portal session
+GET  /api/billing/subscription      - Get subscription details
+POST /api/billing/subscription      - Update subscription
+DELETE /api/billing/subscription    - Cancel subscription
+GET  /api/billing/invoices          - Get billing history
+POST /api/webhooks/stripe           - Stripe webhook handler
+POST /api/webhooks/stripe-connect   - Connect webhook handler
+```
+
+## Stripe Monetization
+
+### Subscription Tiers
+The platform offers four subscription tiers:
+
+| Tier | Monthly | Yearly | Features |
+|------|---------|--------|----------|
+| FREE | $0 | $0 | Basic debugging, 100 logs/day |
+| USER | $9.99 | $99.99 | Unlimited logs, screenshots, audits |
+| TEAM | $29.99 | $299.99 | Team collaboration, shared sessions |
+| ENTERPRISE | $99.99 | $999.99 | Custom integrations, priority support |
+
+### Stripe Architecture
+```
+/functions/src/services/
+├── stripe/
+│   ├── stripe-gateway.ts     # Centralized Stripe API client
+│   └── index.ts              # Module exports
+├── stripe.service.ts         # Subscription management
+└── connect.service.ts        # Stripe Connect V2 for marketplace
+```
+
+**Key Components:**
+- **Stripe Gateway** - Singleton client, webhook verification, error handling
+- **Stripe Service** - Customer management, subscriptions, billing history
+- **Connect Service** - Connected accounts, platform fees, payouts
+
+### Setting Up Stripe Secrets
+```bash
+# Set Stripe API keys
+firebase functions:secrets:set STRIPE_SECRET_KEY
+firebase functions:secrets:set STRIPE_WEBHOOK_SECRET
+firebase functions:secrets:set STRIPE_CONNECT_WEBHOOK_SECRET
+
+# Verify secrets
+firebase functions:secrets:list
+```
+
+### Webhook Configuration
+Configure webhooks in Stripe Dashboard:
+- **Standard Webhooks**: `https://rapidtriage-me.web.app/api/webhooks/stripe`
+  - Events: `customer.*`, `invoice.*`, `subscription.*`, `checkout.session.completed`
+- **Connect Webhooks**: `https://rapidtriage-me.web.app/api/webhooks/stripe-connect`
+  - Events: `account.updated`, `account.application.deauthorized`
+
 ## Testing Strategy
 
 ### Test Suites
@@ -327,23 +402,37 @@ POST /auth/*               - Authentication endpoints
 
 ### Test Files
 - `/test-suite/` - Main test infrastructure
-- `/test/` - Additional test utilities
+- `/test-suite/playwright/` - Playwright E2E tests
+- `/functions/test/` - Functions test organization
+- `/functions/test/__mocks__/` - Firebase mocks
+- `/functions/test/unit/` - Unit tests by category
 - `/examples/` - Test examples and demos
-- `/functions/src/**/*.test.ts` - Functions unit tests
 
 ### Running Tests
 ```bash
-# Run specific test suites
-node test-suite/capture-test-screenshots.js
-node test-lifecycle.js
-node test-both-modes.js
+# Run functions tests
+cd functions && npm test
 
-# Run functions tests with emulators
-cd functions && npm run test
+# Run with coverage report
+cd functions && npm run test:coverage
+
+# Run specific test file
+cd functions && npm test -- stripe.service.test.ts
+
+# Run Playwright tests
+cd test-suite/playwright && npm test
+
+# Run security checks before deployment
+./scripts/security-check.sh
 
 # View test reports
-node view-test-summary.js
 open reports/standalone-report.html
+```
+
+### Test Architecture Notes
+The current test suite uses **mock-based testing** via `firebase-functions-test`. Tests validate behavior through replicated mock handlers. For integration testing with real code coverage, use Firebase emulators:
+```bash
+firebase emulators:exec 'cd functions && npm test'
 ```
 
 ## Code Standards
@@ -376,15 +465,53 @@ try {
 }
 ```
 
+## Release Automation
+
+### Using the Release Skill
+The `/release` skill provides a comprehensive 12-stage release pipeline:
+```bash
+/release                    # Start interactive release process
+/release staging            # Deploy to staging only
+/release production         # Deploy to production
+```
+
+### Release Stages
+1. **Release Interview** - Gather release scope, type, and features
+2. **Pre-Flight Checks** - Verify CLI auth, git status, versions
+3. **Package Upgrades** - Update npm packages across all directories
+4. **Test Execution** - Run Jest tests with coverage (target: 90%+)
+5. **Backup & Version Control** - Git commits, Firestore exports, version tags
+6. **Build** - TypeScript compilation, type checking, linting
+7. **Database & Migrations** - Deploy Firestore rules/indexes
+8. **Documentation** - Update API docs, MkDocs, GitHub Pages
+9. **Static Assets & Hosting** - Deploy Firebase Hosting
+10. **API & Functions Deployment** - Deploy Firebase Functions
+11. **Webhook Verification** - Test Stripe webhook endpoints
+12. **Post-Deployment Verification** - Health checks, smoke tests
+
+### Security Checks Before Release
+Always run security checks before deployment:
+```bash
+./scripts/security-check.sh
+```
+
+This script checks for:
+- Exposed secrets in code (Stripe keys, API keys)
+- Proper .gitignore configuration
+- npm audit vulnerabilities
+- Dangerous code patterns (eval, innerHTML)
+- Valid security rules files
+
 ## Production Deployment
 
 ### Pre-deployment Checklist
-1. Run all tests (`npm test`)
-2. Check TypeScript (`npm run typecheck`)
-3. Verify environment variables
-4. Test locally with Firebase emulators
-5. Update version numbers
-6. Review security rules
+1. Run security check (`./scripts/security-check.sh`)
+2. Run all tests (`cd functions && npm test`)
+3. Check TypeScript (`npm run typecheck`)
+4. Verify environment variables
+5. Test locally with Firebase emulators
+6. Update version numbers
+7. Review security rules
 
 ### Deployment Process
 ```bash
@@ -555,10 +682,18 @@ firebase functions:log --only api --severity ERROR
 
 ## Important Notes
 
-### Security Reminders
+### Security Policy
+See `SECURITY.md` for comprehensive security guidelines including:
+- Vulnerability reporting (security@yarlis.com)
+- Pre-deployment security checklist
+- Code security standards
+- Dependency management policy
+
+**Quick Security Reminders:**
 - Never commit API keys or tokens
-- Use Firebase secrets for sensitive values
-- Rotate tokens regularly
+- Use Firebase secrets for sensitive values (`firebase functions:secrets:set`)
+- Run `./scripts/security-check.sh` before every deployment
+- Rotate tokens quarterly
 - Review Firestore and Storage security rules
 - Validate all user inputs
 
@@ -580,13 +715,17 @@ firebase functions:log --only api --severity ERROR
 - [ ] Add support for Firefox extension
 - [ ] Enhance mobile app features
 - [ ] Implement advanced filtering for logs
-- [ ] Add team collaboration features
+- [x] Add team collaboration features (via TEAM tier)
+- [x] Stripe monetization system
+- [x] Stripe Connect V2 marketplace
+- [x] Automated release pipeline
+- [x] Security audit tooling
 
 ---
 
-**Project Version**: 2.0.0
-**Last Updated**: January 2025
-**Status**: Production Ready (Firebase)
+**Project Version**: 2.1.0
+**Last Updated**: February 2026
+**Status**: Production Ready (Firebase + Stripe Monetization)
 **Migration**: Cloudflare to Firebase Complete
 
 *This document provides comprehensive project context for AI-assisted development. Always prioritize security, performance, and code quality in all implementations.*
