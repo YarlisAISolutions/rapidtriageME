@@ -1,13 +1,6 @@
 {
   "indexes": [
     {
-      "collectionGroup": "users",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "email", "order": "ASCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "browserSessions",
       "queryScope": "COLLECTION",
       "fields": [
@@ -16,31 +9,10 @@
       ]
     },
     {
-      "collectionGroup": "browserSessions",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "expiresAt", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "consoleLogs",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "consoleLogs",
       "queryScope": "COLLECTION_GROUP",
       "fields": [
         { "fieldPath": "level", "order": "ASCENDING" },
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "networkLogs",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
         { "fieldPath": "timestamp", "order": "DESCENDING" }
       ]
     },
@@ -69,13 +41,6 @@
       ]
     },
     {
-      "collectionGroup": "screenshots",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "expiresAt", "order": "ASCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "workspaces",
       "queryScope": "COLLECTION",
       "fields": [
@@ -93,32 +58,11 @@
       ]
     },
     {
-      "collectionGroup": "activities",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "apiKeys",
       "queryScope": "COLLECTION_GROUP",
       "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "rateLimits",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "expiresAt", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "refreshTokens",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "expiresAt", "order": "ASCENDING" }
       ]
     },
     {
