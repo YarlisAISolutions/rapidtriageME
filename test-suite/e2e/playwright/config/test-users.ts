@@ -3,10 +3,52 @@
  *
  * Defines test users with different subscription tiers and permissions
  * for role-based E2E testing.
+ *
+ * Subscription Tiers:
+ * - FREE: Basic browser debugging, 10 scans/month
+ * - USER: Individual paid plan, 100 scans/month, Lighthouse enabled
+ * - TEAM: Team collaboration, 500 scans/month, team dashboard
+ * - ENTERPRISE: Full platform access, unlimited, SSO, audit logs
+ * - ADMIN: System administration access
  */
 
 export type SubscriptionTier = 'free' | 'user' | 'team' | 'enterprise';
 export type UserRole = 'free' | 'user' | 'team' | 'enterprise' | 'admin';
+
+export interface UserLimits {
+  monthlyScans: number; // -1 = unlimited
+  maxApiKeys: number; // -1 = unlimited
+  maxTeamMembers: number; // -1 = unlimited
+  maxWorkspaces?: number;
+  maxStorageMb?: number;
+}
+
+export interface UserFeatures {
+  // Basic features (all tiers)
+  consoleLogsEnabled: boolean;
+  networkLogsEnabled: boolean;
+  screenshotEnabled: boolean;
+  elementInspectorEnabled: boolean;
+
+  // Paid features (user+)
+  lighthouseEnabled: boolean;
+  apiKeyEnabled: boolean;
+  exportEnabled: boolean;
+
+  // Team features (team+)
+  teamDashboardEnabled: boolean;
+  sharedWorkspacesEnabled: boolean;
+
+  // Enterprise features (enterprise+)
+  ssoEnabled: boolean;
+  auditLogsEnabled: boolean;
+  prioritySupport: boolean;
+  customBrandingEnabled: boolean;
+  dedicatedInfraEnabled: boolean;
+
+  // Admin features
+  adminEnabled: boolean;
+}
 
 export interface TestUser {
   id: string;
@@ -15,19 +57,8 @@ export interface TestUser {
   role: UserRole;
   tier: SubscriptionTier;
   permissions: string[];
-  limits: {
-    monthlyScans: number | null; // null = unlimited
-    maxApiKeys: number;
-    maxTeamMembers: number;
-  };
-  features: {
-    apiKeyEnabled: boolean;
-    lighthouseEnabled: boolean;
-    exportEnabled: boolean;
-    teamDashboard: boolean;
-    sso: boolean;
-    customIntegrations: boolean;
-  };
+  limits: UserLimits;
+  features: UserFeatures;
 }
 
 /**
@@ -45,14 +76,30 @@ export const TEST_USERS: Record<UserRole, TestUser> = {
       monthlyScans: 10,
       maxApiKeys: 0,
       maxTeamMembers: 1,
+      maxWorkspaces: 1,
+      maxStorageMb: 100,
     },
     features: {
-      apiKeyEnabled: false,
+      // Basic - enabled
+      consoleLogsEnabled: true,
+      networkLogsEnabled: true,
+      screenshotEnabled: true,
+      elementInspectorEnabled: true,
+      // Paid - disabled
       lighthouseEnabled: false,
+      apiKeyEnabled: false,
       exportEnabled: false,
-      teamDashboard: false,
-      sso: false,
-      customIntegrations: false,
+      // Team - disabled
+      teamDashboardEnabled: false,
+      sharedWorkspacesEnabled: false,
+      // Enterprise - disabled
+      ssoEnabled: false,
+      auditLogsEnabled: false,
+      prioritySupport: false,
+      customBrandingEnabled: false,
+      dedicatedInfraEnabled: false,
+      // Admin - disabled
+      adminEnabled: false,
     },
   },
 
@@ -67,14 +114,30 @@ export const TEST_USERS: Record<UserRole, TestUser> = {
       monthlyScans: 100,
       maxApiKeys: 3,
       maxTeamMembers: 1,
+      maxWorkspaces: 3,
+      maxStorageMb: 500,
     },
     features: {
-      apiKeyEnabled: true,
+      // Basic - enabled
+      consoleLogsEnabled: true,
+      networkLogsEnabled: true,
+      screenshotEnabled: true,
+      elementInspectorEnabled: true,
+      // Paid - enabled
       lighthouseEnabled: true,
+      apiKeyEnabled: true,
       exportEnabled: true,
-      teamDashboard: false,
-      sso: false,
-      customIntegrations: false,
+      // Team - disabled
+      teamDashboardEnabled: false,
+      sharedWorkspacesEnabled: false,
+      // Enterprise - disabled
+      ssoEnabled: false,
+      auditLogsEnabled: false,
+      prioritySupport: false,
+      customBrandingEnabled: false,
+      dedicatedInfraEnabled: false,
+      // Admin - disabled
+      adminEnabled: false,
     },
   },
 
@@ -84,19 +147,35 @@ export const TEST_USERS: Record<UserRole, TestUser> = {
     displayName: 'Team Tier',
     role: 'team',
     tier: 'team',
-    permissions: ['read', 'write', 'scan', 'export', 'lighthouse', 'api', 'team_dashboard'],
+    permissions: ['read', 'write', 'scan', 'export', 'lighthouse', 'api', 'team_dashboard', 'workspace'],
     limits: {
       monthlyScans: 500,
       maxApiKeys: 10,
-      maxTeamMembers: 5,
+      maxTeamMembers: 10,
+      maxWorkspaces: 10,
+      maxStorageMb: 2000,
     },
     features: {
-      apiKeyEnabled: true,
+      // Basic - enabled
+      consoleLogsEnabled: true,
+      networkLogsEnabled: true,
+      screenshotEnabled: true,
+      elementInspectorEnabled: true,
+      // Paid - enabled
       lighthouseEnabled: true,
+      apiKeyEnabled: true,
       exportEnabled: true,
-      teamDashboard: true,
-      sso: false,
-      customIntegrations: false,
+      // Team - enabled
+      teamDashboardEnabled: true,
+      sharedWorkspacesEnabled: true,
+      // Enterprise - disabled
+      ssoEnabled: false,
+      auditLogsEnabled: false,
+      prioritySupport: false,
+      customBrandingEnabled: false,
+      dedicatedInfraEnabled: false,
+      // Admin - disabled
+      adminEnabled: false,
     },
   },
 
@@ -108,17 +187,33 @@ export const TEST_USERS: Record<UserRole, TestUser> = {
     tier: 'enterprise',
     permissions: ['*'],
     limits: {
-      monthlyScans: null, // unlimited
+      monthlyScans: -1, // unlimited
       maxApiKeys: -1, // unlimited
       maxTeamMembers: -1, // unlimited
+      maxWorkspaces: -1, // unlimited
+      maxStorageMb: -1, // unlimited
     },
     features: {
-      apiKeyEnabled: true,
+      // Basic - enabled
+      consoleLogsEnabled: true,
+      networkLogsEnabled: true,
+      screenshotEnabled: true,
+      elementInspectorEnabled: true,
+      // Paid - enabled
       lighthouseEnabled: true,
+      apiKeyEnabled: true,
       exportEnabled: true,
-      teamDashboard: true,
-      sso: true,
-      customIntegrations: true,
+      // Team - enabled
+      teamDashboardEnabled: true,
+      sharedWorkspacesEnabled: true,
+      // Enterprise - enabled
+      ssoEnabled: true,
+      auditLogsEnabled: true,
+      prioritySupport: true,
+      customBrandingEnabled: true,
+      dedicatedInfraEnabled: true,
+      // Admin - disabled
+      adminEnabled: false,
     },
   },
 
@@ -130,17 +225,29 @@ export const TEST_USERS: Record<UserRole, TestUser> = {
     tier: 'enterprise',
     permissions: ['*', 'admin'],
     limits: {
-      monthlyScans: null,
+      monthlyScans: -1,
       maxApiKeys: -1,
       maxTeamMembers: -1,
+      maxWorkspaces: -1,
+      maxStorageMb: -1,
     },
     features: {
-      apiKeyEnabled: true,
+      // All features enabled
+      consoleLogsEnabled: true,
+      networkLogsEnabled: true,
+      screenshotEnabled: true,
+      elementInspectorEnabled: true,
       lighthouseEnabled: true,
+      apiKeyEnabled: true,
       exportEnabled: true,
-      teamDashboard: true,
-      sso: true,
-      customIntegrations: true,
+      teamDashboardEnabled: true,
+      sharedWorkspacesEnabled: true,
+      ssoEnabled: true,
+      auditLogsEnabled: true,
+      prioritySupport: true,
+      customBrandingEnabled: true,
+      dedicatedInfraEnabled: true,
+      adminEnabled: true,
     },
   },
 };
@@ -162,30 +269,43 @@ export function hasPermission(user: TestUser, permission: string): boolean {
 /**
  * Check if user can perform action based on limits
  */
-export function canPerformAction(user: TestUser, action: 'scan' | 'createApiKey' | 'addTeamMember', currentCount: number): boolean {
+export function canPerformAction(
+  user: TestUser,
+  action: 'scan' | 'createApiKey' | 'addTeamMember' | 'createWorkspace',
+  currentCount: number
+): boolean {
   switch (action) {
     case 'scan':
-      return user.limits.monthlyScans === null || currentCount < user.limits.monthlyScans;
+      return user.limits.monthlyScans === -1 || currentCount < user.limits.monthlyScans;
     case 'createApiKey':
       return user.limits.maxApiKeys === -1 || currentCount < user.limits.maxApiKeys;
     case 'addTeamMember':
       return user.limits.maxTeamMembers === -1 || currentCount < user.limits.maxTeamMembers;
+    case 'createWorkspace':
+      return (user.limits.maxWorkspaces ?? 0) === -1 || currentCount < (user.limits.maxWorkspaces ?? 0);
     default:
       return false;
   }
 }
 
 /**
+ * Check if user has a specific feature enabled
+ */
+export function hasFeature(user: TestUser, feature: keyof UserFeatures): boolean {
+  return user.features[feature] === true;
+}
+
+/**
  * Get all users that have a specific feature enabled
  */
-export function getUsersWithFeature(feature: keyof TestUser['features']): TestUser[] {
+export function getUsersWithFeature(feature: keyof UserFeatures): TestUser[] {
   return Object.values(TEST_USERS).filter(user => user.features[feature]);
 }
 
 /**
  * Get minimum tier required for a feature
  */
-export function getMinimumTierForFeature(feature: keyof TestUser['features']): SubscriptionTier {
+export function getMinimumTierForFeature(feature: keyof UserFeatures): SubscriptionTier {
   const tiers: SubscriptionTier[] = ['free', 'user', 'team', 'enterprise'];
   for (const tier of tiers) {
     const user = Object.values(TEST_USERS).find(u => u.tier === tier);
@@ -196,11 +316,50 @@ export function getMinimumTierForFeature(feature: keyof TestUser['features']): S
   return 'enterprise';
 }
 
+/**
+ * Check if a tier meets the minimum requirement
+ */
+export function tierMeetsMinimum(userTier: UserRole, minTier: UserRole): boolean {
+  const tierOrder: UserRole[] = ['free', 'user', 'team', 'enterprise', 'admin'];
+  return tierOrder.indexOf(userTier) >= tierOrder.indexOf(minTier);
+}
+
+/**
+ * Get tier display name
+ */
+export function getTierDisplayName(tier: SubscriptionTier | UserRole): string {
+  const names: Record<string, string> = {
+    free: 'Free',
+    user: 'User (Individual)',
+    team: 'Team',
+    enterprise: 'Enterprise',
+    admin: 'Administrator',
+  };
+  return names[tier] || tier;
+}
+
+/**
+ * Get tier pricing (monthly)
+ */
+export function getTierPricing(tier: SubscriptionTier): { monthly: number; yearly: number } {
+  const pricing: Record<SubscriptionTier, { monthly: number; yearly: number }> = {
+    free: { monthly: 0, yearly: 0 },
+    user: { monthly: 19, yearly: 190 },
+    team: { monthly: 49, yearly: 490 },
+    enterprise: { monthly: 199, yearly: 1990 },
+  };
+  return pricing[tier];
+}
+
 export default {
   TEST_USERS,
   getTestUser,
   hasPermission,
+  hasFeature,
   canPerformAction,
   getUsersWithFeature,
   getMinimumTierForFeature,
+  tierMeetsMinimum,
+  getTierDisplayName,
+  getTierPricing,
 };

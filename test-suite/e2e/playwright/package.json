@@ -16,6 +16,7 @@
     "test:example": "playwright test tests/example-com/",
     "test:rapidtriage": "playwright test tests/rapidtriage-api/",
     "test:extension": "playwright test tests/rapidtriage-api/ --grep 'Extension'",
+    "test:permissions": "playwright test tests/permissions/",
     "install:browsers": "playwright install chromium"
   },
   "keywords": [
