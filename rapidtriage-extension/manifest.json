@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "RapidTriage DevTools",
-    "version": "3.0.0",
-    "description": "YarlisAISolutions RapidTriage - Complete browser debugging and monitoring toolkit",
+    "version": "3.1.0",
+    "description": "YarlisAISolutions RapidTriage - Complete browser debugging and monitoring toolkit with Stripe payments integration",
     "devtools_page": "devtools.html",
     "permissions": [
         "scripting",

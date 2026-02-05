@@ -30,24 +30,82 @@ async function handleAuthRequest(req: Request, res: Response): Promise<void> {
   const method = req.method;
 
   try {
-    // Login endpoint
+    // Login endpoint - creates a custom token for client-side Firebase auth
     if (path === '/login' && method === 'POST') {
-      const { email, password } = req.body;
+      const { email, password, idToken } = req.body;
 
+      // Option 1: Exchange Firebase ID token (from client-side signInWithEmailAndPassword)
+      if (idToken) {
+        try {
+          const decodedToken = await authService.verifyIdToken(idToken);
+          if (!decodedToken) {
+            res.status(401).json({
+              success: false,
+              error: 'Invalid ID token',
+            });
+            return;
+          }
+
+          // Get or create user profile
+          const user = await authService.getOrCreateUser(
+            decodedToken.uid,
+            decodedToken.email || '',
+            decodedToken.name
+          );
+
+          // Generate our JWT tokens
+          const accessToken = authService.generateToken(user.uid, user.email);
+          const refreshToken = authService.generateRefreshToken(user.uid);
+
+          res.status(200).json({
+            success: true,
+            data: {
+              accessToken,
+              refreshToken,
+              expiresIn: 86400,
+              user: {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                plan: user.plan,
+              },
+            },
+          });
+          return;
+        } catch (error) {
+          res.status(401).json({
+            success: false,
+            error: 'Authentication failed',
+            message: error instanceof Error ? error.message : 'Unknown error',
+          });
+          return;
+        }
+      }
+
+      // Option 2: Email/password validation (for creating custom token)
       if (!email || !password) {
         res.status(400).json({
           success: false,
-          error: 'Email and password are required',
+          error: 'Email and password are required, or provide an idToken',
         });
         return;
       }
 
-      // In production, this would validate against Firebase Auth or Keycloak
-      // For now, return a placeholder response
-      res.status(501).json({
-        success: false,
-        error: 'Login not implemented - use Firebase Auth or Keycloak',
-        hint: 'POST to /auth/token with a Firebase ID token',
+      // For email/password login, client should use Firebase Auth SDK directly,
+      // then exchange the ID token. Return guidance on the proper flow.
+      res.status(200).json({
+        success: true,
+        message: 'Use Firebase Auth SDK for login',
+        instructions: {
+          step1: 'Call signInWithEmailAndPassword(auth, email, password) on the client',
+          step2: 'Get the ID token: const idToken = await user.getIdToken()',
+          step3: 'POST to /auth/login or /auth/token with { idToken } to get API tokens',
+        },
+        endpoints: {
+          login: 'POST /auth/login with { idToken }',
+          token: 'POST /auth/token with { idToken }',
+          verify: 'POST /auth/verify with Bearer token',
+        },
       });
       return;
     }

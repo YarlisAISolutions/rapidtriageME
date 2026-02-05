@@ -32,12 +32,28 @@ export { apiDocs } from './http/docs/index.js';
 export { sse } from './http/mcp/sse.js';
 
 // ============================================
+// WEBHOOKS
+// ============================================
+
+// Stripe Webhook (subscriptions, payments)
+export { stripeWebhook } from './http/webhooks/stripe.js';
+
+// Stripe Connect Webhook (V2 accounts, thin events)
+export { connectWebhook } from './http/webhooks/connect.js';
+
+// ============================================
 // CALLABLE FUNCTIONS
 // ============================================
 
 export { createApiKey } from './callable/createApiKey.js';
 export { revokeApiKey } from './callable/revokeApiKey.js';
 export { captureScreenshot } from './callable/captureScreenshot.js';
+
+// Stripe/Subscription
+export { createCheckoutSession } from './callable/createCheckoutSession.js';
+export { createPortalSession } from './callable/createPortalSession.js';
+export { getSubscription } from './callable/getSubscription.js';
+export { cancelSubscription, reactivateSubscription } from './callable/cancelSubscription.js';
 
 // ============================================
 // SCHEDULED FUNCTIONS

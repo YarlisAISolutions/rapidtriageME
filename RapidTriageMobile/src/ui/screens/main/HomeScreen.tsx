@@ -1,22 +1,35 @@
 /**
  * Home Screen
- * Main landing screen for authenticated users
+ * Main landing screen for authenticated users with dashboard stats
  */
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  RefreshControl,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useTheme } from '../../styles/themes';
-import { SPACING } from '../../styles/themes';
-import { H2, H3, Body1 } from '../../components/common/Typography';
+import { SPACING, BORDER_RADIUS, SHADOWS } from '../../styles/themes';
+import { H2, H3, Body1, Body2 } from '../../components/common/Typography';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
+import { UsageMeter } from '../../components/monetization/UsageMeter';
+import { UpgradeModal } from '../../components/monetization/UpgradeModal';
 import { useAuthStore, useTriageStore } from '@store/index';
 import { useNavigation } from '@react-navigation/native';
+
+// Plan limits
+const PLAN_LIMITS = {
+  free: 10,
+  user: 100,
+  team: 500,
+  enterprise: null, // unlimited
+};
 
 export const HomeScreen: React.FC = () => {
   const theme = useTheme();
@@ -24,11 +37,31 @@ export const HomeScreen: React.FC = () => {
   const { user } = useAuthStore();
   const { reports } = useTriageStore();
 
-  const recentReports = reports.slice(0, 3);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState<'limit_reached' | 'voluntary'>('voluntary');
 
-  const handleQuickScan = () => {
+  const recentReports = reports.slice(0, 5);
+
+  // Get plan info
+  const currentPlan = user?.subscription?.tierId || 'free';
+  const scansUsed = user?.subscription?.usage?.scansUsed || 0;
+  const scansLimit = PLAN_LIMITS[currentPlan as keyof typeof PLAN_LIMITS] ?? 10;
+  const scansRemaining = scansLimit === null ? null : Math.max(scansLimit - scansUsed, 0);
+  const usagePercentage = scansLimit === null ? 0 : (scansUsed / scansLimit) * 100;
+
+  // Check if user is near limit
+  const isNearLimit = scansLimit !== null && usagePercentage >= 80;
+  const isAtLimit = scansLimit !== null && scansUsed >= scansLimit;
+
+  const handleQuickScan = useCallback(() => {
+    if (isAtLimit) {
+      setUpgradeReason('limit_reached');
+      setShowUpgradeModal(true);
+      return;
+    }
     navigation.navigate('Scan');
-  };
+  }, [isAtLimit, navigation]);
 
   const handleViewReports = () => {
     navigation.navigate('Reports');
@@ -38,9 +71,52 @@ export const HomeScreen: React.FC = () => {
     navigation.navigate('Dashboard');
   };
 
+  const handleUpgrade = async (priceId: string) => {
+    // This would call the Firebase function to create Stripe checkout
+    try {
+      // Mock for now - integrate with real Stripe checkout
+      Alert.alert(
+        'Upgrading...',
+        'Opening Stripe checkout...',
+        [{ text: 'OK' }]
+      );
+      // const { httpsCallable } = await import('firebase/functions');
+      // const functions = getApp().functions();
+      // const createCheckout = httpsCallable(functions, 'createCheckoutSession');
+      // const result = await createCheckout({ priceId, successUrl: '...', cancelUrl: '...' });
+      // Linking.openURL(result.data.url);
+    } catch (error) {
+      console.error('Failed to create checkout:', error);
+      throw error;
+    }
+  };
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // Fetch latest stats from API
+    try {
+      // const stats = await dashboardService.getStats();
+      // Update stores with fresh data
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
+  const getScoreColor = (score: number): string => {
+    if (score >= 90) return theme.SUCCESS;
+    if (score >= 50) return theme.WARNING;
+    return theme.ERROR;
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.BACKGROUND_SECONDARY }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
         {/* Welcome Section */}
         <View style={styles.welcomeSection}>
           <H2 style={[styles.welcome, { color: theme.TEXT }]}>
@@ -58,7 +134,7 @@ export const HomeScreen: React.FC = () => {
           </H3>
           <View style={styles.actionButtons}>
             <Button
-              title="Start New Scan"
+              title={isAtLimit ? 'Upgrade to Scan' : 'Start New Scan'}
               onPress={handleQuickScan}
               variant="primary"
               size="large"
@@ -76,91 +152,204 @@ export const HomeScreen: React.FC = () => {
           </View>
         </Card>
 
-        {/* Usage Stats */}
+        {/* Usage Stats Card */}
         <Card style={styles.statsCard} padding="LG">
-          <H3 style={[styles.sectionTitle, { color: theme.TEXT }]}>
-            This Month
-          </H3>
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <H2 style={[styles.statNumber, { color: theme.PRIMARY }]}>
-                {user?.subscription.usage.scansUsed || 0}
-              </H2>
-              <Body1 style={[styles.statLabel, { color: theme.TEXT_SECONDARY }]}>
-                Scans Used
-              </Body1>
-            </View>
-            <View style={styles.statItem}>
-              <H2 style={[styles.statNumber, { color: theme.SUCCESS }]}>
+          <View style={styles.statsHeader}>
+            <H3 style={[styles.sectionTitle, { color: theme.TEXT }]}>
+              This Month's Usage
+            </H3>
+            <TouchableOpacity onPress={() => navigation.navigate('Subscription')}>
+              <Body2 style={[styles.planBadge, { color: theme.PRIMARY }]}>
+                {currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)} Plan
+              </Body2>
+            </TouchableOpacity>
+          </View>
+
+          <UsageMeter
+            used={scansUsed}
+            limit={scansLimit}
+            label="Scans"
+            size="large"
+            showRemaining
+            showPercentage
+          />
+
+          {/* Quick Stats Row */}
+          <View style={styles.quickStatsRow}>
+            <View style={[styles.quickStat, { backgroundColor: theme.BACKGROUND_SECONDARY }]}>
+              <H3 style={[styles.quickStatNumber, { color: theme.SUCCESS }]}>
                 {reports.filter(r => r.status === 'completed').length}
-              </H2>
-              <Body1 style={[styles.statLabel, { color: theme.TEXT_SECONDARY }]}>
+              </H3>
+              <Body2 style={[styles.quickStatLabel, { color: theme.TEXT_SECONDARY }]}>
                 Completed
-              </Body1>
+              </Body2>
+            </View>
+            <View style={[styles.quickStat, { backgroundColor: theme.BACKGROUND_SECONDARY }]}>
+              <H3 style={[styles.quickStatNumber, { color: theme.WARNING }]}>
+                {reports.filter(r => r.status === 'pending').length}
+              </H3>
+              <Body2 style={[styles.quickStatLabel, { color: theme.TEXT_SECONDARY }]}>
+                In Progress
+              </Body2>
+            </View>
+            <View style={[styles.quickStat, { backgroundColor: theme.BACKGROUND_SECONDARY }]}>
+              <H3 style={[styles.quickStatNumber, { color: theme.ERROR }]}>
+                {reports.filter(r => r.status === 'failed').length}
+              </H3>
+              <Body2 style={[styles.quickStatLabel, { color: theme.TEXT_SECONDARY }]}>
+                Failed
+              </Body2>
             </View>
           </View>
-          {user?.subscription.usage.scansLimit > 0 && (
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBar}>
-                <View 
-                  style={[
-                    styles.progressFill, 
-                    { 
-                      backgroundColor: theme.PRIMARY,
-                      width: `${Math.min((user.subscription.usage.scansUsed / user.subscription.usage.scansLimit) * 100, 100)}%`
-                    }
-                  ]} 
-                />
-              </View>
-              <Body1 style={[styles.progressText, { color: theme.TEXT_SECONDARY }]}>
-                {user.subscription.usage.scansLimit - user.subscription.usage.scansUsed} scans remaining
-              </Body1>
-            </View>
-          )}
         </Card>
 
+        {/* Upgrade Prompt if near limit */}
+        {isNearLimit && !isAtLimit && (
+          <Card
+            style={[styles.upgradePrompt, { borderColor: theme.WARNING }]}
+            padding="MD"
+          >
+            <View style={styles.upgradePromptContent}>
+              <View style={styles.upgradePromptText}>
+                <Body1 style={[styles.upgradePromptTitle, { color: theme.TEXT }]}>
+                  ⚠️ Running Low on Scans
+                </Body1>
+                <Body2 style={[styles.upgradePromptSubtitle, { color: theme.TEXT_SECONDARY }]}>
+                  You've used {usagePercentage.toFixed(0)}% of your monthly scans
+                </Body2>
+              </View>
+              <Button
+                title="Upgrade"
+                onPress={() => {
+                  setUpgradeReason('voluntary');
+                  setShowUpgradeModal(true);
+                }}
+                variant="primary"
+                size="small"
+              />
+            </View>
+          </Card>
+        )}
+
+        {/* At Limit Alert */}
+        {isAtLimit && (
+          <Card
+            style={[styles.limitAlert, { backgroundColor: theme.ERROR + '15', borderColor: theme.ERROR }]}
+            padding="MD"
+          >
+            <View style={styles.limitAlertContent}>
+              <Body1 style={[styles.limitAlertTitle, { color: theme.ERROR }]}>
+                🚫 Monthly Limit Reached
+              </Body1>
+              <Body2 style={[styles.limitAlertSubtitle, { color: theme.TEXT_SECONDARY }]}>
+                Upgrade your plan to continue scanning
+              </Body2>
+              <Button
+                title="Upgrade Now"
+                onPress={() => {
+                  setUpgradeReason('limit_reached');
+                  setShowUpgradeModal(true);
+                }}
+                variant="primary"
+                size="medium"
+                fullWidth
+                style={styles.limitAlertButton}
+              />
+            </View>
+          </Card>
+        )}
+
         {/* Recent Reports */}
-        {recentReports.length > 0 && (
-          <Card style={styles.recentReports} padding="LG">
-            <View style={styles.sectionHeader}>
-              <H3 style={[styles.sectionTitle, { color: theme.TEXT }]}>
-                Recent Reports
-              </H3>
+        <Card style={styles.recentReports} padding="LG">
+          <View style={styles.sectionHeader}>
+            <H3 style={[styles.sectionTitle, { color: theme.TEXT }]}>
+              Recent Audits
+            </H3>
+            {recentReports.length > 0 && (
               <Button
                 title="View All"
                 onPress={handleViewReports}
                 variant="ghost"
                 size="small"
               />
-            </View>
+            )}
+          </View>
+          
+          {recentReports.length > 0 ? (
             <View style={styles.reportsList}>
               {recentReports.map((report) => (
-                <View key={report.id} style={[styles.reportItem, { borderBottomColor: theme.BORDER_PRIMARY }]}>
+                <TouchableOpacity
+                  key={report.id}
+                  style={[styles.reportItem, { borderBottomColor: theme.BORDER_PRIMARY }]}
+                  onPress={() => navigation.navigate('ReportDetail', { reportId: report.id })}
+                >
                   <View style={styles.reportInfo}>
                     <Body1 style={[styles.reportUrl, { color: theme.TEXT }]} numberOfLines={1}>
                       {report.url}
                     </Body1>
-                    <Body1 style={[styles.reportDate, { color: theme.TEXT_SECONDARY }]}>
+                    <Body2 style={[styles.reportDate, { color: theme.TEXT_SECONDARY }]}>
                       {new Date(report.createdAt).toLocaleDateString()}
-                    </Body1>
+                    </Body2>
                   </View>
-                  <View style={[
-                    styles.statusBadge,
-                    { 
-                      backgroundColor: report.status === 'completed' ? theme.SUCCESS : 
-                                     report.status === 'pending' ? theme.WARNING : theme.ERROR 
-                    }
-                  ]}>
-                    <Body1 style={[styles.statusText, { color: theme.WHITE }]}>
-                      {report.status}
-                    </Body1>
-                  </View>
-                </View>
+                  
+                  {/* Score Badge */}
+                  {report.status === 'completed' && report.results && (
+                    <View
+                      style={[
+                        styles.scoreBadge,
+                        { backgroundColor: getScoreColor(report.results.performance.score) + '20' },
+                      ]}
+                    >
+                      <Body2
+                        style={[
+                          styles.scoreText,
+                          { color: getScoreColor(report.results.performance.score) },
+                        ]}
+                      >
+                        {report.results.performance.score}
+                      </Body2>
+                    </View>
+                  )}
+                  
+                  {/* Status Badge */}
+                  {report.status !== 'completed' && (
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        {
+                          backgroundColor:
+                            report.status === 'pending' ? theme.WARNING : theme.ERROR,
+                        },
+                      ]}
+                    >
+                      <Body2 style={styles.statusText}>
+                        {report.status}
+                      </Body2>
+                    </View>
+                  )}
+                </TouchableOpacity>
               ))}
             </View>
-          </Card>
-        )}
+          ) : (
+            <View style={styles.emptyReports}>
+              <Body1 style={[styles.emptyIcon, { color: theme.TEXT_TERTIARY }]}>📊</Body1>
+              <Body1 style={[styles.emptyText, { color: theme.TEXT_SECONDARY }]}>
+                No audits yet. Start your first scan!
+              </Body1>
+            </View>
+          )}
+        </Card>
       </ScrollView>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        visible={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        onUpgrade={handleUpgrade}
+        currentPlan={currentPlan}
+        currentUsage={scansLimit ? { used: scansUsed, limit: scansLimit } : undefined}
+        reason={upgradeReason}
+      />
     </SafeAreaView>
   );
 };
@@ -187,6 +376,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: SPACING.MD,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.MD,
+  },
   actionButtons: {
     gap: SPACING.MD,
   },
@@ -196,48 +391,78 @@ const styles = StyleSheet.create({
   statsCard: {
     marginBottom: SPACING.LG,
   },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: SPACING.MD,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: SPACING.XS,
-  },
-  statLabel: {
-    fontSize: 14,
-  },
-  progressContainer: {
-    marginTop: SPACING.MD,
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginBottom: SPACING.SM,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  progressText: {
-    textAlign: 'center',
-    fontSize: 14,
-  },
-  recentReports: {
-    marginBottom: SPACING.LG,
-  },
-  sectionHeader: {
+  statsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: SPACING.MD,
+  },
+  planBadge: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  quickStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: SPACING.LG,
+    gap: SPACING.SM,
+  },
+  quickStat: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: SPACING.MD,
+    borderRadius: BORDER_RADIUS.MD,
+  },
+  quickStatNumber: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: SPACING.XS / 2,
+  },
+  quickStatLabel: {
+    fontSize: 12,
+  },
+  upgradePrompt: {
+    marginBottom: SPACING.LG,
+    borderWidth: 1,
+  },
+  upgradePromptContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  upgradePromptText: {
+    flex: 1,
+    marginRight: SPACING.MD,
+  },
+  upgradePromptTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: SPACING.XS / 2,
+  },
+  upgradePromptSubtitle: {
+    fontSize: 13,
+  },
+  limitAlert: {
+    marginBottom: SPACING.LG,
+    borderWidth: 1,
+  },
+  limitAlertContent: {
+    alignItems: 'center',
+  },
+  limitAlertTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: SPACING.XS,
+  },
+  limitAlertSubtitle: {
+    fontSize: 14,
+    marginBottom: SPACING.MD,
+  },
+  limitAlertButton: {
+    marginTop: SPACING.SM,
+  },
+  recentReports: {
+    marginBottom: SPACING.LG,
   },
   reportsList: {
     // Reports list styles
@@ -254,11 +479,23 @@ const styles = StyleSheet.create({
     marginRight: SPACING.MD,
   },
   reportUrl: {
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '500',
     marginBottom: SPACING.XS / 2,
   },
   reportDate: {
     fontSize: 12,
+  },
+  scoreBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scoreText: {
+    fontSize: 14,
+    fontWeight: '700',
   },
   statusBadge: {
     paddingHorizontal: SPACING.SM,
@@ -269,5 +506,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     textTransform: 'capitalize',
+    color: '#FFFFFF',
+  },
+  emptyReports: {
+    alignItems: 'center',
+    paddingVertical: SPACING.XL,
+  },
+  emptyIcon: {
+    fontSize: 40,
+    marginBottom: SPACING.MD,
+  },
+  emptyText: {
+    textAlign: 'center',
   },
 });

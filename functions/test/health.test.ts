@@ -222,7 +222,7 @@ describe('Health Endpoint', () => {
       expect(status).toBe(200);
 
       // Status field should indicate health
-      expect(['healthy', 'ok', 'pass']).toContain(body.status.toString().toLowerCase());
+      expect(['healthy', 'ok', 'pass']).toContain(String(body.status).toLowerCase());
     }, TestTimeouts.SHORT);
   });
 

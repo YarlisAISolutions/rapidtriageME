@@ -6,7 +6,8 @@
  */
 
 import * as admin from 'firebase-admin';
-import * as functionsTest from 'firebase-functions-test';
+import functionsTest from 'firebase-functions-test';
+import type { FeaturesList } from 'firebase-functions-test/lib/features';
 
 // ============================================
 // EMULATOR CONFIGURATION
@@ -62,13 +63,13 @@ export function configureEmulatorEnvironment(): void {
  * Firebase Functions Test instance
  * Provides offline mode testing capabilities
  */
-let testEnv: ReturnType<typeof functionsTest> | null = null;
+let testEnv: FeaturesList | null = null;
 
 /**
  * Initialize Firebase Functions Test environment
  * @param useEmulator - If true, connects to running emulator; if false, uses offline mode
  */
-export function initializeTestEnvironment(useEmulator: boolean = false): ReturnType<typeof functionsTest> {
+export function initializeTestEnvironment(useEmulator: boolean = false): FeaturesList {
   if (testEnv) {
     return testEnv;
   }
@@ -204,13 +205,17 @@ export function createMockRequest(options: {
   body?: unknown;
   query?: Record<string, string>;
 }): Partial<import('express').Request> {
+  const headers = options.headers || {};
   return {
     method: options.method || 'GET',
     path: options.path || '/',
-    headers: options.headers || {},
+    headers,
     body: options.body || {},
     query: options.query || {},
-    get: (header: string) => (options.headers || {})[header.toLowerCase()],
+    get: ((name: string) => {
+      if (name === 'set-cookie') return undefined;
+      return headers[name.toLowerCase()];
+    }) as import('express').Request['get'],
   };
 }
 
@@ -240,10 +245,14 @@ export function createMockResponse(): {
       body = data;
       return this as import('express').Response;
     },
-    set: function(header: string, value: string) {
-      headers[header] = value;
-      return this as import('express').Response;
-    },
+    set: function(this: import('express').Response, field: string | Record<string, string>, value?: string | string[]) {
+      if (typeof field === 'string') {
+        headers[field] = Array.isArray(value) ? value.join(', ') : (value || '');
+      } else {
+        Object.entries(field).forEach(([k, v]) => { headers[k] = v; });
+      }
+      return this;
+    } as import('express').Response['set'],
     setHeader: function(header: string, value: string) {
       headers[header] = value;
       return this as unknown as import('express').Response;

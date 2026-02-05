@@ -10,6 +10,9 @@ import { authMiddleware, AuthenticatedRequest } from '../../middleware/auth.midd
 import { createRateLimiter } from '../../middleware/rateLimit.middleware.js';
 import { screenshotService } from '../../services/screenshot.service.js';
 import { sessionService } from '../../services/session.service.js';
+import dashboardApi from './dashboard.js';
+import connectApi from './connect.js';
+import tokensApi from './tokens.js';
 import { RAPIDTRIAGE_API_TOKEN, JWT_SECRET } from '../../config/secrets.js';
 
 /**
@@ -396,6 +399,205 @@ async function handleApiRequest(req: Request, res: Response): Promise<void> {
         message: `Element inspection request for ${selector}`,
         note: 'Remote inspection requires browser connector',
       });
+      return;
+    }
+
+    // ============================================
+    // DASHBOARD ENDPOINTS
+    // ============================================
+
+    // Dashboard stats endpoint
+    if (path === '/dashboard/stats' && method === 'GET') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      await dashboardApi.getDashboardStats(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Check if scan is allowed (usage limit)
+    if (path === '/dashboard/check-scan' && method === 'GET') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      await dashboardApi.checkScanAllowed(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Billing history endpoint
+    if (path === '/dashboard/billing-history' && method === 'GET') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      await dashboardApi.getBillingHistory(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Upcoming invoice endpoint
+    if (path === '/dashboard/upcoming-invoice' && method === 'GET') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      await dashboardApi.getUpcomingInvoice(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // ============================================
+    // TOKEN USAGE ENDPOINTS
+    // ============================================
+
+    // Get token balance
+    if (path === '/tokens/balance' && method === 'GET') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      await tokensApi.getTokenBalance(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Check operation allowance
+    if (path.match(/^\/tokens\/check\/[\w-]+$/) && method === 'GET') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      (req as any).params = { operation: path.split('/').pop() };
+      await tokensApi.checkOperation(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Consume tokens
+    if (path === '/tokens/consume' && method === 'POST') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      await tokensApi.consumeTokens(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Get token usage history
+    if (path === '/tokens/history' && method === 'GET') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      await tokensApi.getUsageHistory(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Get token pricing (public)
+    if (path === '/tokens/pricing' && method === 'GET') {
+      await tokensApi.getTokenPricing(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // ============================================
+    // STRIPE CONNECT ENDPOINTS
+    // ============================================
+
+    // Create connected account
+    if (path === '/connect/accounts' && method === 'POST') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      await connectApi.createAccount(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Get my connected account
+    if (path === '/connect/my-account' && method === 'GET') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      await connectApi.getMyAccount(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Get account onboarding link
+    if (path.match(/^\/connect\/accounts\/[\w-]+\/onboarding$/) && method === 'POST') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      const accountId = path.split('/')[3];
+      (req as any).params = { accountId };
+      await connectApi.getOnboardingLink(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Get account status
+    if (path.match(/^\/connect\/accounts\/[\w-]+\/status$/) && method === 'GET') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      const accountId = path.split('/')[3];
+      (req as any).params = { accountId };
+      await connectApi.getAccountStatus(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Create product on connected account
+    if (path.match(/^\/connect\/accounts\/[\w-]+\/products$/) && method === 'POST') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      const accountId = path.split('/')[3];
+      (req as any).params = { accountId };
+      await connectApi.createProduct(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Create subscription for connected account
+    if (path.match(/^\/connect\/accounts\/[\w-]+\/subscribe$/) && method === 'POST') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      const accountId = path.split('/')[3];
+      (req as any).params = { accountId };
+      await connectApi.createSubscription(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // Get billing portal for connected account
+    if (path.match(/^\/connect\/accounts\/[\w-]+\/billing-portal$/) && method === 'POST') {
+      if (!authResult.authenticated) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+      const accountId = path.split('/')[3];
+      (req as any).params = { accountId };
+      await connectApi.getBillingPortal(req as AuthenticatedRequest, res);
+      return;
+    }
+
+    // ============================================
+    // STOREFRONT ENDPOINTS (Public)
+    // ============================================
+
+    // List products for storefront (public)
+    if (path.match(/^\/connect\/storefront\/[\w-]+\/products$/) && method === 'GET') {
+      const accountId = path.split('/')[3];
+      (req as any).params = { accountId };
+      await connectApi.listProducts(req, res);
+      return;
+    }
+
+    // Create checkout session (public)
+    if (path.match(/^\/connect\/storefront\/[\w-]+\/checkout$/) && method === 'POST') {
+      const accountId = path.split('/')[3];
+      (req as any).params = { accountId };
+      await connectApi.createCheckout(req, res);
       return;
     }
 
